@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir \"E:\\\\dnmp\\\\www\\\\eat-meal-record\\\\uniapp-project\\\\src\\\\types\":*)",
+      "Bash(npm install:*)",
+      "Bash(npm view:*)",
+      "Bash(npm run type:check:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(xargs:*)",
+      "Bash(timeout:*)"
+    ]
+  }
+}

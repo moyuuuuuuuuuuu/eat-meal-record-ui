@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>测试页面</title>
+</head>
+<body>
+    <h1>测试连接</h1>
+    <div id="status"></div>
+    <script>
+        // 测试 Vite 连接
+        fetch('/@vite/client')
+            .then(r => r.ok ? '✅ Vite 客户端连接正常' : '❌ Vite 客户端连接失败: ' + r.status)
+            .then(msg => document.getElementById('status').innerHTML = msg)
+            .catch(err => document.getElementById('status').innerHTML = '❌ 错误: ' + err.message);
+    </script>
+</body>
+</html>

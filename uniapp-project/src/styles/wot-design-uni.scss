@@ -1,0 +1,15 @@
+/**
+ * Wot Design Uni 全局样式导入
+ * 组件库会自动按需加载样式，但这里提供全局导入选项
+ */
+
+// 基础变量和工具
+@import 'wot-design-uni/components/common/abstracts/variable';
+@import 'wot-design-uni/components/common/abstracts/_config';
+@import 'wot-design-uni/components/common/abstracts/_function';
+@import 'wot-design-uni/components/common/abstracts/_mixin';
+
+// 如果需要导入所有组件样式（不推荐，会增加包体积）
+// @import 'wot-design-uni/components/wd-button/index';
+// @import 'wot-design-uni/components/wd-cell/index';
+// ... 其他组件样式按需导入
