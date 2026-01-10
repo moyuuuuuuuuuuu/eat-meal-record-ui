@@ -9,7 +9,8 @@ export default defineConfig({
     port: 5173,
     strictPort: false,
     open: false,
-    cors: true
+    cors: true,
+    historyApiFallback: true
   },
   build: {
     target: 'es2015',
