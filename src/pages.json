@@ -13,16 +13,6 @@
     "animationDuration": 300
   },
   "pages": [
-    {
-      "path": "pages/index/index",
-      "type": "home",
-      "name": "home",
-      "layout": "tabbar",
-      "style": {
-        "navigationBarTitleText": "首页",
-        "navigationStyle": "custom"
-      }
-    },
     // #ifdef APP || MP-WEIXIN
     {
       "path": "pages/about/index",
@@ -34,6 +24,16 @@
       }
     },
     // #endif
+    {
+      "path": "pages/index/index",
+      "type": "home",
+      "name": "home",
+      "layout": "tabbar",
+      "style": {
+        "navigationBarTitleText": "首页",
+        "navigationStyle": "custom"
+      }
+    },
     {
       "path": "pages/add-meal/index",
       "type": "page",

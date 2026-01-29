@@ -7,193 +7,10 @@
 }
 </route>
 
-<template>
-  <view class="page-container bg-[var(--page-bg)] min-h-screen">
-    <view class="header-container fixed top-0 left-0 w-full z-10 bg-[var(--page-bg)]">
-      <wd-navbar title="选择食物" left-arrow @click-left="goBack" />
-      <view class="bg-[var(--card-bg)] px-4 py-3 border-b border-[var(--border-color)]">
-        <wd-search v-model="searchQuery" placeholder="搜索食物..." hide-cancel />
-      </view>
-    </view>
-
-    <!-- 顶占位 (44px navbar + ~54px search) -->
-    <view class="h-[100px]"></view>
-
-    <!-- 食物列表 -->
-    <view class="px-4 py-4 space-y-3 pb-32">
-      <view
-        v-for="(food, index) in filteredFoods"
-        :key="index"
-        class="bg-[var(--card-bg)] rounded-xl p-4 shadow-sm active:bg-gray-50 flex justify-between items-center w-full"
-        @click="selectFood(food)"
-      >
-        <view>
-          <view class="text-sm font-bold text-[var(--text-main)] mb-1">{{ food.name }}</view>
-          <view class="flex gap-3 text-[10px] text-[var(--text-sub)]">
-            <text>{{ food.calories }}kcal / {{ food.unit }}</text>
-            <text>P:{{ food.protein }}g F:{{ food.fat }}g C:{{ food.carbs }}g</text>
-          </view>
-        </view>
-        <IconPlus size="16" color="#10b981" />
-      </view>
-    </view>
-
-    <!-- 数量选择模态框 (使用 wd-popup 或自定义) -->
-    <wd-popup v-model="showPopup" position="bottom" custom-style="border-radius: 20px 20px 0 0; background: white;">
-      <view v-if="currentFood" class="p-6">
-        <view class="flex justify-between items-center mb-10">
-          <view class="p-2" @click="showPopup = false">
-            <IconX size="20" color="#111827" />
-          </view>
-          <text class="text-lg font-bold text-gray-900">{{ currentFood.name }}</text>
-          <view class="w-8"></view>
-        </view>
-
-        <!-- 营养概览 -->
-        <view class="grid grid-cols-4 gap-4 text-center mb-10">
-          <view>
-            <view class="text-lg font-bold text-gray-900">{{ popupNutrition.calories }}</view>
-            <view class="text-[10px] text-gray-400">千卡</view>
-          </view>
-          <view>
-            <view class="text-lg font-bold text-gray-900">{{ popupNutrition.carbs }}</view>
-            <view class="text-[10px] text-gray-400">碳水</view>
-          </view>
-          <view>
-            <view class="text-lg font-bold text-gray-900">{{ popupNutrition.protein }}</view>
-            <view class="text-[10px] text-gray-400">蛋白质</view>
-          </view>
-          <view>
-            <view class="text-lg font-bold text-gray-900">{{ popupNutrition.fat }}</view>
-            <view class="text-[10px] text-gray-400">脂肪</view>
-          </view>
-        </view>
-
-        <!-- 数量输入 -->
-        <view class="flex flex-col items-center mb-10">
-          <view class="flex items-center gap-6">
-            <view class="text-4xl font-bold text-gray-900 border-b-2 border-gray-100 pb-2 px-6">
-              <input type="digit" v-model="quantity" class="text-center w-24" />
-            </view>
-          </view>
-          <text class="text-xs text-gray-400 mt-4">输入数量 ({{ selectedUnit }})</text>
-        </view>
-
-        <!-- 单位选择 -->
-        <view class="flex justify-center gap-4 mb-10">
-          <view
-            v-for="unit in availableUnits"
-            :key="unit.name"
-            class="px-4 py-2 rounded-full border transition-all"
-            :class="selectedUnit === unit.name ? 'bg-emerald-500 border-emerald-500 text-white' : 'bg-gray-50 border-gray-100 text-gray-500'"
-            @click="selectedUnit = unit.name"
-          >
-            <text class="text-sm">{{ unit.name }}</text>
-          </view>
-        </view>
-
-        <wd-button block size="large" @click="confirmSelect">确定</wd-button>
-      </view>
-    </wd-popup>
-
-    <!-- 拍照识别按钮 -->
-    <view class="fixed bottom-10 right-6 w-14 h-14 bg-emerald-500 rounded-full shadow-lg flex items-center justify-center z-20 active:opacity-80 transition-all" @click="handleCamera">
-      <IconCamera size="24" color="white" />
-    </view>
-
-    <!-- AI 识别引导 -->
-    <wd-popup 
-      v-model="showCameraGuide" 
-      position="bottom" 
-      custom-style="border-radius: 24px 24px 0 0; background: var(--card-bg);"
-      overlay-style="background-color: rgba(6, 78, 59, 0.45);"
-    >
-      <view class="p-6">
-        <view class="flex justify-between items-center mb-8">
-          <view class="p-2" @click="showCameraGuide = false">
-            <IconX size="20" color="var(--text-main)" />
-          </view>
-          <text class="text-lg font-bold text-[var(--text-main)]">AI 识别食物</text>
-          <view class="w-10"></view>
-        </view>
-
-        <view class="flex flex-col items-center mb-10">
-          <view class="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mb-6">
-            <IconCamera size="40" color="#10b981" />
-          </view>
-          <text class="text-xl font-bold text-[var(--text-main)] mb-4">拍照一键识别</text>
-          
-          <view class="space-y-4 w-full">
-            <view class="flex items-start gap-4">
-              <view class="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <text class="text-white text-xs">1</text>
-              </view>
-              <text class="text-sm text-[var(--text-sub)]">对准餐盘拍摄清晰照片</text>
-            </view>
-            <view class="flex items-start gap-4">
-              <view class="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <text class="text-white text-xs">2</text>
-              </view>
-              <text class="text-sm text-[var(--text-sub)]">系统自动识别盘中多种食物</text>
-            </view>
-            <view class="flex items-start gap-4">
-              <view class="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <text class="text-white text-xs">3</text>
-              </view>
-              <text class="text-sm text-[var(--text-sub)]">确认并快速添加到今日餐食</text>
-            </view>
-          </view>
-        </view>
-
-        <view class="space-y-3">
-          <wd-button block size="large" @click="handleCameraRecognition" custom-style="background-color: #10b981 !important; border-color: #10b981 !important;">开始识别</wd-button>
-          <wd-button block size="large" plain @click="showCameraGuide = false" custom-style="color: #10b981 !important; border-color: #10b981 !important;">返回</wd-button>
-        </view>
-      </view>
-    </wd-popup>
-
-    <!-- 识别结果展示 -->
-    <wd-popup 
-      v-model="showRecognitionResults" 
-      position="bottom" 
-      custom-style="border-radius: 24px 24px 0 0; background: var(--card-bg);"
-      overlay-style="background-color: rgba(6, 78, 59, 0.45);"
-    >
-      <view class="p-6">
-        <view class="flex justify-between items-center mb-6">
-          <view class="p-2" @click="showRecognitionResults = false">
-            <IconX size="20" color="var(--text-main)" />
-          </view>
-          <text class="text-lg font-bold text-[var(--text-main)]">识别结果</text>
-          <view class="w-10"></view>
-        </view>
-
-        <view class="grid grid-cols-2 gap-3 mb-8">
-          <view
-            v-for="(food, idx) in recognizedFoods"
-            :key="idx"
-            class="bg-[var(--page-bg)] rounded-xl p-3 border border-[var(--border-color)] active:border-emerald-500 transition-all font-sans"
-            @click="handleRecognizedFoodSelect(food)"
-          >
-            <view class="text-sm font-bold text-[var(--text-main)] mb-1">{{ food.name }}</view>
-            <view class="text-[10px] text-[var(--text-sub)] mb-2">{{ food.unit }} | {{ food.calories }}kcal</view>
-            <view class="flex items-center justify-between">
-              <text class="text-[9px] text-emerald-600 font-bold">匹配度 98%</text>
-              <IconPlus size="12" color="#10b981" />
-            </view>
-          </view>
-        </view>
-
-        <wd-button block size="large" plain @click="showRecognitionResults = false" custom-style="color: #10b981 !important; border-color: #10b981 !important;">重新拍摄</wd-button>
-      </view>
-    </wd-popup>
-  </view>
-</template>
-
 <script setup lang="ts">
+import IconCamera from '@/components/icons/IconCamera.vue'
 import IconPlus from '@/components/icons/IconPlus.vue'
 import IconX from '@/components/icons/IconX.vue'
-import IconCamera from '@/components/icons/IconCamera.vue'
 
 const searchQuery = ref('')
 const showPopup = ref(false)
@@ -213,7 +30,8 @@ const commonFoods = [
 ]
 
 const filteredFoods = computed(() => {
-  if (!searchQuery.value) return commonFoods
+  if (!searchQuery.value)
+    return commonFoods
   return commonFoods.filter(f => f.name.includes(searchQuery.value))
 })
 
@@ -224,9 +42,10 @@ const availableUnits = [
 ]
 
 const popupNutrition = computed(() => {
-  if (!currentFood.value) return { calories: 0, protein: 0, fat: 0, carbs: 0 }
+  if (!currentFood.value)
+    return { calories: 0, protein: 0, fat: 0, carbs: 0 }
   const ratio = availableUnits.find(u => u.name === selectedUnit.value)?.ratio || 1
-  const q = parseFloat(quantity.value.toString()) || 0
+  const q = Number.parseFloat(quantity.value.toString()) || 0
   return {
     calories: Math.round(currentFood.value.calories * ratio * q),
     protein: (currentFood.value.protein * ratio * q).toFixed(1),
@@ -247,7 +66,23 @@ function selectFood(food: any) {
 }
 
 function confirmSelect() {
-  // 模拟逻辑：发送数据回上一个页面或存入 Store
+  if (!currentFood.value)
+    return
+
+  const ratio = availableUnits.find(u => u.name === selectedUnit.value)?.ratio || 1
+  const q = Number.parseFloat(quantity.value.toString()) || 0
+
+  const selectedFood = {
+    ...currentFood.value,
+    quantity: q,
+    selectedUnit: selectedUnit.value,
+    totalCalories: Math.round(currentFood.value.calories * ratio * q),
+    totalProtein: (currentFood.value.protein * ratio * q).toFixed(1),
+    totalFat: (currentFood.value.fat * ratio * q).toFixed(1),
+    totalCarbs: (currentFood.value.carbs * ratio * q).toFixed(1),
+  }
+
+  uni.$emit('add-food-item', selectedFood)
   uni.showToast({ title: '已添加', icon: 'success' })
   showPopup.value = false
   setTimeout(() => uni.navigateBack(), 1000)
@@ -282,9 +117,252 @@ function handleRecognizedFoodSelect(food: any) {
 }
 </script>
 
+<template>
+  <view class="page-container min-h-screen bg-[var(--page-bg)]">
+    <view class="header-container fixed left-0 top-0 z-10 w-full bg-[var(--page-bg)]">
+      <wd-navbar title="选择食物" left-arrow @click-left="goBack" />
+      <view class="border-b border-[var(--border-color)] bg-[var(--card-bg)] px-4 py-3">
+        <wd-search v-model="searchQuery" placeholder="搜索食物..." hide-cancel />
+      </view>
+    </view>
+
+    <!-- 顶占位 (44px navbar + ~54px search) -->
+    <view class="h-[100px]" />
+
+    <!-- 食物列表 -->
+    <view class="px-4 py-4 pb-32 space-y-3">
+      <view
+        v-for="(food, index) in filteredFoods"
+        :key="index"
+        class="w-full flex items-center justify-between rounded-xl bg-[var(--card-bg)] p-4 shadow-sm active:bg-[var(--page-bg)]"
+        @click="selectFood(food)"
+      >
+        <view>
+          <view class="mb-1 text-sm text-[var(--text-main)] font-bold">
+            {{ food.name }}
+          </view>
+          <view class="flex gap-3 text-[10px] text-[var(--text-sub)]">
+            <text>{{ food.calories }}kcal / {{ food.unit }}</text>
+            <text>P:{{ food.protein }}g F:{{ food.fat }}g C:{{ food.carbs }}g</text>
+          </view>
+        </view>
+        <IconPlus size="16" color="#10b981" />
+      </view>
+    </view>
+
+    <wd-popup v-model="showPopup" position="bottom" :z-index="50" custom-style="border-radius: 20px 20px 0 0; background: var(--card-bg);">
+      <view v-if="currentFood" class="p-5">
+        <view class="mb-6 flex items-center justify-between">
+          <view class="p-1" @click="showPopup = false">
+            <IconX size="20" color="var(--text-main)" />
+          </view>
+          <text class="text-base text-[var(--text-main)] font-bold">
+            {{ currentFood.name }}
+          </text>
+          <view class="w-7" />
+        </view>
+
+        <!-- 营养概览 -->
+        <view class="grid grid-cols-4 mb-6 gap-2 text-center">
+          <view>
+            <view class="text-base text-[var(--text-main)] font-bold">
+              {{ popupNutrition.calories }}
+            </view>
+            <view class="text-[9px] text-[var(--text-sub)]">
+              千卡
+            </view>
+          </view>
+          <view>
+            <view class="text-base text-[var(--text-main)] font-bold">
+              {{ popupNutrition.carbs }}
+            </view>
+            <view class="text-[9px] text-[var(--text-sub)]">
+              碳水
+            </view>
+          </view>
+          <view>
+            <view class="text-base text-[var(--text-main)] font-bold">
+              {{ popupNutrition.protein }}
+            </view>
+            <view class="text-[9px] text-[var(--text-sub)]">
+              蛋白质
+            </view>
+          </view>
+          <view>
+            <view class="text-base text-[var(--text-main)] font-bold">
+              {{ popupNutrition.fat }}
+            </view>
+            <view class="text-[9px] text-[var(--text-sub)]">
+              脂肪
+            </view>
+          </view>
+        </view>
+
+        <!-- 数量输入 -->
+        <view class="mb-6 flex flex-col items-center">
+          <view class="flex items-center gap-4">
+            <view class="border-b-2 border-[var(--border-color)] px-4 pb-1 font-bold">
+              <input v-model="quantity" type="digit" class="h-24 w-40 text-center text-7xl text-[var(--text-main)]">
+            </view>
+          </view>
+          <text class="mt-2 text-xs text-[var(--text-sub)]">
+            输入数量 ({{ selectedUnit }})
+          </text>
+        </view>
+
+        <!-- 单位选择 -->
+        <view class="mb-8 flex justify-center gap-3">
+          <view
+            v-for="unit in availableUnits"
+            :key="unit.name"
+            class="border rounded-full px-3 py-1.5 text-xs transition-all"
+            :class="selectedUnit === unit.name ? 'bg-emerald-500 border-emerald-500 text-white' : 'bg-[var(--page-bg)] border-[var(--border-color)] text-[var(--text-sub)]'"
+            @click="selectedUnit = unit.name"
+          >
+            <text>
+              {{ unit.name }}
+            </text>
+          </view>
+        </view>
+
+        <wd-button block type="success" size="large" class="from-emerald-500 to-emerald-600 bg-gradient-to-r !border-none !text-white" @click="confirmSelect">
+          确定
+        </wd-button>
+      </view>
+    </wd-popup>
+
+    <!-- 拍照识别按钮 -->
+    <view class="fixed bottom-10 right-6 z-20 h-14 w-14 flex items-center justify-center rounded-full from-emerald-500 to-emerald-600 bg-gradient-to-r shadow-lg transition-all active:opacity-80" @click="handleCamera">
+      <IconCamera size="24" color="white" />
+    </view>
+
+    <!-- AI 识别引导 -->
+    <wd-popup
+      v-model="showCameraGuide"
+      position="bottom"
+      :z-index="50"
+      custom-style="border-radius: 24px 24px 0 0; background: var(--card-bg);"
+      overlay-style="background-color: rgba(0, 0, 0, 0.5);"
+    >
+      <view class="p-6">
+        <view class="mb-8 flex items-center justify-between">
+          <view class="p-2" @click="showCameraGuide = false">
+            <IconX size="20" color="var(--text-main)" />
+          </view>
+          <text class="text-lg text-[var(--text-main)] font-bold">
+            AI 识别食物
+          </text>
+          <view class="w-10" />
+        </view>
+
+        <view class="mb-10 flex flex-col items-center">
+          <view class="mb-6 h-20 w-20 flex items-center justify-center rounded-full bg-emerald-50">
+            <IconCamera size="40" class="text-emerald-500" />
+          </view>
+          <text class="mb-4 text-xl text-[var(--text-main)] font-bold">
+            拍照一键识别
+          </text>
+
+          <view class="w-full space-y-4">
+            <view class="flex items-start gap-4">
+              <view class="mt-0.5 h-6 w-6 flex flex-shrink-0 items-center justify-center rounded-full bg-emerald-500">
+                <text class="text-xs text-white">
+                  1
+                </text>
+              </view>
+              <text class="text-sm text-[var(--text-sub)]">
+                对准餐盘拍摄清晰照片
+              </text>
+            </view>
+            <view class="flex items-start gap-4">
+              <view class="mt-0.5 h-6 w-6 flex flex-shrink-0 items-center justify-center rounded-full bg-emerald-500">
+                <text class="text-xs text-white">
+                  2
+                </text>
+              </view>
+              <text class="text-sm text-[var(--text-sub)]">
+                系统自动识别盘中多种食物
+              </text>
+            </view>
+            <view class="flex items-start gap-4">
+              <view class="mt-0.5 h-6 w-6 flex flex-shrink-0 items-center justify-center rounded-full bg-emerald-500">
+                <text class="text-xs text-white">
+                  3
+                </text>
+              </view>
+              <text class="text-sm text-[var(--text-sub)]">
+                确认并快速添加到今日餐食
+              </text>
+            </view>
+          </view>
+        </view>
+
+        <view class="space-y-3">
+          <wd-button block size="large" type="success" custom-class="confirm-btn" @click="handleCameraRecognition">
+            开始识别
+          </wd-button>
+          <wd-button size="large" plain type="success" block @click="showCameraGuide = false">
+            返回
+          </wd-button>
+        </view>
+      </view>
+    </wd-popup>
+
+    <!-- 识别结果展示 -->
+    <wd-popup
+      v-model="showRecognitionResults"
+      position="bottom"
+      :z-index="50"
+      custom-style="border-radius: 24px 24px 0 0; background: var(--card-bg);"
+      overlay-style="background-color: rgba(0, 0, 0, 0.5);"
+    >
+      <view class="p-6">
+        <view class="mb-6 flex items-center justify-between">
+          <view class="p-2" @click="showRecognitionResults = false">
+            <IconX size="20" color="var(--text-main)" />
+          </view>
+          <text class="text-lg text-[var(--text-main)] font-bold">
+            识别结果
+          </text>
+          <view class="w-10" />
+        </view>
+
+        <view class="grid grid-cols-2 mb-8 gap-3">
+          <view
+            v-for="(food, idx) in recognizedFoods"
+            :key="idx"
+            class="border border-[var(--border-color)] rounded-xl bg-[var(--card-bg)] p-3 font-sans transition-all active:border-emerald-500"
+            @click="handleRecognizedFoodSelect(food)"
+          >
+            <view class="mb-1 text-sm text-[var(--text-main)] font-bold">
+              {{ food.name }}
+            </view>
+            <view class="mb-2 text-[10px] text-[var(--text-sub)]">
+              {{ food.unit }} | {{ food.calories }}kcal
+            </view>
+            <view class="flex items-center justify-between">
+              <text class="text-[9px] text-emerald-600 font-bold">
+                匹配度 98%
+              </text>
+              <IconPlus size="12" class="text-emerald-500" />
+            </view>
+          </view>
+        </view>
+
+        <wd-button size="large" type="success" plain block @click="showRecognitionResults = false">
+          重新拍摄
+        </wd-button>
+      </view>
+    </wd-popup>
+  </view>
+</template>
+
 <style scoped>
 :deep(.wd-search) {
   padding: 0;
   background: transparent;
+}
+:deep(.confirm-btn) {
+  --at-apply: "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white border-none";
 }
 </style>
