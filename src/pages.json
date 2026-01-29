@@ -13,20 +13,15 @@
     "animationDuration": 300
   },
   "pages": [
-    // #ifdef APP || MP-WEIXIN
     {
       "path": "pages/index/index",
       "type": "home",
       "name": "home",
       "layout": "tabbar",
       "style": {
-        "navigationBarTitleText": "首页"
+        "navigationBarTitleText": "首页",
+        "navigationStyle": "custom"
       }
-    },
-    // #endif
-    {
-      "path": "pages/index/index",
-      "type": "home"
     },
     // #ifdef APP || MP-WEIXIN
     {
@@ -61,7 +56,8 @@
       "name": "feed",
       "layout": "tabbar",
       "style": {
-        "navigationBarTitleText": "动态广场"
+        "navigationBarTitleText": "动态广场",
+        "navigationStyle": "custom"
       }
     },
     {

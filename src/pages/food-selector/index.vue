@@ -97,13 +97,104 @@
     </wd-popup>
 
     <!-- 拍照识别按钮 -->
-    <view class="fixed bottom-10 right-6 w-14 h-14 bg-emerald-500 rounded-full shadow-lg flex items-center justify-center z-20" @click="handleCamera">
+    <view class="fixed bottom-10 right-6 w-14 h-14 bg-emerald-500 rounded-full shadow-lg flex items-center justify-center z-20 active:opacity-80 transition-all" @click="handleCamera">
       <IconCamera size="24" color="white" />
     </view>
+
+    <!-- AI 识别引导 -->
+    <wd-popup 
+      v-model="showCameraGuide" 
+      position="bottom" 
+      custom-style="border-radius: 24px 24px 0 0; background: var(--card-bg);"
+      overlay-style="background-color: rgba(6, 78, 59, 0.45);"
+    >
+      <view class="p-6">
+        <view class="flex justify-between items-center mb-8">
+          <view class="p-2" @click="showCameraGuide = false">
+            <IconX size="20" color="var(--text-main)" />
+          </view>
+          <text class="text-lg font-bold text-[var(--text-main)]">AI 识别食物</text>
+          <view class="w-10"></view>
+        </view>
+
+        <view class="flex flex-col items-center mb-10">
+          <view class="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mb-6">
+            <IconCamera size="40" color="#10b981" />
+          </view>
+          <text class="text-xl font-bold text-[var(--text-main)] mb-4">拍照一键识别</text>
+          
+          <view class="space-y-4 w-full">
+            <view class="flex items-start gap-4">
+              <view class="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <text class="text-white text-xs">1</text>
+              </view>
+              <text class="text-sm text-[var(--text-sub)]">对准餐盘拍摄清晰照片</text>
+            </view>
+            <view class="flex items-start gap-4">
+              <view class="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <text class="text-white text-xs">2</text>
+              </view>
+              <text class="text-sm text-[var(--text-sub)]">系统自动识别盘中多种食物</text>
+            </view>
+            <view class="flex items-start gap-4">
+              <view class="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <text class="text-white text-xs">3</text>
+              </view>
+              <text class="text-sm text-[var(--text-sub)]">确认并快速添加到今日餐食</text>
+            </view>
+          </view>
+        </view>
+
+        <view class="space-y-3">
+          <wd-button block size="large" @click="handleCameraRecognition" custom-style="background-color: #10b981 !important; border-color: #10b981 !important;">开始识别</wd-button>
+          <wd-button block size="large" plain @click="showCameraGuide = false" custom-style="color: #10b981 !important; border-color: #10b981 !important;">返回</wd-button>
+        </view>
+      </view>
+    </wd-popup>
+
+    <!-- 识别结果展示 -->
+    <wd-popup 
+      v-model="showRecognitionResults" 
+      position="bottom" 
+      custom-style="border-radius: 24px 24px 0 0; background: var(--card-bg);"
+      overlay-style="background-color: rgba(6, 78, 59, 0.45);"
+    >
+      <view class="p-6">
+        <view class="flex justify-between items-center mb-6">
+          <view class="p-2" @click="showRecognitionResults = false">
+            <IconX size="20" color="var(--text-main)" />
+          </view>
+          <text class="text-lg font-bold text-[var(--text-main)]">识别结果</text>
+          <view class="w-10"></view>
+        </view>
+
+        <view class="grid grid-cols-2 gap-3 mb-8">
+          <view
+            v-for="(food, idx) in recognizedFoods"
+            :key="idx"
+            class="bg-[var(--page-bg)] rounded-xl p-3 border border-[var(--border-color)] active:border-emerald-500 transition-all font-sans"
+            @click="handleRecognizedFoodSelect(food)"
+          >
+            <view class="text-sm font-bold text-[var(--text-main)] mb-1">{{ food.name }}</view>
+            <view class="text-[10px] text-[var(--text-sub)] mb-2">{{ food.unit }} | {{ food.calories }}kcal</view>
+            <view class="flex items-center justify-between">
+              <text class="text-[9px] text-emerald-600 font-bold">匹配度 98%</text>
+              <IconPlus size="12" color="#10b981" />
+            </view>
+          </view>
+        </view>
+
+        <wd-button block size="large" plain @click="showRecognitionResults = false" custom-style="color: #10b981 !important; border-color: #10b981 !important;">重新拍摄</wd-button>
+      </view>
+    </wd-popup>
   </view>
 </template>
 
 <script setup lang="ts">
+import IconPlus from '@/components/icons/IconPlus.vue'
+import IconX from '@/components/icons/IconX.vue'
+import IconCamera from '@/components/icons/IconCamera.vue'
+
 const searchQuery = ref('')
 const showPopup = ref(false)
 const currentFood = ref<any>(null)
@@ -162,17 +253,32 @@ function confirmSelect() {
   setTimeout(() => uni.navigateBack(), 1000)
 }
 
+const showCameraGuide = ref(false)
+const showRecognitionResults = ref(false)
+const recognizedFoods = ref<any[]>([])
+
 function handleCamera() {
-  uni.showActionSheet({
-    itemList: ['拍照识别', '相册导入'],
-    success: (res) => {
-      uni.showLoading({ title: 'AI 识别中...' })
-      setTimeout(() => {
-        uni.hideLoading()
-        uni.showToast({ title: '识别功能开发中', icon: 'none' })
-      }, 1500)
-    }
-  })
+  showCameraGuide.value = true
+}
+
+function handleCameraRecognition() {
+  uni.showLoading({ title: 'AI 识别中...' })
+  setTimeout(() => {
+    uni.hideLoading()
+    recognizedFoods.value = [
+      { name: '糙米饭', unit: '100g', calories: 111, protein: 2.6, fat: 0.9, carbs: 23 },
+      { name: '鸡胸肉', unit: '100g', calories: 133, protein: 24, fat: 5, carbs: 0 },
+      { name: '西兰花', unit: '100g', calories: 34, protein: 2.8, fat: 0.4, carbs: 6.6 },
+      { name: '煮鸡蛋', unit: '1个', calories: 78, protein: 6.3, fat: 5.3, carbs: 0.6 },
+    ]
+    showCameraGuide.value = false
+    showRecognitionResults.value = true
+  }, 1500)
+}
+
+function handleRecognizedFoodSelect(food: any) {
+  showRecognitionResults.value = false
+  selectFood(food)
 }
 </script>
 

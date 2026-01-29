@@ -3,31 +3,35 @@
   "name": "feed",
   "layout": "tabbar",
   "style": {
-    "navigationBarTitleText": "动态广场"
+    "navigationBarTitleText": "动态广场",
+    "navigationStyle": "custom"
   }
 }
 </route>
 
 <template>
   <view class="page-container bg-[var(--page-bg)] min-h-screen pb-20">
-    <wd-navbar title="动态广场" fixed placeholder />
-    
-    <!-- 发布按钮区域 -->
-    <view class="bg-[var(--card-bg)] px-4 py-3 border-b border-[var(--border-color)] mb-2">
-      <view class="flex items-center gap-3 bg-[var(--page-bg)] rounded-lg px-4 py-2" @click="handleCreatePost">
-        <view class="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center">
-          <IconUser size="16" color="white" />
-        </view>
-        <text class="text-[var(--text-sub)] text-sm">分享你的饮食心得...</text>
-        <view class="ml-auto flex items-center gap-2">
-          <IconImage size="20" color="#9ca3af" />
-          <IconVideo size="20" color="#9ca3af" />
+    <view class="header-container fixed top-0 left-0 w-full z-10 bg-[var(--page-bg)]">
+      <wd-navbar title="动态广场" />
+      <view class="bg-[var(--card-bg)] px-4 py-2 border-b border-[var(--border-color)]">
+        <view class="flex items-center gap-3 bg-[var(--page-bg)] rounded-xl px-4 py-2" @click="handleCreatePost">
+          <view class="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center">
+            <IconUser size="16" color="white" />
+          </view>
+          <text class="text-[var(--text-sub)] text-sm">分享你的饮食心得...</text>
+          <view class="ml-auto flex items-center gap-2">
+            <IconImage size="18" color="#9ca3af" />
+            <IconVideo size="18" color="#9ca3af" />
+          </view>
         </view>
       </view>
     </view>
 
+    <!-- 顶部占位 (navbar 44px + area ~52px + gap) -->
+    <view class="h-[120px]"></view>
+
     <!-- 动态列表 -->
-    <view class="posts-list space-y-2">
+    <view class="posts-list space-y-2 mt-4">
       <view v-for="post in posts" :key="post.id" class="bg-[var(--card-bg)] px-4 py-4">
         <!-- 作者信息 -->
         <view class="flex items-center gap-3 mb-3">
