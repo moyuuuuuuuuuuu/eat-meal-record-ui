@@ -32,9 +32,36 @@ function generateUser(username?: string, status?: UserStatus) {
 // 模拟用户数据库
 const mockUsers = generateMockData.array(index => generateUser(`user${index + 1}`), 10)
 
+// Helper to generate random stats
+function generateUserStats() {
+  return {
+    joinDays: generateMockData.number(1, 365),
+    totalRecords: generateMockData.number(1, 300),
+    avgCalories: generateMockData.number(1500, 2500),
+    currentWeight: generateMockData.number(50, 90),
+    targetWeight: generateMockData.number(45, 85),
+    height: generateMockData.number(150, 190),
+    age: generateMockData.number(18, 60),
+    gender: Math.random() > 0.5 ? '男' : '女',
+  }
+}
+
 export default defineMock({
+  // 获取用户统计信息
+  '[GET]/api/v3/user/stats': () => {
+    const stats = generateUserStats()
+    return {
+      code: 200,
+      message: 'success',
+      data: {
+        name: '健康达人',
+        ...stats,
+      },
+    }
+  },
+
   // 批量创建用户（数组输入）
-  '[POST]/user/createWithArray': ({ data }) => {
+  '[POST]/api/v3/user/createWithArray': ({ data }) => {
     console.log('[Mock] POST /user/createWithArray', data)
 
     if (!Array.isArray(data)) {
@@ -67,7 +94,7 @@ export default defineMock({
   },
 
   // 批量创建用户（列表输入）
-  '[POST]/user/createWithList': ({ data }) => {
+  '[POST]/api/v3/user/createWithList': ({ data }) => {
     console.log('[Mock] POST /user/createWithList', data)
 
     if (!Array.isArray(data)) {
@@ -100,7 +127,7 @@ export default defineMock({
   },
 
   // 用户登录
-  '[GET]/user/login': ({ query }) => {
+  '[GET]/api/v3/user/login': ({ query }) => {
     console.log('[Mock] GET /user/login', query)
 
     const { username, password } = query
@@ -148,7 +175,7 @@ export default defineMock({
   },
 
   // 用户登出
-  '[GET]/user/logout': () => {
+  '[GET]/api/v3/user/logout': () => {
     console.log('[Mock] GET /user/logout')
 
     return {
@@ -157,8 +184,20 @@ export default defineMock({
     }
   },
 
+  // 获取用户统计信息
+  '[GET]/api/v3/user/stats': () => {
+    return {
+      code: 200,
+      data: {
+        name: 'User One', // Default name or from token if implemented
+        ...generateUserStats(),
+      },
+      message: 'ok',
+    }
+  },
+
   // 根据用户名获取用户
-  '[GET]/user/{username}': ({ params }) => {
+  '[GET]/api/v3/user/{username}': ({ params }) => {
     console.log(`[Mock] GET /user/${params.username}`)
 
     const username = params.username
@@ -195,7 +234,7 @@ export default defineMock({
   },
 
   // 更新用户信息
-  '[PUT]/user/{username}': ({ params, data }) => {
+  '[PUT]/api/v3/user/{username}': ({ params, data }) => {
     console.log(`[Mock] PUT /user/${params.username}`, data)
 
     const username = params.username
@@ -233,7 +272,7 @@ export default defineMock({
   },
 
   // 删除用户
-  '[DELETE]/user/{username}': ({ params }) => {
+  '[DELETE]/api/v3/user/{username}': ({ params }) => {
     console.log(`[Mock] DELETE /user/${params.username}`)
 
     const username = params.username
@@ -266,7 +305,7 @@ export default defineMock({
   },
 
   // 创建用户
-  '[POST]/user': ({ data }) => {
+  '[POST]/api/v3/user': ({ data }) => {
     console.log('[Mock] POST /user', data)
 
     if (!data.username) {

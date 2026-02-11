@@ -53,7 +53,7 @@ function generatePet(id?: number, status?: PetStatus) {
 
 export default defineMock({
   // 上传宠物图片
-  '[POST]/pet/{petId}/uploadImage': ({ params, data }) => {
+  '[POST]/api/v3/pet/{petId}/uploadImage': ({ params, data }) => {
     console.log(`[Mock] POST /pet/${params.petId}/uploadImage`, data)
 
     return {
@@ -68,7 +68,7 @@ export default defineMock({
   },
 
   // 添加新宠物
-  '[POST]/pet': ({ data }) => {
+  '[POST]/api/v3/pet': ({ data }) => {
     console.log('[Mock] POST /pet', data)
 
     const newPet = {
@@ -80,7 +80,7 @@ export default defineMock({
   },
 
   // 更新宠物信息
-  '[PUT]/pet': ({ data }) => {
+  '[PUT]/api/v3/pet': ({ data }) => {
     console.log('[Mock] PUT /pet', data)
 
     if (!data.id) {
@@ -100,7 +100,7 @@ export default defineMock({
   },
 
   // 根据状态查找宠物
-  '[GET]/pet/findByStatus': ({ query }) => {
+  '[GET]/api/v3/pet/findByStatus': ({ query }) => {
     console.log('[Mock] GET /pet/findByStatus', query)
 
     const status = query.status as PetStatus
@@ -128,7 +128,7 @@ export default defineMock({
   },
 
   // 根据ID获取宠物
-  '[GET]/pet/{petId}': ({ params }) => {
+  '[GET]/api/v3/pet/{petId}': ({ params }) => {
     console.log(`[Mock] GET /pet/${params.petId}`)
 
     const petId = Number.parseInt(params.petId)
@@ -158,7 +158,7 @@ export default defineMock({
   },
 
   // 使用表单数据更新宠物
-  '[POST]/pet/{petId}': ({ params, data }) => {
+  '[POST]/api/v3/pet/{petId}': ({ params, data }) => {
     console.log(`[Mock] POST /pet/${params.petId}`, data)
 
     const petId = Number.parseInt(params.petId)
@@ -194,7 +194,7 @@ export default defineMock({
   },
 
   // 删除宠物
-  '[DELETE]/pet/{petId}': ({ params, headers }) => {
+  '[DELETE]/api/v3/pet/{petId}': ({ params, headers }) => {
     console.log(`[Mock] DELETE /pet/${params.petId}`, headers)
 
     const petId = Number.parseInt(params.petId)

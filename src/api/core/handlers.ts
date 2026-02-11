@@ -66,7 +66,7 @@ export async function handleAlovaResponse(
   }
 
   // Return data for successful responses
-  return json
+  return json.data
 }
 
 // Handle request errors

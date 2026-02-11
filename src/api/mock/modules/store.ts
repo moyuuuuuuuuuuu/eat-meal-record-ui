@@ -29,7 +29,7 @@ function generateOrder(id?: number, status?: OrderStatus) {
 
 export default defineMock({
   // 获取库存
-  '[GET]/store/inventory': () => {
+  '[GET]/api/v3/store/inventory': () => {
     console.log('[Mock] GET /store/inventory')
 
     // 生成随机库存数据
@@ -49,7 +49,7 @@ export default defineMock({
   },
 
   // 下单购买宠物
-  '[POST]/store/order': ({ data }) => {
+  '[POST]/api/v3/store/order': ({ data }) => {
     console.log('[Mock] POST /store/order', data)
 
     // 验证必填字段
@@ -87,7 +87,7 @@ export default defineMock({
   },
 
   // 根据ID获取订单
-  '[GET]/store/order/{orderId}': ({ params }) => {
+  '[GET]/api/v3/store/order/{orderId}': ({ params }) => {
     console.log(`[Mock] GET /store/order/${params.orderId}`)
 
     const orderId = Number.parseInt(params.orderId)
@@ -128,7 +128,7 @@ export default defineMock({
   },
 
   // 删除订单
-  '[DELETE]/store/order/{orderId}': ({ params }) => {
+  '[DELETE]/api/v3/store/order/{orderId}': ({ params }) => {
     console.log(`[Mock] DELETE /store/order/${params.orderId}`)
 
     const orderId = Number.parseInt(params.orderId)

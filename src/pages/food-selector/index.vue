@@ -1,38 +1,61 @@
-<route lang="json">
-{
-  "style": {
-    "navigationBarTitleText": "选择食物",
-    "navigationStyle": "custom"
-  }
-}
-</route>
-
 <script setup lang="ts">
+import type { FoodInfo } from '@/api/globals'
 import IconCamera from '@/components/icons/IconCamera.vue'
 import IconPlus from '@/components/icons/IconPlus.vue'
 import IconX from '@/components/icons/IconX.vue'
 
+definePage({
+  style: {
+    navigationBarTitleText: '选择食物',
+    navigationStyle: 'custom',
+  },
+})
+
 const searchQuery = ref('')
 const showPopup = ref(false)
-const currentFood = ref<any>(null)
+const currentFood = ref<FoodInfo | null>(null)
 const quantity = ref(1)
 const selectedUnit = ref('')
 
-const commonFoods = [
-  { name: '燕麦粥', unit: '100g', calories: 68, protein: 2.4, fat: 1.4, carbs: 12 },
-  { name: '煮鸡蛋', unit: '1个', calories: 78, protein: 6.3, fat: 5.3, carbs: 0.6 },
-  { name: '全麦面包', unit: '1片', calories: 90, protein: 3.5, fat: 1.2, carbs: 17 },
-  { name: '牛奶', unit: '100ml', calories: 60, protein: 3.2, fat: 3.4, carbs: 4.8 },
-  { name: '糙米饭', unit: '100g', calories: 111, protein: 2.6, fat: 0.9, carbs: 23 },
-  { name: '鸡胸肉', unit: '100g', calories: 133, protein: 24, fat: 5, carbs: 0 },
-  { name: '西兰花', unit: '100g', calories: 34, protein: 2.8, fat: 0.4, carbs: 6.6 },
-  { name: '三文鱼', unit: '100g', calories: 206, protein: 20, fat: 13, carbs: 0 },
-]
+// 食物列表 - 从 API 加载
+const foodList = ref<FoodInfo[]>([])
+const isLoading = ref(false)
 
+// 加载食物列表
+async function loadFoods(keyword = '') {
+  isLoading.value = true
+  try {
+    const res = await Apis.food.getList({
+      params: { keyword, pageSize: 50 },
+    }).send()
+    if (res) {
+      foodList.value = res.list
+    }
+  }
+  catch (e) {
+    console.error('[food-selector] loadFoods error', e)
+  }
+  finally {
+    isLoading.value = false
+  }
+}
+
+// 页面加载时获取食物列表
+onMounted(() => loadFoods())
+
+// 搜索防抖
+let searchTimer: ReturnType<typeof setTimeout> | null = null
+watch(searchQuery, (val: string) => {
+  if (searchTimer)
+    clearTimeout(searchTimer)
+  searchTimer = setTimeout(() => loadFoods(val), 300)
+})
+
+// 本地过滤（搜索前的即时过滤）
 const filteredFoods = computed(() => {
   if (!searchQuery.value)
-    return commonFoods
-  return commonFoods.filter(f => f.name.includes(searchQuery.value))
+    return foodList.value
+  return foodList.value.filter((f: FoodInfo) => f.name.includes(searchQuery.value))
 })
 
 const availableUnits = [
@@ -58,7 +81,7 @@ function goBack() {
   uni.navigateBack()
 }
 
-function selectFood(food: any) {
+function selectFood(food: FoodInfo) {
   currentFood.value = food
   selectedUnit.value = food.unit === '100g' ? '100g' : '份'
   quantity.value = 1
@@ -90,28 +113,32 @@ function confirmSelect() {
 
 const showCameraGuide = ref(false)
 const showRecognitionResults = ref(false)
-const recognizedFoods = ref<any[]>([])
+const recognizedFoods = ref<(FoodInfo & { confidence: number })[]>([])
 
 function handleCamera() {
   showCameraGuide.value = true
 }
 
-function handleCameraRecognition() {
+async function handleCameraRecognition() {
   uni.showLoading({ title: 'AI 识别中...' })
-  setTimeout(() => {
+  try {
+    const res = await Apis.food.recognize().send()
+    if (res) {
+      recognizedFoods.value = res
+    }
+  }
+  catch (e) {
+    console.error('[food-selector] recognize error', e)
+    uni.showToast({ title: '识别失败', icon: 'error' })
+  }
+  finally {
     uni.hideLoading()
-    recognizedFoods.value = [
-      { name: '糙米饭', unit: '100g', calories: 111, protein: 2.6, fat: 0.9, carbs: 23 },
-      { name: '鸡胸肉', unit: '100g', calories: 133, protein: 24, fat: 5, carbs: 0 },
-      { name: '西兰花', unit: '100g', calories: 34, protein: 2.8, fat: 0.4, carbs: 6.6 },
-      { name: '煮鸡蛋', unit: '1个', calories: 78, protein: 6.3, fat: 5.3, carbs: 0.6 },
-    ]
     showCameraGuide.value = false
     showRecognitionResults.value = true
-  }, 1500)
+  }
 }
 
-function handleRecognizedFoodSelect(food: any) {
+function handleRecognizedFoodSelect(food: FoodInfo) {
   showRecognitionResults.value = false
   selectFood(food)
 }
@@ -342,7 +369,7 @@ function handleRecognizedFoodSelect(food: any) {
             </view>
             <view class="flex items-center justify-between">
               <text class="text-[9px] text-emerald-600 font-bold">
-                匹配度 98%
+                匹配度 {{ food.confidence || 98 }}%
               </text>
               <IconPlus size="12" class="text-emerald-500" />
             </view>
