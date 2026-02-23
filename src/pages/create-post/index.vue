@@ -1,11 +1,3 @@
-<route lang="json">
-{
-  "style": {
-    "navigationBarTitleText": "发布动态",
-    "navigationStyle": "custom"
-  }
-}
-</route>
 
 <template>
   <view class="page-container bg-[var(--page-bg)] h-screen flex flex-col overflow-hidden">
@@ -27,7 +19,7 @@
             placeholder="分享你的饮食心得..."
             :maxlength="500"
           />
-          
+
           <view class="flex items-center justify-between mt-4 pb-2 border-b border-[var(--border-color)]">
             <view class="flex gap-4">
               <IconImage size="22" color="#9ca3af" />
@@ -48,8 +40,8 @@
             v-for="topic in popularTopics"
             :key="topic"
             class="px-3 py-1.5 rounded-full text-xs transition-all border"
-            :class="selectedTopics.includes(topic) 
-              ? 'bg-emerald-500 border-emerald-500 text-white' 
+            :class="selectedTopics.includes(topic)
+              ? 'bg-emerald-500 border-emerald-500 text-white'
               : 'bg-[var(--page-bg)] border-[var(--border-color)] text-[var(--text-sub)]'"
             @click="toggleTopic(topic)"
           >
@@ -69,10 +61,10 @@
               {{ selectedMeals.length > 0 ? `已关联 ${selectedMeals.length}个餐食` : '关联餐食记录' }}
             </text>
           </view>
-          <IconChevronRight 
-            size="16" 
-            color="#9ca3af" 
-            :style="{ transform: showMealSelector ? 'rotate(90deg)' : 'rotate(0)', transition: 'all 0.3s' }" 
+          <IconChevronRight
+            size="16"
+            color="#9ca3af"
+            :style="{ transform: showMealSelector ? 'rotate(90deg)' : 'rotate(0)', transition: 'all 0.3s' }"
           />
         </view>
 
@@ -95,9 +87,9 @@
                   <text class="text-[10px] text-emerald-600">{{ meal.totalCalories }} kcal</text>
                 </view>
                 <view class="flex flex-wrap gap-1">
-                  <text 
-                    v-for="(item, idx) in meal.items" 
-                    :key="idx" 
+                  <text
+                    v-for="(item, idx) in meal.items"
+                    :key="idx"
                     class="text-[9px] bg-[var(--card-bg)] px-1.5 py-0.5 rounded text-[var(--text-sub)] border border-[var(--border-color)]"
                   >
                     {{ item.name }}
@@ -111,8 +103,8 @@
 
       <!-- 已关联餐食详细展示 -->
       <view v-if="selectedMeals.length > 0 && !showMealSelector" class="space-y-2">
-        <view 
-          v-for="meal in selectedMeals" 
+        <view
+          v-for="meal in selectedMeals"
           :key="meal.id"
           class="bg-gradient-to-r from-emerald-50/50 to-teal-50/50 rounded-lg p-3 border border-emerald-100 flex items-center justify-between"
         >
@@ -147,6 +139,12 @@
 </template>
 
 <script setup lang="ts">
+definePage({
+  style: {
+    navigationBarTitleText: '发布动态',
+    navigationStyle: 'custom',
+  },
+})
 import IconImage from '@/components/icons/IconImage.vue'
 import IconVideo from '@/components/icons/IconVideo.vue'
 import IconHash from '@/components/icons/IconHash.vue'

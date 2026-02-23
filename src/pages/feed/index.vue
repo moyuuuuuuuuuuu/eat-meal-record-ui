@@ -1,15 +1,13 @@
-<route lang="json">
-{
-  "name": "feed",
-  "layout": "tabbar",
-  "style": {
-    "navigationBarTitleText": "动态广场",
-    "navigationStyle": "custom"
-  }
-}
-</route>
 
 <script setup lang="ts">
+definePage({
+  name: 'feed',
+  layout: 'tabbar',
+  style: {
+    navigationBarTitleText: '动态广场',
+    navigationStyle: 'custom',
+  },
+})
 import { useRequest } from 'alova/client'
 
 const { data: posts } = useRequest(Apis.feed.getPosts(), {

@@ -1,11 +1,3 @@
-<route lang="json">
-{
-  "style": {
-    "navigationBarTitleText": "餐食记录",
-    "navigationStyle": "custom"
-  }
-}
-</route>
 
 <template>
   <view class="page-container bg-[var(--page-bg)] h-screen flex flex-col overflow-hidden">
@@ -76,6 +68,12 @@
 </template>
 
 <script setup lang="ts">
+definePage({
+  style: {
+    navigationBarTitleText: '餐食记录',
+    navigationStyle: 'custom',
+  },
+})
 const expandedDay = ref<string | null>(null)
 
 const history = [

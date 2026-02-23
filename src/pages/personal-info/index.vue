@@ -1,11 +1,3 @@
-<route lang="json">
-{
-  "style": {
-    "navigationBarTitleText": "个人信息",
-    "navigationStyle": "custom"
-  }
-}
-</route>
 
 <template>
   <view class="page-container bg-[var(--page-bg)] h-screen flex flex-col overflow-hidden">
@@ -96,6 +88,12 @@
 </template>
 
 <script setup lang="ts">
+definePage({
+  style: {
+    navigationBarTitleText: '个人信息',
+    navigationStyle: 'custom',
+  },
+})
 const name = ref('用户')
 const gender = ref('女')
 const birthday = ref('1998-01-15')

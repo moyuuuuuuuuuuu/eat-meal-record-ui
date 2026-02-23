@@ -1,11 +1,3 @@
-<route lang="json">
-{
-  "style": {
-    "navigationBarTitleText": "主题设置",
-    "navigationStyle": "custom"
-  }
-}
-</route>
 
 <template>
   <view class="page-container bg-[var(--page-bg)] min-h-screen">
@@ -54,6 +46,12 @@
 </template>
 
 <script setup lang="ts">
+definePage({
+  style: {
+    navigationBarTitleText: '主题设置',
+    navigationStyle: 'custom',
+  },
+})
 import IconSun from '@/components/icons/IconSun.vue'
 import IconMoon from '@/components/icons/IconMoon.vue'
 import IconMonitor from '@/components/icons/IconMonitor.vue'

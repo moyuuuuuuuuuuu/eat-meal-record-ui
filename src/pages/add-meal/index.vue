@@ -1,13 +1,10 @@
-<route lang="json">
-{
-  "style": {
-    "navigationBarTitleText": "添加餐食",
-    "navigationStyle": "custom"
-  }
-}
-</route>
-
 <script setup lang="ts">
+definePage({
+  style: {
+    navigationBarTitleText: '添加餐食',
+    navigationStyle: 'custom',
+  },
+})
 const mealType = ref('早餐')
 const foodItems = ref<any[]>([])
 

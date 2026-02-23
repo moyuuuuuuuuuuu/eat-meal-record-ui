@@ -1,11 +1,3 @@
-<route lang="json">
-{
-  "style": {
-    "navigationBarTitleText": "目标设置",
-    "navigationStyle": "custom"
-  }
-}
-</route>
 
 <template>
   <view class="page-container bg-[var(--page-bg)] h-screen flex flex-col overflow-hidden">
@@ -35,7 +27,7 @@
           <!-- 营养素目标 -->
       <view class="bg-[var(--card-bg)] rounded-xl p-4 shadow-sm">
         <text class="text-sm font-bold text-[var(--text-main)] mb-6 block">营养素目标</text>
-        
+
         <view class="space-y-8">
           <!-- 蛋白质 -->
           <view>
@@ -87,6 +79,12 @@
 </template>
 
 <script setup lang="ts">
+definePage({
+  style: {
+    navigationBarTitleText: '目标设置',
+    navigationStyle: 'custom',
+  },
+})
 const dailyCalories = ref(2000)
 const protein = ref(150)
 const fat = ref(55)

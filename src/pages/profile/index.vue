@@ -1,15 +1,13 @@
-<route lang="json">
-{
-  "name": "profile",
-  "layout": "tabbar",
-  "style": {
-    "navigationBarTitleText": "个人中心",
-    "navigationStyle": "custom"
-  }
-}
-</route>
 
 <script setup lang="ts">
+definePage({
+  name: 'profile',
+  layout: 'tabbar',
+  style: {
+    navigationBarTitleText: '个人中心',
+    navigationStyle: 'custom',
+  },
+})
 import { useRequest } from 'alova/client'
 
 const { data: userStats } = useRequest(Apis.user.getStats(), {
