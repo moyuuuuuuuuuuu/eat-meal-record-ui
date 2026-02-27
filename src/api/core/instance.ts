@@ -1,6 +1,7 @@
 import AdapterUniapp from '@alova/adapter-uniapp'
 import { createAlova } from 'alova'
 import vueHook from 'alova/vue'
+import { useAuth } from '@/composables/useAuth'
 import mockAdapter from '../mock/mockAdapter'
 import { handleAlovaError, handleAlovaResponse } from './handlers'
 
@@ -11,6 +12,12 @@ export const alovaInstance = createAlova({
   }),
   statesHook: vueHook,
   beforeRequest: (method) => {
+    // Add JWT Token
+    const { token } = useAuth()
+    if (token.value) {
+      method.config.headers.Authorization = `Bearer ${token.value}`
+    }
+
     // Add content type for POST/PUT/PATCH requests
     if (['POST', 'PUT', 'PATCH'].includes(method.type)) {
       method.config.headers['Content-Type'] = 'application/json'

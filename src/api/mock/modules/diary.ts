@@ -53,11 +53,32 @@ export default defineMock({
   },
 
   // Get meal records for a specific date (currently returns same static data)
-  '[GET]/api/v3/diary/meals': ({ _query }: any) => {
+  '[GET]/api/v3/diary/meals': () => {
     return {
-      code: 200,
-      data: meals,
-      message: 'ok',
+      code: 0,
+      data: {
+        晚餐: [
+          {
+            id: 5,
+            name: '茶油',
+            amount: 2,
+            unit: 'g',
+            calories: '17.98',
+            protein: '0.00',
+            carbs: '0.00',
+          },
+          {
+            id: 6,
+            name: '胡麻油',
+            amount: 3,
+            unit: '汤匙',
+            calories: '378.00',
+            protein: '0.00',
+            carbs: '0.00',
+          },
+        ],
+      },
+      msg: 'ok',
     }
   },
 

@@ -7,6 +7,7 @@
  * @FilePath: /wot-starter/src/api/core/handlers.ts
  */
 import type { Method } from 'alova'
+import { useAuth } from '@/composables/useAuth'
 import router from '@/router'
 
 // Custom error class for API errors
@@ -26,6 +27,7 @@ export class ApiError extends Error {
 interface ApiResponse {
   code: number
   msg?: string
+  message?: string
   data?: any
   success?: boolean
   total?: number
@@ -37,12 +39,14 @@ export async function handleAlovaResponse(
   response: UniApp.RequestSuccessCallbackResult | UniApp.UploadFileSuccessCallbackResult | UniApp.DownloadSuccessData,
 ) {
   const globalToast = useGlobalToast()
+  const { logout } = useAuth()
   // Extract status code and data from UniApp response
   const { statusCode, data } = response as UniNamespace.RequestSuccessCallbackResult
 
-  // 处理401/403错误（如果不是在handleAlovaResponse中处理的）
+  // 处理401/403错误
   if ((statusCode === 401 || statusCode === 403)) {
     // 如果是未授权错误，清除用户信息并跳转到登录页
+    logout()
     globalToast.error({ msg: '登录已过期，请重新登录！', duration: 500 })
     const timer = setTimeout(() => {
       clearTimeout(timer)
@@ -52,9 +56,15 @@ export async function handleAlovaResponse(
     throw new ApiError('登录已过期，请重新登录！', statusCode, data)
   }
 
-  // Handle HTTP error status codes
+  // 处理500错误
+  if (statusCode === 500) {
+    globalToast.error('服务器内部错误 (500)')
+    throw new ApiError('服务器内部错误 (500)', statusCode, data)
+  }
+
+  // Handle other HTTP error status codes
   if (statusCode >= 400) {
-    globalToast.error(`Request failed with status: ${statusCode}`)
+    globalToast.error(`请求失败，状态码: ${statusCode}`)
     throw new ApiError(`Request failed with status: ${statusCode}`, statusCode, data)
   }
 
@@ -65,6 +75,12 @@ export async function handleAlovaResponse(
     console.log('[Alova Response]', json)
   }
 
+  // Handle both 0 and 200 as success codes
+  if (json.code !== 0 && json.code !== 200) {
+    globalToast.error(json.msg || json.message || '请求失败')
+    throw new ApiError(json.msg || json.message || 'Request failed', json.code || statusCode, data)
+  }
+
   // Return data for successful responses
   return json.data
 }
@@ -72,14 +88,16 @@ export async function handleAlovaResponse(
 // Handle request errors
 export function handleAlovaError(error: any, method: Method) {
   const globalToast = useGlobalToast()
+  const { logout } = useAuth()
   // Log error in development
   if (import.meta.env.MODE === 'development') {
     console.error('[Alova Error]', error, method)
   }
 
-  // 处理401/403错误（如果不是在handleAlovaResponse中处理的）
+  // 处理401/403错误
   if (error instanceof ApiError && (error.code === 401 || error.code === 403)) {
     // 如果是未授权错误，清除用户信息并跳转到登录页
+    logout()
     globalToast.error({ msg: '登录已过期，请重新登录！', duration: 500 })
     const timer = setTimeout(() => {
       clearTimeout(timer)

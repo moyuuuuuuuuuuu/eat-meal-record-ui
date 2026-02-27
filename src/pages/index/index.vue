@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { FoodItem } from '@/api/globals'
 import { useRequest } from 'alova/client'
+import Apis from '@/api'
 
 definePage({
   name: 'home',
