@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { FoodItem } from '@/api/globals'
 import { useRequest } from 'alova/client'
-import Apis from '@/api'
 
 definePage({
   name: 'home',
@@ -34,13 +33,17 @@ const meals = ref<Record<string, FoodItem[]>>({
   加餐: [],
 })
 
+const isAllMealsEmpty = computed(() => {
+  return Object.values(meals.value).every(mealList => mealList.length === 0)
+})
+
 // Fetch summary data
-const { send: getSummary } = useRequest(Apis.diary.getSummary(), {
+const { send: getSummary } = useRequest(Apis.diary.summary(), {
   immediate: true,
 })
 
 // Fetch meals data
-const { send: getMeals } = useRequest(Apis.diary.getMeals(), {
+const { send: getMeals } = useRequest(Apis.diary.meals(), {
   immediate: true,
 })
 
@@ -61,7 +64,7 @@ onShow(async () => {
 })
 
 function deleteFood(id: string) {
-  Apis.diary.deleteFood({ params: { id } }).send().then(() => {
+  useRequest(Apis.diary.deleteFood({ params: { id } })).send().then(() => {
     // Refresh data
     getSummary().then((res) => {
       if (res) {
@@ -143,13 +146,13 @@ function handleAddMeal(type: string) {
           </view>
           <view class="mb-2">
             <text class="text-base text-[var(--text-main)] font-bold">
-              {{ totalIntake.protein.toFixed(1) }}
+              {{ Number(totalIntake.protein).toFixed(1) || 0 }}
             </text>
             <text class="ml-1 text-[10px] text-[var(--text-sub)]">
               / {{ dailyGoal.protein }}g
             </text>
           </view>
-          <wd-progress :percentage="Math.min((totalIntake.protein / dailyGoal.protein) * 100, 100)" color="#3b82f6" :show-pivot="false" stroke-width="4px" />
+          <wd-progress :percentage="Math.min(Number(((totalIntake.protein / dailyGoal.protein) * 100).toFixed(1)), 100)" color="#3b82f6" :show-pivot="false" stroke-width="4px" />
         </view>
 
         <!-- 脂肪 -->
@@ -159,13 +162,13 @@ function handleAddMeal(type: string) {
           </view>
           <view class="mb-2">
             <text class="text-base text-[var(--text-main)] font-bold">
-              {{ totalIntake.fat.toFixed(1) }}
+              {{ Number(totalIntake.fat).toFixed(1) || 0 }}
             </text>
             <text class="ml-1 text-[10px] text-[var(--text-sub)]">
               / {{ dailyGoal.fat }}g
             </text>
           </view>
-          <wd-progress :percentage="Math.min((totalIntake.fat / dailyGoal.fat) * 100, 100)" color="#f59e0b" :show-pivot="false" stroke-width="4px" />
+          <wd-progress :percentage="Math.min(Number(((totalIntake.fat / dailyGoal.fat) * 100).toFixed(1)), 100)" color="#f59e0b" :show-pivot="false" stroke-width="4px" />
         </view>
 
         <!-- 碳水 -->
@@ -175,13 +178,13 @@ function handleAddMeal(type: string) {
           </view>
           <view class="mb-2">
             <text class="text-base text-[var(--text-main)] font-bold">
-              {{ totalIntake.carbs.toFixed(1) }}
+              {{ Number(totalIntake.carbs).toFixed(1) || 0 }}
             </text>
             <text class="ml-1 text-[10px] text-[var(--text-sub)]">
               / {{ dailyGoal.carbs }}g
             </text>
           </view>
-          <wd-progress :percentage="Math.min((totalIntake.carbs / dailyGoal.carbs) * 100, 100)" color="#8b5cf6" :show-pivot="false" stroke-width="4px" />
+          <wd-progress :percentage="Math.min(Number(((totalIntake.carbs / dailyGoal.carbs) * 100).toFixed(1)), 100)" color="#8b5cf6" :show-pivot="false" stroke-width="4px" />
         </view>
       </view>
     </view>
@@ -192,14 +195,40 @@ function handleAddMeal(type: string) {
     </view>
 
     <!-- 餐食记录 -->
-    <view class="mt-4 px-4">
+    <view class="mb-10 mt-4 px-4">
       <view class="mb-3 ml-1 text-xs text-[var(--text-sub)] font-bold tracking-wider uppercase">
         今日餐食
       </view>
-      <MealRecord meal-type="早餐" :foods="meals.早餐" @delete-food="deleteFood" />
-      <MealRecord meal-type="午餐" :foods="meals.午餐" @delete-food="deleteFood" />
-      <MealRecord meal-type="晚餐" :foods="meals.晚餐" @delete-food="deleteFood" />
-      <MealRecord meal-type="加餐" :foods="meals.加餐" @delete-food="deleteFood" />
+
+      <view v-if="isAllMealsEmpty" class="rounded-2xl bg-[var(--card-bg)] py-10 shadow-sm">
+        <view class="flex flex-col items-center justify-center">
+          <view class="mb-4 h-20 w-20 flex items-center justify-center rounded-full bg-[var(--page-bg)]">
+            <IconCoffee size="40" color="#9ca3af" />
+          </view>
+          <text class="mb-2 text-sm text-[var(--text-main)] font-medium">
+            暂无餐食记录
+          </text>
+          <text class="mb-6 text-xs text-[var(--text-sub)]">
+            开启健康生活，从记录第一餐开始
+          </text>
+          <wd-button
+            size="small"
+            plain
+            type="success"
+            custom-class="!rounded-full"
+            @click="handleAddMeal('早餐')"
+          >
+            去记录
+          </wd-button>
+        </view>
+      </view>
+
+      <template v-else>
+        <MealRecord meal-type="早餐" :foods="meals.早餐" @delete-food="deleteFood" />
+        <MealRecord meal-type="午餐" :foods="meals.午餐" @delete-food="deleteFood" />
+        <MealRecord meal-type="晚餐" :foods="meals.晚餐" @delete-food="deleteFood" />
+        <MealRecord meal-type="加餐" :foods="meals.加餐" @delete-food="deleteFood" />
+      </template>
     </view>
 
     <!-- 悬浮添加按钮 -->

@@ -1,11 +1,3 @@
-/*
- * @Author: weisheng
- * @Date: 2025-04-17 15:58:11
- * @LastEditTime: 2025-06-15 21:47:22
- * @LastEditors: weisheng
- * @Description: Alova response and error handlers
- * @FilePath: /wot-starter/src/api/core/handlers.ts
- */
 import type { Method } from 'alova'
 import { useAuth } from '@/composables/useAuth'
 import router from '@/router'
@@ -43,19 +35,6 @@ export async function handleAlovaResponse(
   // Extract status code and data from UniApp response
   const { statusCode, data } = response as UniNamespace.RequestSuccessCallbackResult
 
-  // 处理401/403错误
-  if ((statusCode === 401 || statusCode === 403)) {
-    // 如果是未授权错误，清除用户信息并跳转到登录页
-    logout()
-    globalToast.error({ msg: '登录已过期，请重新登录！', duration: 500 })
-    const timer = setTimeout(() => {
-      clearTimeout(timer)
-      router.replaceAll({ name: 'login' })
-    }, 500)
-
-    throw new ApiError('登录已过期，请重新登录！', statusCode, data)
-  }
-
   // 处理500错误
   if (statusCode === 500) {
     globalToast.error('服务器内部错误 (500)')
@@ -73,6 +52,25 @@ export async function handleAlovaResponse(
   // Log response in development
   if (import.meta.env.MODE === 'development') {
     console.log('[Alova Response]', json)
+  }
+
+  if ([401, 403, 400].includes(json.code)) {
+    // 如果是未授权错误，清除用户信息并跳转到登录页
+    logout()
+    globalToast.error({ msg: '登录已过期，请重新登录！', duration: 500 })
+    const timer = setTimeout(() => {
+      clearTimeout(timer)
+      // 获取当前页面栈
+      const pages = getCurrentPages()
+      const currentPage = pages[pages.length - 1]
+      const redirect = currentPage ? encodeURIComponent(`/${currentPage.route}${currentPage.$page.fullPath.includes('?') ? `?${currentPage.$page.fullPath.split('?')[1]}` : ''}`) : ''
+
+      // 小程序和公众号引导到微信授权页面、普通h5引导到手机验证码登录页面
+      // 这里统一跳转到 login 页面，由 login 页面内部根据环境展示不同内容
+      router.replaceAll({ name: 'login', query: { redirect } })
+    }, 500)
+
+    throw new ApiError('登录已过期，请重新登录！', statusCode, data)
   }
 
   // Handle both 0 and 200 as success codes
@@ -101,8 +99,15 @@ export function handleAlovaError(error: any, method: Method) {
     globalToast.error({ msg: '登录已过期，请重新登录！', duration: 500 })
     const timer = setTimeout(() => {
       clearTimeout(timer)
-      router.replaceAll({ name: 'login' })
-    }, 500)
+      // 获取当前页面栈
+      const pages = getCurrentPages()
+      const currentPage = pages[pages.length - 1]
+      const redirect = currentPage ? encodeURIComponent(`/${currentPage.route}${currentPage.$page.fullPath.includes('?') ? `?${currentPage.$page.fullPath.split('?')[1]}` : ''}`) : ''
+
+      // 小程序和公众号引导到微信授权页面、普通h5引导到手机验证码登录页面
+      // 这里统一跳转到 login 页面，由 login 页面内部根据环境展示不同内容
+      router.replaceAll({ name: 'login', query: { redirect } })
+    }, 800)
     throw new ApiError('登录已过期，请重新登录！', error.code, error.data)
   }
 

@@ -17,7 +17,7 @@ page {
   --text-main: #111827;
   --text-sub: #6b7280;
   --border-color: #f3f4f6;
-  
+
   background-color: var(--page-bg);
   height: 100%;
 }

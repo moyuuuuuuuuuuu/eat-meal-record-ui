@@ -1,5 +1,6 @@
-
 <script setup lang="ts">
+import { usePagination } from 'alova/client'
+
 definePage({
   name: 'feed',
   layout: 'tabbar',
@@ -8,18 +9,54 @@ definePage({
     navigationStyle: 'custom',
   },
 })
-import { useRequest } from 'alova/client'
 
-const { data: posts } = useRequest(Apis.feed.getPosts(), {
-  initialData: [],
+const loadingProps = inject('globalLoadingProps')
+// 使用 usePagination 处理分页请求
+const {
+  loading,
+  data: posts,
+  isLastPage,
+  page,
+} = usePagination(
+  (page, pageSize) => Apis.feed.list({ params: { page, pageSize } }),
+  {
+    initialData: {
+      total: 0,
+      data: [],
+    },
+    // 将 API 返回的 PaginatedResponse 映射到 usePagination 要求的结构
+    data: res => res.data,
+    total: res => res.total,
+    initialPageSize: 6,
+    append: true,
+  },
+)
+
+const hasReachedBottom = ref(false)
+
+const showSkeleton = computed(() => {
+  return loading.value && page.value === 1 && posts.value.length === 0
+})
+
+// 下拉刷新
+onPullDownRefresh(async () => {
+  page.value = 1
+  hasReachedBottom.value = false
+  uni.stopPullDownRefresh()
+})
+
+// 上拉加载更多
+onReachBottom(() => {
+  hasReachedBottom.value = true
+  if (!isLastPage.value && !loading.value) {
+    page.value++
+  }
 })
 
 function handleLike(id: string) {
-  if (!posts.value)
-    return
   const post = posts.value.find(p => p.id === id)
   if (post) {
-    Apis.feed.likePost({ data: { id } }).send().then((res) => {
+    useRequest(Apis.feed.like({ data: { id } })).send().then((res) => {
       post.isLiked = res.isLiked
       post.likes = res.likes
     })
@@ -56,76 +93,102 @@ function handleCreatePost() {
 
     <!-- 动态列表 -->
     <view class="posts-list mt-4 space-y-2">
-      <view v-for="post in posts" :key="post.id" class="bg-[var(--card-bg)] px-4 py-4">
-        <!-- 作者信息 -->
-        <view class="mb-3 flex items-center gap-3">
-          <view class="h-10 w-10 flex items-center justify-center rounded-full from-emerald-400 to-teal-500 bg-gradient-to-br">
-            <IconUser size="20" color="white" />
-          </view>
-          <view class="flex-1">
-            <view class="text-[var(--text-main)] font-medium">
-              {{ post.author.name }}
+      <!-- 第一页加载且为空时显示骨架屏 -->
+      <template v-if="showSkeleton">
+        <view v-for="i in 3" :key="i" class="bg-[var(--card-bg)] px-4 py-4">
+          <wd-skeleton
+            title
+            avatar
+            :row="3"
+            loading
+          />
+        </view>
+      </template>
+
+      <template v-else>
+        <view v-for="post in posts" :key="post.id" class="bg-[var(--card-bg)] px-4 py-4">
+          <!-- 作者信息 -->
+          <view class="mb-3 flex items-center gap-3">
+            <view
+              class="h-10 w-10 flex items-center justify-center rounded-full from-emerald-400 to-teal-500 bg-gradient-to-br"
+            >
+              <IconUser size="20" color="white" />
             </view>
-            <view class="text-xs text-[var(--text-sub)]">
-              {{ post.timestamp }}
+            <view class="flex-1">
+              <view class="text-[var(--text-main)] font-medium">
+                {{ post.author.nickname }}
+              </view>
+              <view class="text-xs text-[var(--text-sub)]">
+                {{ post.created_at }}
+              </view>
             </view>
           </view>
-        </view>
 
-        <!-- 文字内容 -->
-        <view class="mb-3 text-sm text-[var(--text-main)] leading-relaxed">
-          {{ post.content }}
-        </view>
+          <!-- 文字内容 -->
+          <view class="mb-3 text-sm text-[var(--text-main)] leading-relaxed">
+            {{ post.content }}
+          </view>
 
-        <!-- 话题标签 -->
-        <view v-if="post.topics && post.topics.length" class="mb-3 flex flex-wrap gap-2">
-          <text v-for="topic in post.topics" :key="topic" class="text-xs text-emerald-600 font-medium">
-            {{ topic }}
-          </text>
-        </view>
+          <!-- 话题标签 -->
+          <view v-if="post.topics && post.topics.length" class="mb-3 flex flex-wrap gap-2">
+            <text v-for="topic in post.topics" :key="topic" class="text-xs text-emerald-600 font-medium">
+              {{ topic.title }}
+            </text>
+          </view>
 
-        <!-- 餐食引用 (简化版) -->
-        <view v-if="post.mealReference" class="mb-3 border border-emerald-100/20 rounded-lg bg-emerald-50/10 p-3">
-          <view class="mb-1 flex items-center justify-between">
-            <view class="flex items-center gap-1">
-              <view class="h-4 w-4 flex items-center justify-center rounded bg-emerald-500">
-                <text class="text-[8px] text-white">
-                  餐
+          <!-- 餐食引用 (简化版) -->
+          <view v-if="post.mealReference" class="mb-3 border border-emerald-100/20 rounded-lg bg-emerald-50/10 p-3">
+            <view class="mb-1 flex items-center justify-between">
+              <view class="flex items-center gap-1">
+                <view class="h-4 w-4 flex items-center justify-center rounded bg-emerald-500">
+                  <text class="text-[8px] text-white">
+                    餐
+                  </text>
+                </view>
+                <text class="text-xs text-[var(--text-main)] font-medium">
+                  {{ post.mealReference.mealType }}
                 </text>
               </view>
-              <text class="text-xs text-[var(--text-main)] font-medium">
-                {{ post.mealReference.mealType }}
+              <text class="text-xs text-emerald-600">
+                {{ post.mealReference.totalCalories }} kcal
               </text>
             </view>
-            <text class="text-xs text-emerald-600">
-              {{ post.mealReference.totalCalories }} kcal
-            </text>
           </view>
-        </view>
 
-        <!-- 互动按钮 -->
-        <view class="flex items-center gap-6 border-t border-[var(--border-color)] pt-3">
-          <view class="flex items-center gap-1" @click="handleLike(post.id)">
-            <IconHeart :color="post.isLiked ? '#ef4444' : '#6b7280'" size="18" />
-            <text class="text-xs text-[var(--text-sub)]">
-              {{ post.likes }}
-            </text>
-          </view>
-          <view class="flex items-center gap-1">
-            <IconMessageCircle color="#6b7280" size="18" />
-            <text class="text-xs text-[var(--text-sub)]">
-              {{ post.comments }}
-            </text>
-          </view>
-          <view class="ml-auto">
-            <IconShare2 color="#6b7280" size="18" />
+          <!-- 互动按钮 -->
+          <view class="flex items-center gap-6 border-t border-[var(--border-color)] pt-3">
+            <view class="flex items-center gap-1" @click="handleLike(post.id)">
+              <IconHeart :color="post.isLiked ? '#ef4444' : '#6b7280'" size="18" />
+              <text class="text-xs text-[var(--text-sub)]">
+                {{ post.likes }}
+              </text>
+            </view>
+            <view class="flex items-center gap-1">
+              <IconMessageCircle color="#6b7280" size="18" />
+              <text class="text-xs text-[var(--text-sub)]">
+                {{ post.comments }}
+              </text>
+            </view>
+            <view class="ml-auto">
+              <IconShare2 color="#6b7280" size="18" />
+            </view>
           </view>
         </view>
-      </view>
+      </template>
+
+      <!-- 加载更多 -->
+      <wd-loadmore
+        v-if="!showSkeleton && hasReachedBottom"
+        :state="isLastPage ? 'finished' : (loading ? 'loading' : 'ready')" finished-text="我是有底线的"
+        loading-text="加载中" :loading-props="loadingProps"
+      />
     </view>
 
     <!-- 悬浮发布按钮 -->
-    <view class="fixed bottom-24 right-6 h-14 w-14 flex items-center justify-center rounded-full from-emerald-500 to-teal-500 bg-gradient-to-r shadow-lg" @click="handleCreatePost">
+    <view
+      class="fixed bottom-24 right-6 h-14 w-14 flex items-center justify-center rounded-full from-emerald-500 to-teal-500 bg-gradient-to-r shadow-lg"
+      @click="handleCreatePost"
+    >
       <IconPlus size="24" color="white" />
     </view>
   </view>

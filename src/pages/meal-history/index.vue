@@ -1,113 +1,165 @@
-
-<template>
-  <view class="page-container bg-[var(--page-bg)] h-screen flex flex-col overflow-hidden">
-    <wd-navbar title="餐食记录" fixed placeholder left-arrow @click-left="goBack" />
-
-    <scroll-view scroll-y class="flex-1 px-4 py-4 w-full">
-      <view class="space-y-4 pb-24 w-full">
-        <view v-for="day in history" :key="day.id" class="bg-[var(--card-bg)] rounded-xl shadow-sm overflow-hidden w-full">
-          <!-- 日期头部 -->
-          <view class="p-4 active:bg-[var(--page-bg)] flex flex-col" @click="toggleDay(day.id)">
-            <view class="flex items-center justify-between mb-4">
-              <view class="flex items-center gap-2">
-                <text class="text-sm font-bold text-[var(--text-main)]">{{ day.date }}</text>
-                <text class="text-[10px] text-[var(--text-sub)]">{{ day.mealCount }}餐</text>
-              </view>
-              <IconChevronDown size="16" color="#9ca3af" :style="{ transform: expandedDay === day.id ? 'rotate(180deg)' : 'rotate(0)', transition: 'all 0.3s' }" />
-            </view>
-
-            <view class="flex items-center justify-around">
-              <view class="flex items-center gap-2">
-                <view class="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center">
-                  <IconFlame size="16" color="white" />
-                </view>
-                <view>
-                  <text class="text-xs text-[var(--text-sub)] block">摄入</text>
-                  <text class="text-sm font-bold text-[var(--text-main)]">{{ day.totalCalories }}</text>
-                </view>
-              </view>
-              <view class="w-px h-8 bg-[var(--border-color)]"></view>
-              <view class="flex items-center gap-2">
-                <view class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center">
-                  <IconTrendingUp size="16" color="#3b82f6" />
-                </view>
-                <view>
-                  <text class="text-xs text-[var(--text-sub)] block">消耗</text>
-                  <text class="text-sm font-bold text-[var(--text-main)]">{{ day.totalBurned }}</text>
-                </view>
-              </view>
-              <view class="w-px h-8 bg-[var(--border-color)]"></view>
-              <view>
-                <text class="text-xs text-[var(--text-sub)] block">净摄入</text>
-                <text class="text-sm font-bold text-emerald-600">{{ day.totalCalories - day.totalBurned }}</text>
-              </view>
-            </view>
-          </view>
-
-          <!-- 餐食详情 (展开) -->
-          <view v-if="expandedDay === day.id" class="border-t border-[var(--border-color)] p-2 space-y-2 bg-[var(--page-bg)]">
-            <view v-for="meal in day.meals" :key="meal.id" class="bg-[var(--card-bg)] rounded-lg p-3">
-              <view class="flex items-center justify-between mb-2">
-                <view class="flex items-center gap-2">
-                  <view class="w-1.5 h-1.5 rounded-full bg-emerald-500"></view>
-                  <text class="text-xs font-bold text-[var(--text-main)]">{{ meal.mealType }}</text>
-                </view>
-                <text class="text-xs text-[var(--text-sub)]">{{ meal.totalCalories }} kcal</text>
-              </view>
-              <view class="flex flex-wrap gap-2">
-                <text v-for="(item, idx) in meal.items" :key="idx" class="text-[10px] text-[var(--text-sub)] bg-[var(--page-bg)] px-2 py-0.5 rounded">
-                  {{ item.name }} {{ item.amount }}
-                </text>
-              </view>
-            </view>
-          </view>
-        </view>
-      </view>
-    </scroll-view>
-  </view>
-</template>
-
 <script setup lang="ts">
+import { usePagination } from 'alova/client'
+
 definePage({
   style: {
     navigationBarTitleText: '餐食记录',
     navigationStyle: 'custom',
   },
 })
-const expandedDay = ref<string | null>(null)
 
-const history = [
+const expandedDay = ref<string | number | null>(null)
+const hasReachedBottom = ref(false)
+
+// 使用 usePagination 处理分页请求
+const {
+  loading,
+  data: history,
+  isLastPage,
+  page,
+} = usePagination(
+  (page, pageSize) => Apis.diary.history({ params: { page, pageSize } }),
   {
-    id: '1',
-    date: '今天',
-    totalCalories: 1850,
-    totalBurned: 420,
-    mealCount: 3,
-    meals: [
-      { id: '1-1', mealType: '早餐', totalCalories: 228, items: [{ name: '燕麦粥', amount: '200g' }, { name: '煮鸡蛋', amount: '1个' }] },
-      { id: '1-2', mealType: '午餐', totalCalories: 335, items: [{ name: '糙米饭', amount: '150g' }, { name: '鸡胸肉', amount: '120g' }] },
-    ]
+    initialData: {
+      total: 0,
+      data: [],
+    },
+    data: res => res.data,
+    total: res => res.total,
+    initialPageSize: 10,
+    append: true,
   },
-  {
-    id: '2',
-    date: '昨天',
-    totalCalories: 1920,
-    totalBurned: 380,
-    mealCount: 4,
-    meals: [
-      { id: '2-1', mealType: '早餐', totalCalories: 330, items: [{ name: '全麦面包', amount: '2片' }] },
-    ]
-  }
-]
+)
+
+const showSkeleton = computed(() => {
+  return loading.value && page.value === 1 && history.value.length === 0
+})
 
 function goBack() {
   uni.navigateBack()
 }
 
-function toggleDay(id: string) {
+function toggleDay(id: string | number) {
   expandedDay.value = expandedDay.value === id ? null : id
 }
+
+// 下拉刷新
+onPullDownRefresh(async () => {
+  page.value = 1
+  hasReachedBottom.value = false
+  uni.stopPullDownRefresh()
+})
+
+// 上拉加载更多
+onReachBottom(() => {
+  hasReachedBottom.value = true
+  if (!isLastPage.value && !loading.value) {
+    page.value++
+  }
+})
 </script>
 
+<template>
+  <view class="page-container min-h-screen bg-[var(--page-bg)]">
+    <wd-navbar title="餐食记录" placeholder left-arrow fixed @click-left="goBack" />
+
+    <view class="px-4 py-4 space-y-4">
+      <!-- 骨架屏 -->
+      <template v-if="showSkeleton">
+        <view v-for="i in 3" :key="i" class="rounded-xl bg-[var(--card-bg)] p-4 shadow-sm">
+          <wd-skeleton title avatar :row="3" loading />
+        </view>
+      </template>
+
+      <!-- 列表内容 -->
+      <template v-else>
+        <view v-for="day in history" :key="day.id" class="w-full overflow-hidden rounded-xl bg-[var(--card-bg)] shadow-sm">
+          <!-- 日期头部 -->
+          <view class="flex flex-col p-4 active:bg-[var(--page-bg)]" @click="toggleDay(day.id)">
+            <view class="mb-4 flex items-center justify-between">
+              <view class="flex items-center gap-2">
+                <text class="text-sm text-[var(--text-main)] font-bold">
+                  {{ day.date }}
+                </text>
+                <text class="text-[10px] text-[var(--text-sub)]">
+                  {{ day.mealCount }}餐
+                </text>
+              </view>
+              <IconChevronDown size="16" color="#9ca3af" :style="{ transform: expandedDay === day.id ? 'rotate(180deg)' : 'rotate(0)', transition: 'all 0.3s' }" />
+            </view>
+
+            <view class="flex items-center justify-around">
+              <view class="flex items-center gap-2">
+                <view class="h-8 w-8 flex items-center justify-center rounded-full bg-emerald-500">
+                  <IconFlame size="16" color="white" />
+                </view>
+                <view>
+                  <text class="block text-xs text-[var(--text-sub)]">
+                    摄入
+                  </text>
+                  <text class="text-sm text-[var(--text-main)] font-bold">
+                    {{ day.totalCalories }}
+                  </text>
+                </view>
+              </view>
+              <view class="h-8 w-px bg-[var(--border-color)]" />
+              <view class="flex items-center gap-2">
+                <view class="h-8 w-8 flex items-center justify-center rounded-full bg-blue-50">
+                  <IconTrendingUp size="16" color="#3b82f6" />
+                </view>
+                <view>
+                  <text class="block text-xs text-[var(--text-sub)]">
+                    消耗
+                  </text>
+                  <text class="text-sm text-[var(--text-main)] font-bold">
+                    {{ day.totalBurned }}
+                  </text>
+                </view>
+              </view>
+              <view class="h-8 w-px bg-[var(--border-color)]" />
+              <view>
+                <text class="block text-xs text-[var(--text-sub)]">
+                  净摄入
+                </text>
+                <text class="text-sm text-emerald-600 font-bold">
+                  {{ day.totalCalories - day.totalBurned }}
+                </text>
+              </view>
+            </view>
+          </view>
+
+          <!-- 餐食详情 (展开) -->
+          <view v-if="expandedDay === day.id" class="border-t border-[var(--border-color)] bg-[var(--page-bg)] p-2 space-y-2">
+            <view v-for="meal in day.meals" :key="meal.id" class="rounded-lg bg-[var(--card-bg)] p-3">
+              <view class="mb-2 flex items-center justify-between">
+                <view class="flex items-center gap-2">
+                  <view class="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  <text class="text-xs text-[var(--text-main)] font-bold">
+                    {{ meal.mealType }}
+                  </text>
+                </view>
+                <text class="text-xs text-[var(--text-sub)]">
+                  {{ meal.totalCalories }} kcal
+                </text>
+              </view>
+              <view class="flex flex-wrap gap-2">
+                <text v-for="(item, idx) in meal.items" :key="idx" class="rounded bg-[var(--page-bg)] px-2 py-0.5 text-[10px] text-[var(--text-sub)]">
+                  {{ item.name }} {{ item.amount }}
+                </text>
+              </view>
+            </view>
+          </view>
+        </view>
+      </template>
+
+      <wd-loadmore v-if="!showSkeleton && hasReachedBottom" :state="isLastPage ? 'finished' : (loading ? 'loading' : 'ready')" finished-text="上拉加载下一页" />
+    </view>
+  </view>
+</template>
+
 <style scoped>
+.page-container {
+  padding-bottom: constant(safe-area-inset-bottom);
+  padding-bottom: env(safe-area-inset-bottom);
+}
 </style>

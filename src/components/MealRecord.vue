@@ -19,12 +19,13 @@ const props = withDefaults(defineProps<{
 
 defineEmits(['delete-food'])
 
-const totalCalories = computed(() => props.foods.reduce((sum, f) => sum + f.calories, 0))
+// const totalCalories = computed(() => props.foods.reduce((sum, f) => sum + f.calories, 0))
 const totalNutrients = computed(() => props.foods.reduce((acc, f) => ({
-  protein: acc.protein + f.protein,
-  fat: acc.fat + f.fat,
-  carbs: acc.carbs + f.carbs,
-}), { protein: 0, fat: 0, carbs: 0 }))
+  calories: Number(acc.calories) + Number(f.calories),
+  protein: Number(acc.protein) + Number(f.protein),
+  fat: Number(acc.fat) + Number(f.fat),
+  carbs: Number(acc.carbs) + Number(f.carbs),
+}), { calories: 0, protein: 0, fat: 0, carbs: 0 }))
 </script>
 
 <template>
@@ -34,7 +35,7 @@ const totalNutrients = computed(() => props.foods.reduce((acc, f) => ({
         {{ mealType }}
       </view>
       <view class="text-xs text-[var(--text-sub)]">
-        共 {{ totalCalories }} kcal
+        共 {{ totalNutrients.calories }} kcal
       </view>
     </view>
 
@@ -66,7 +67,10 @@ const totalNutrients = computed(() => props.foods.reduce((acc, f) => ({
       </view>
     </view>
 
-    <view v-if="foods.length > 1" class="mt-3 flex gap-4 border-t border-[var(--border-color)] pt-3 text-[10px] text-[var(--text-sub)]">
+    <view
+      v-if="foods.length > 1"
+      class="mt-3 flex gap-4 border-t border-[var(--border-color)] pt-3 text-[10px] text-[var(--text-sub)]"
+    >
       <text>蛋白质: {{ totalNutrients.protein.toFixed(1) }}g</text>
       <text>脂肪: {{ totalNutrients.fat.toFixed(1) }}g</text>
       <text>碳水: {{ totalNutrients.carbs.toFixed(1) }}g</text>

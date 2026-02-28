@@ -8,23 +8,7 @@ import { createApis, withConfigType } from './createApis'
 export { alovaInstance }
 
 // Configure method options for specific APIs
-export const $$userConfigMap = withConfigType({
-  'diary.getMeals': {
-    transform: (data: any) => {
-      const transformedData: Record<string, any[]> = {}
-      for (const key in data) {
-        transformedData[key] = data[key].map((item: any) => ({
-          ...item,
-          calories: Number.parseFloat(item.calories) || 0,
-          protein: Number.parseFloat(item.protein) || 0,
-          carbs: Number.parseFloat(item.carbs) || 0,
-          fat: Number.parseFloat(item.fat) || 0,
-        }))
-      }
-      return transformedData
-    },
-  },
-})
+export const $$userConfigMap = withConfigType({})
 
 // Create the global Apis object
 const Apis = createApis(alovaInstance, $$userConfigMap)

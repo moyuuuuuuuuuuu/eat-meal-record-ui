@@ -10,6 +10,7 @@ type _LocationUrl =
   "/pages/feed/index" |
   "/pages/food-selector/index" |
   "/pages/goal-settings/index" |
+  "/pages/login/index" |
   "/pages/meal-history/index" |
   "/pages/personal-info/index" |
   "/pages/profile/index" |

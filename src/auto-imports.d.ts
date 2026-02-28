@@ -504,7 +504,6 @@ declare module 'vue' {
     readonly tryOnMounted: UnwrapRef<typeof import('@vueuse/core')['tryOnMounted']>
     readonly tryOnScopeDispose: UnwrapRef<typeof import('@vueuse/core')['tryOnScopeDispose']>
     readonly tryOnUnmounted: UnwrapRef<typeof import('@vueuse/core')['tryOnUnmounted']>
-    readonly uniStorage: UnwrapRef<typeof import('./composables/useAuth')['uniStorage']>
     readonly unref: UnwrapRef<typeof import('vue')['unref']>
     readonly unrefElement: UnwrapRef<typeof import('@vueuse/core')['unrefElement']>
     readonly until: UnwrapRef<typeof import('@vueuse/core')['until']>

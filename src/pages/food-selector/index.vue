@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import type { FoodInfo } from '@/api/globals'
+import type { FoodInfo, TmpFoodUnit } from '@/api/globals'
+import { usePagination } from 'alova/client'
 import IconCamera from '@/components/icons/IconCamera.vue'
 import IconPlus from '@/components/icons/IconPlus.vue'
+import IconSearch from '@/components/icons/IconSearch.vue'
 import IconX from '@/components/icons/IconX.vue'
 
 definePage({
@@ -12,69 +14,83 @@ definePage({
 })
 
 const searchQuery = ref('')
+
+// 使用 usePagination 处理分页请求
+const {
+  loading,
+  data: foodList,
+  isLastPage,
+  page,
+} = usePagination(
+  (page, pageSize) => Apis.food.search({ params: { page, pageSize, name: searchQuery.value } }),
+  {
+    initialData: {
+      total: 0,
+      data: [],
+    },
+    // 将 API 返回的 PaginatedResponse 映射到 usePagination 要求的结构
+    data: res => res.data,
+    total: res => res.total,
+    initialPageSize: 15,
+    watchingStates: [searchQuery],
+    debounce: 300,
+    append: true,
+  },
+)
+
+const showSkeleton = computed(() => {
+  return loading.value && page.value === 1 && foodList.value.length === 0
+})
+
 const showPopup = ref(false)
 const currentFood = ref<FoodInfo | null>(null)
 const quantity = ref(1)
-const selectedUnit = ref('')
+const selectedUnit = ref<TmpFoodUnit>()
+const loadingProps = inject('globalLoadingProps')
 
-// 食物列表 - 从 API 加载
-const foodList = ref<FoodInfo[]>([])
-const isLoading = ref(false)
+const hasReachedBottom = ref(false)
 
-// 加载食物列表
-async function loadFoods(keyword = '') {
-  isLoading.value = true
-  try {
-    const res = await Apis.food.getList({
-      params: { keyword, pageSize: 50 },
-    }).send()
-    if (res) {
-      foodList.value = res.list
-    }
+// 上拉加载更多
+onReachBottom(() => {
+  hasReachedBottom.value = true
+  if (!isLastPage.value && !loading.value) {
+    page.value++
   }
-  catch (e) {
-    console.error('[food-selector] loadFoods error', e)
-  }
-  finally {
-    isLoading.value = false
-  }
-}
-
-// 页面加载时获取食物列表
-onMounted(() => loadFoods())
-
-// 搜索防抖
-let searchTimer: ReturnType<typeof setTimeout> | null = null
-watch(searchQuery, (val: string) => {
-  if (searchTimer)
-    clearTimeout(searchTimer)
-  searchTimer = setTimeout(() => loadFoods(val), 300)
 })
 
-// 本地过滤（搜索前的即时过滤）
-const filteredFoods = computed(() => {
-  if (!searchQuery.value)
-    return foodList.value
-  return foodList.value.filter((f: FoodInfo) => f.name.includes(searchQuery.value))
+const availableUnits = computed<TmpFoodUnit[]>(() => {
+  if (!currentFood.value || !currentFood.value.units)
+    return []
+  return currentFood.value.units.map(u => ({
+    name: u.unit_name,
+    id: u.unit_id,
+    isDefault: u.is_default,
+    nutrition: u.nutrition,
+  }))
 })
-
-const availableUnits = [
-  { name: '份', ratio: 1 },
-  { name: '100g', ratio: 1 },
-  { name: '克', ratio: 0.01 },
-]
 
 const popupNutrition = computed(() => {
   if (!currentFood.value)
     return { calories: 0, protein: 0, fat: 0, carbs: 0 }
-  const ratio = availableUnits.find(u => u.name === selectedUnit.value)?.ratio || 1
+
+  const unit = availableUnits.value.find(u => u.name === selectedUnit.value?.name)
+  if (!unit)
+    return { calories: 0, protein: 0, fat: 0, carbs: 0 }
+
   const q = Number.parseFloat(quantity.value.toString()) || 0
   return {
-    calories: Math.round(currentFood.value.calories * ratio * q),
-    protein: (currentFood.value.protein * ratio * q).toFixed(1),
-    fat: (currentFood.value.fat * ratio * q).toFixed(1),
-    carbs: (currentFood.value.carbs * ratio * q).toFixed(1),
+    calories: Math.round(Number(unit.nutrition.calories) * q),
+    protein: (Number(unit.nutrition.protein) * q).toFixed(1),
+    fat: (Number(unit.nutrition.fibers || 0) * q).toFixed(1), // 注意：示例响应中是 fibers，暂且对应到原有的 fat/fibers 逻辑
+    carbs: (Number(unit.nutrition.carbs) * q).toFixed(1),
   }
+})
+
+// 下拉刷新
+onPullDownRefresh(async () => {
+  page.value = 1
+  hasReachedBottom.value = false
+  uni.stopPullDownRefresh()
 })
 
 function goBack() {
@@ -83,7 +99,7 @@ function goBack() {
 
 function selectFood(food: FoodInfo) {
   currentFood.value = food
-  selectedUnit.value = food.unit === '100g' ? '100g' : '份'
+  selectedUnit.value = availableUnits.value.find(u => u.isDefault)
   quantity.value = 1
   showPopup.value = true
 }
@@ -92,19 +108,20 @@ function confirmSelect() {
   if (!currentFood.value)
     return
 
-  const ratio = availableUnits.find(u => u.name === selectedUnit.value)?.ratio || 1
-  const q = Number.parseFloat(quantity.value.toString()) || 0
+  const unit = selectedUnit.value
+  if (!unit)
+    return
 
+  const q = Number.parseFloat(quantity.value.toString()) || 0
   const selectedFood = {
     ...currentFood.value,
     quantity: q,
     selectedUnit: selectedUnit.value,
-    totalCalories: Math.round(currentFood.value.calories * ratio * q),
-    totalProtein: (currentFood.value.protein * ratio * q).toFixed(1),
-    totalFat: (currentFood.value.fat * ratio * q).toFixed(1),
-    totalCarbs: (currentFood.value.carbs * ratio * q).toFixed(1),
+    totalCalories: Math.round(Number(unit.nutrition.calories) * q),
+    totalProtein: (Number(unit.nutrition.protein) * q).toFixed(1),
+    totalFat: (Number(unit.nutrition.fibers || 0) * q).toFixed(1),
+    totalCarbs: (Number(unit.nutrition.carbs) * q).toFixed(1),
   }
-
   uni.$emit('add-food-item', selectedFood)
   uni.showToast({ title: '已添加', icon: 'success' })
   showPopup.value = false
@@ -158,26 +175,58 @@ function handleRecognizedFoodSelect(food: FoodInfo) {
 
     <!-- 食物列表 -->
     <view class="px-4 py-4 pb-32 space-y-3">
-      <view
-        v-for="(food, index) in filteredFoods"
-        :key="index"
-        class="w-full flex items-center justify-between rounded-xl bg-[var(--card-bg)] p-4 shadow-sm active:bg-[var(--page-bg)]"
-        @click="selectFood(food)"
-      >
-        <view>
-          <view class="mb-1 text-sm text-[var(--text-main)] font-bold">
-            {{ food.name }}
+      <!-- 骨架屏 -->
+      <template v-if="showSkeleton">
+        <view v-for="i in 5" :key="i" class="w-full rounded-xl bg-[var(--card-bg)] p-4 shadow-sm">
+          <wd-skeleton title :row="1" loading />
+        </view>
+      </template>
+
+      <template v-else>
+        <view
+          v-for="(food, index) in foodList"
+          :key="index"
+          class="w-full flex items-center justify-between rounded-xl bg-[var(--card-bg)] p-4 shadow-sm active:bg-[var(--page-bg)]"
+          @click="selectFood(food)"
+        >
+          <view>
+            <view class="mb-1 text-sm text-[var(--text-main)] font-bold">
+              {{ food.name }}
+            </view>
+            <view class="flex gap-3 text-[10px] text-[var(--text-sub)]">
+              <text>{{ food.calories }}kcal / {{ food.unit }}</text>
+              <text>
+                蛋白质:{{ food.protein || 0 }}/g 脂肪:{{ food.fat || 0 }}/g
+                碳水:{{ food.carbs || 0 }}/g
+              </text>
+            </view>
           </view>
-          <view class="flex gap-3 text-[10px] text-[var(--text-sub)]">
-            <text>{{ food.calories }}kcal / {{ food.unit }}</text>
-            <text>P:{{ food.protein }}g F:{{ food.fat }}g C:{{ food.carbs }}g</text>
+          <IconPlus size="16" color="#10b981" />
+        </view>
+      </template>
+
+      <!-- 加载更多 -->
+      <wd-loadmore
+        v-if="!showSkeleton && hasReachedBottom"
+        :state="isLastPage ? 'finished' : (loading ? 'loading' : 'ready')" finished-text="我是有底线的"
+        loading-text="加载中" :loading-props="loadingProps"
+      />
+
+      <!-- 空状态 -->
+      <view v-if="!loading && foodList.length === 0" class="py-20 text-center">
+        <view class="mb-2 text-gray-400">
+          <IconSearch size="48" class="mx-auto mb-4 opacity-20" />
+          <view class="text-sm">
+            未找到相关食物
           </view>
         </view>
-        <IconPlus size="16" color="#10b981" />
       </view>
     </view>
 
-    <wd-popup v-model="showPopup" position="bottom" :z-index="50" custom-style="border-radius: 20px 20px 0 0; background: var(--card-bg);">
+    <wd-popup
+      v-model="showPopup" position="bottom" :z-index="50"
+      custom-style="border-radius: 20px 20px 0 0; background: var(--card-bg);"
+    >
       <view v-if="currentFood" class="p-5">
         <view class="mb-6 flex items-center justify-between">
           <view class="p-1" @click="showPopup = false">
@@ -233,7 +282,7 @@ function handleRecognizedFoodSelect(food: FoodInfo) {
             </view>
           </view>
           <text class="mt-2 text-xs text-[var(--text-sub)]">
-            输入数量 ({{ selectedUnit }})
+            输入数量 ({{ selectedUnit.name }})
           </text>
         </view>
 
@@ -243,8 +292,8 @@ function handleRecognizedFoodSelect(food: FoodInfo) {
             v-for="unit in availableUnits"
             :key="unit.name"
             class="border rounded-full px-3 py-1.5 text-xs transition-all"
-            :class="selectedUnit === unit.name ? 'bg-emerald-500 border-emerald-500 text-white' : 'bg-[var(--page-bg)] border-[var(--border-color)] text-[var(--text-sub)]'"
-            @click="selectedUnit = unit.name"
+            :class="selectedUnit.id === unit.id ? 'bg-emerald-500 border-emerald-500 text-white' : 'bg-[var(--page-bg)] border-[var(--border-color)] text-[var(--text-sub)]'"
+            @click="selectedUnit = unit"
           >
             <text>
               {{ unit.name }}
@@ -252,14 +301,21 @@ function handleRecognizedFoodSelect(food: FoodInfo) {
           </view>
         </view>
 
-        <wd-button block type="success" size="large" class="from-emerald-500 to-emerald-600 bg-gradient-to-r !border-none !text-white" @click="confirmSelect">
+        <wd-button
+          block type="success" size="large"
+          class="from-emerald-500 to-emerald-600 bg-gradient-to-r !border-none !text-white"
+          @click="confirmSelect"
+        >
           确定
         </wd-button>
       </view>
     </wd-popup>
 
     <!-- 拍照识别按钮 -->
-    <view class="fixed bottom-10 right-6 z-20 h-14 w-14 flex items-center justify-center rounded-full from-emerald-500 to-emerald-600 bg-gradient-to-r shadow-lg transition-all active:opacity-80" @click="handleCamera">
+    <view
+      class="fixed bottom-10 right-6 z-20 h-14 w-14 flex items-center justify-center rounded-full from-emerald-500 to-emerald-600 bg-gradient-to-r shadow-lg transition-all active:opacity-80"
+      @click="handleCamera"
+    >
       <IconCamera size="24" color="white" />
     </view>
 
@@ -389,6 +445,7 @@ function handleRecognizedFoodSelect(food: FoodInfo) {
   padding: 0;
   background: transparent;
 }
+
 :deep(.confirm-btn) {
   --at-apply: "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white border-none";
 }
