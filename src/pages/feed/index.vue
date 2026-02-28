@@ -45,6 +45,17 @@ onPullDownRefresh(async () => {
   uni.stopPullDownRefresh()
 })
 
+// 监听发布动态成功的事件，自动刷新列表
+uni.$on('refresh-feed', () => {
+  page.value = 1
+  hasReachedBottom.value = false
+})
+
+// 组件卸载时移除监听
+onUnmounted(() => {
+  uni.$off('refresh-feed')
+})
+
 // 上拉加载更多
 onReachBottom(() => {
   hasReachedBottom.value = true
@@ -53,11 +64,11 @@ onReachBottom(() => {
   }
 })
 
-function handleLike(id: string) {
-  const post = posts.value.find(p => p.id === id)
+function handleLike(post: any) {
   if (post) {
+    const id = post.id
     useRequest(Apis.feed.like({ data: { id } })).send().then((res) => {
-      post.isLiked = res.isLiked
+      post.is_like = res.isLike
       post.likes = res.likes
     })
   }
@@ -65,6 +76,16 @@ function handleLike(id: string) {
 
 function handleCreatePost() {
   uni.navigateTo({ url: '/pages/create-post/index' })
+}
+
+function previewImage(post: any, current: string) {
+  const urls = post.attach
+    .filter((a: any) => a.type === 0)
+    .map((a: any) => a.attach)
+  uni.previewImage({
+    urls,
+    current,
+  })
 }
 </script>
 
@@ -116,7 +137,7 @@ function handleCreatePost() {
             </view>
             <view class="flex-1">
               <view class="text-[var(--text-main)] font-medium">
-                {{ post.author.nickname }}
+                {{ post.author?.nickname || '匿名用户' }}
               </view>
               <view class="text-xs text-[var(--text-sub)]">
                 {{ post.created_at }}
@@ -129,36 +150,90 @@ function handleCreatePost() {
             {{ post.content }}
           </view>
 
+          <!-- 媒体内容 -->
+          <view v-if="post.attach && post.attach.length" class="mb-3 flex flex-wrap gap-2">
+            <template v-for="(item, index) in post.attach" :key="index">
+              <!-- 图片 (type 0) -->
+              <view v-if="item.type === 0" class="h-24 w-24 overflow-hidden rounded-lg">
+                <wd-img
+                  :src="item.attach"
+                  mode="aspectFill"
+                  class="h-full w-full"
+                  @click="previewImage(post, item.attach)"
+                >
+                  <template #error>
+                    <view class="h-full w-full flex items-center justify-center bg-gray-100 text-[10px] text-gray-400">
+                      加载失败
+                    </view>
+                  </template>
+                  <template #loading>
+                    <view class="h-full w-full flex items-center justify-center bg-gray-50">
+                      <wd-loading size="16px" />
+                    </view>
+                  </template>
+                </wd-img>
+              </view>
+              <!-- 视频 (type 1) -->
+              <view v-else-if="item.type === 1" class="h-24 w-40 overflow-hidden rounded-lg">
+                <video
+                  :src="item.attach"
+                  :poster="item.poster"
+                  class="h-full w-full"
+                  :controls="true"
+                />
+              </view>
+            </template>
+          </view>
+
           <!-- 话题标签 -->
           <view v-if="post.topics && post.topics.length" class="mb-3 flex flex-wrap gap-2">
-            <text v-for="topic in post.topics" :key="topic" class="text-xs text-emerald-600 font-medium">
-              {{ topic.title }}
+            <text v-for="topic in post.topics" :key="topic.id" class="text-xs text-emerald-600 font-medium">
+              #{{ topic.title }}
             </text>
           </view>
 
-          <!-- 餐食引用 (简化版) -->
-          <view v-if="post.mealReference" class="mb-3 border border-emerald-100/20 rounded-lg bg-emerald-50/10 p-3">
-            <view class="mb-1 flex items-center justify-between">
-              <view class="flex items-center gap-1">
-                <view class="h-4 w-4 flex items-center justify-center rounded bg-emerald-500">
-                  <text class="text-[8px] text-white">
-                    餐
+          <!-- 餐食引用 (type 4) -->
+          <template v-for="(item, index) in post.attach" :key="`meal-${index}`">
+            <view v-if="item.type === 4" class="mb-3 border border-emerald-100/20 rounded-lg bg-emerald-50/10 p-3">
+              <view class="mb-1 flex items-center justify-between">
+                <view class="flex items-center gap-1">
+                  <view class="h-4 w-4 flex items-center justify-center rounded bg-emerald-500">
+                    <text class="text-[8px] text-white">
+                      餐
+                    </text>
+                  </view>
+                  <text class="text-xs text-[var(--text-main)] font-medium">
+                    {{ item.attach.type }}
                   </text>
                 </view>
-                <text class="text-xs text-[var(--text-main)] font-medium">
-                  {{ post.mealReference.mealType }}
+                <text class="text-xs text-emerald-600">
+                  {{ item.attach.calories }} kcal
                 </text>
               </view>
-              <text class="text-xs text-emerald-600">
-                {{ post.mealReference.totalCalories }} kcal
-              </text>
+              <view class="flex flex-wrap gap-1">
+                <text
+                  v-for="(food, idx) in item.attach.foods"
+                  :key="idx"
+                  class="text-[10px] text-[var(--text-sub)]"
+                >
+                  {{ food }}{{ idx < item.attach.foods.length - 1 ? '、' : '' }}
+                </text>
+              </view>
             </view>
+          </template>
+
+          <!-- 位置信息 -->
+          <view v-if="post.location" class="mb-3 flex items-center gap-1">
+            <IconMapPin size="10" color="#9ca3af" />
+            <text class="text-[10px] text-[var(--text-sub)]">
+              {{ post.location.name || post.location.address || '未知位置' }}
+            </text>
           </view>
 
           <!-- 互动按钮 -->
           <view class="flex items-center gap-6 border-t border-[var(--border-color)] pt-3">
-            <view class="flex items-center gap-1" @click="handleLike(post.id)">
-              <IconHeart :color="post.isLiked ? '#ef4444' : '#6b7280'" size="18" />
+            <view class="flex items-center gap-1" @click="handleLike(post)">
+              <IconHeart :color="post.is_like ? '#ef4444' : '#6b7280'" size="18" />
               <text class="text-xs text-[var(--text-sub)]">
                 {{ post.likes }}
               </text>
@@ -196,7 +271,6 @@ function handleCreatePost() {
 
 <style scoped>
 .page-container {
-  padding-bottom: constant(safe-area-inset-bottom);
   padding-bottom: env(safe-area-inset-bottom);
 }
 </style>

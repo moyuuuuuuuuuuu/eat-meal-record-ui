@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { usePagination } from 'alova/client'
+import IconChevronDown from '@/components/icons/IconChevronDown.vue'
+import IconFlame from '@/components/icons/IconFlame.vue'
+import IconTrendingUp from '@/components/icons/IconTrendingUp.vue'
 
 definePage({
   style: {
@@ -159,7 +162,6 @@ onReachBottom(() => {
 
 <style scoped>
 .page-container {
-  padding-bottom: constant(safe-area-inset-bottom);
   padding-bottom: env(safe-area-inset-bottom);
 }
 </style>

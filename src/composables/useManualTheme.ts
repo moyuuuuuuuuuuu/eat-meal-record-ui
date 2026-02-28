@@ -100,7 +100,10 @@ export function useManualTheme() {
 
   // 页面显示时更新导航栏颜色，确保每次切换页面时导航栏颜色都是正确的
   onShow(() => {
-    store.setNavigationBarColor()
+    // 使用 nextTick 确保页面挂载完成
+    nextTick(() => {
+      store.setNavigationBarColor()
+    })
   })
 
   // 组件卸载时清理监听

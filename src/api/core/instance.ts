@@ -12,6 +12,9 @@ export const alovaInstance = createAlova({
   }),
   statesHook: vueHook,
   beforeRequest: (method) => {
+    // Add Accept header
+    method.config.headers.Accept = 'application/json'
+
     // Add JWT Token
     const { token } = useAuth()
     if (token.value) {
@@ -20,7 +23,11 @@ export const alovaInstance = createAlova({
 
     // Add content type for POST/PUT/PATCH requests
     if (['POST', 'PUT', 'PATCH'].includes(method.type)) {
-      method.config.headers['Content-Type'] = 'application/json'
+      // If the data is FormData, alova will set the correct Content-Type with boundary
+      // Don't overwrite Content-Type if it's already set (e.g. for uploads)
+      if (!method.config.headers['Content-Type'] && !(typeof FormData !== 'undefined' && method.data instanceof FormData)) {
+        method.config.headers['Content-Type'] = 'application/json'
+      }
     }
 
     // Add timestamp to prevent caching for GET requests

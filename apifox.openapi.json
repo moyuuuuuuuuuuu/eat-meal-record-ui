@@ -7186,7 +7186,7 @@
                 "type": "object",
                 "properties": {}
               },
-              "example": "{\r\n    \"content\":\"这是第一条动态\",//动态内容\r\n    \"visibility\":0,//0隐藏 1所有人可见 2尽自己可见3仅好友可见\r\n    \"attach\":[//附件信息\r\n        {\r\n            \"attach\":\"https://tse1-mm.cn.bing.net/th/id/OIP-C.DBEl8H77Sitg8KE7cFhHDAHaFj?w=215&h=180&c=7&r=0&o=7&pid=1.7&rm=3\",//图片/视频地址或者其他三种的主键id\r\n            \"type\":0,//0图片 1视频 2食物 3食谱 4餐食记录\r\n            \"poster\":\"\"//视频封面\r\n        }\r\n    ],\r\n    \"topic\":[2],//关联话题\r\n    \"location\":{//地址信息\r\n        \"latitude\":34.123456,\r\n        \"longitude\":118.123456,\r\n        \"address\":\"河南省郑州市商都路国泓巨正3号楼B座\",\r\n        \"name\":\"国泓巨正广场\"\r\n    }\r\n}"
+              "example": "{\r\n    \"content\":\"这是第7条动态这是第三条动态这是第三条动态这是第三条动态这是第三条动态这是第三条动态这是第三条动态这是第三条动态这是第三条动态\",//动态内容\r\n    \"visibility\":1,//0隐藏 1所有人可见 2尽自己可见3仅好友可见\r\n    \"attach\":[//附件信息\r\n        {\r\n            \"attach\":\"https://tse1-mm.cn.bing.net/th/id/OIP-C.DBEl8H77Sitg8KE7cFhHDAHaFj?w=215&h=180&c=7&r=0&o=7&pid=1.7&rm=3\",//图片/视频地址或者其他三种的主键id\r\n            \"type\":0,//0图片 1视频 2食物 3食谱 4餐食记录\r\n            \"poster\":\"\"//视频封面\r\n        }\r\n    ],\r\n    \"topic\":[2],//关联话题\r\n    \"location\":{//地址信息\r\n        \"latitude\":34.123456,\r\n        \"longitude\":118.123456,\r\n        \"address\":\"河南省郑州市商都路国泓巨正3号楼B座\",\r\n        \"name\":\"国泓巨正广场\"\r\n    }\r\n}"
             }
           },
           "required": true
@@ -7224,12 +7224,23 @@
             "in": "query",
             "description": "",
             "required": false,
+            "example": "1",
             "schema": {
               "type": "string"
             }
           },
           {
             "name": "pageSize",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "example": "10",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "_t",
             "in": "query",
             "description": "",
             "required": false,
@@ -7273,12 +7284,81 @@
                 "type": "object",
                 "properties": {
                   "id": {
-                    "example": "",
+                    "example": "1",
                     "type": "string"
                   }
                 }
               },
               "examples": {}
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/topic/hot": {
+      "get": {
+        "summary": "热门话题",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/topic/create": {
+      "post": {
+        "summary": "自建话题",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {
+                "title": "asdasd"
+              }
             }
           },
           "required": true
@@ -7310,7 +7390,75 @@
         "deprecated": false,
         "description": "",
         "tags": [],
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "_t",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "example": "1772242696133",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ]
+      }
+    },
+    "/upload": {
+      "post": {
+        "summary": "文件上传",
+        "deprecated": false,
+        "description": "",
+        "tags": [],
+        "parameters": [
+          {
+            "name": "Accept",
+            "in": "header",
+            "description": "",
+            "required": false,
+            "example": "application/json",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "format": "binary",
+                    "type": "string",
+                    "example": "file:///Users/moyuu/Pictures/微信图片_20260206110848_26_261.jpg"
+                  }
+                }
+              },
+              "examples": {}
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "description": "",

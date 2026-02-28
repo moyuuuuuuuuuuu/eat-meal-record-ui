@@ -142,12 +142,12 @@ function handleWxLogin() {
 </script>
 
 <template>
-  <view class="login-container px-6 pt-20">
+  <view class="login-container px-6 pt-20 bg-[var(--page-bg)]">
     <view class="mb-12">
-      <view class="mb-2 text-2xl font-bold">
+      <view class="mb-2 text-2xl font-bold text-[var(--text-main)]">
         欢迎回来
       </view>
-      <view class="text-sm text-gray-500">
+      <view class="text-sm text-[var(--text-sub)]">
         记录您的每一餐，开启健康生活
       </view>
     </view>
@@ -164,37 +164,37 @@ function handleWxLogin() {
       </button>
 
       <view class="mb-10 flex items-center justify-center">
-        <view class="h-[1px] flex-1 bg-gray-200" />
-        <view class="mx-4 text-xs text-gray-400">
+        <view class="h-[1px] flex-1 bg-[var(--border-color)]" />
+        <view class="mx-4 text-xs text-[var(--text-sub)]">
           或者使用手机号登录
         </view>
-        <view class="h-[1px] flex-1 bg-gray-200" />
+        <view class="h-[1px] flex-1 bg-[var(--border-color)]" />
       </view>
     </template>
 
     <!-- 手机验证码登录 -->
     <view class="space-y-6">
-      <view class="border-b border-gray-100 pb-2">
+      <view class="border-b border-[var(--border-color)] pb-2">
         <input
           v-model="phone"
           type="number"
           placeholder="请输入手机号"
           maxlength="11"
-          class="h-10"
+          class="h-10 text-[var(--text-main)]"
         >
       </view>
 
-      <view class="flex items-center border-b border-gray-100 pb-2">
+      <view class="flex items-center border-b border-[var(--border-color)] pb-2">
         <input
           v-model="code"
           type="number"
           placeholder="请输入验证码"
           maxlength="6"
-          class="h-10 flex-1"
+          class="h-10 flex-1 text-[var(--text-main)]"
         >
         <text
           class="ml-4 text-sm text-blue-500"
-          :class="{ 'text-gray-400': countdown > 0 }"
+          :class="{ 'text-[var(--text-sub)] opacity-50': countdown > 0 }"
           @click="handleGetCode"
         >
           {{ countdown > 0 ? `${countdown}s后重发` : '获取验证码' }}
@@ -213,7 +213,7 @@ function handleWxLogin() {
     <!-- 用户协议 -->
     <view class="mt-8 flex items-start gap-2">
       <wd-checkbox v-model="isAgree" shape="square" size="14px" />
-      <view class="text-xs text-gray-400 leading-tight">
+      <view class="text-xs text-[var(--text-sub)] leading-tight">
         我已阅读并同意
         <text class="text-blue-500">
           《用户协议》
@@ -230,6 +230,5 @@ function handleWxLogin() {
 <style scoped>
 .login-container {
   min-height: 100vh;
-  background-color: #fff;
 }
 </style>

@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import type { FoodItem } from '@/api/globals'
 import { useRequest } from 'alova/client'
+import IconFlame from '@/components/icons/IconFlame.vue'
+import IconHelpCircle from '@/components/icons/IconHelpCircle.vue'
+import IconTrendingUp from '@/components/icons/IconTrendingUp.vue'
+import { useAuth } from '@/composables/useAuth'
 
 definePage({
   name: 'home',
@@ -47,8 +51,80 @@ const { send: getMeals } = useRequest(Apis.diary.meals(), {
   immediate: true,
 })
 
+const { isLogin } = useAuth()
+
+const { send: updateSteps } = useRequest(data => Apis.user.steps({ data }), {
+  immediate: false,
+})
+
+/**
+ * 获取微信运动数据并同步到后端
+ */
+async function handleWeRunData() {
+  // #ifdef MP-WEIXIN
+  uni.getSetting({
+    success: (res) => {
+      if (!res.authSetting['scope.werun']) {
+        uni.authorize({
+          scope: 'scope.werun',
+          success: () => {
+            getWeRunDataAndUpload()
+          },
+          fail: () => {
+            console.warn('用户拒绝了微信运动授权')
+          },
+        })
+      }
+      else {
+        getWeRunDataAndUpload()
+      }
+    },
+  })
+  // #endif
+}
+
+function getWeRunDataAndUpload() {
+  // #ifdef MP-WEIXIN
+  uni.getWeRunData({
+    success: async (res) => {
+      if (res.encryptedData && res.iv) {
+        try {
+          await updateSteps({
+            encryptedData: res.encryptedData,
+            iv: res.iv,
+          })
+          // 标记已获取过，避免重复拉起
+          uni.setStorageSync('has_fetched_werun', 'true')
+        }
+        catch (err) {
+          console.error('更新步数失败', err)
+        }
+      }
+    },
+    fail: (err) => {
+      console.error('获取微信运动数据失败', err)
+    },
+  })
+  // #endif
+}
+
 // Combined data fetching
 onShow(async () => {
+  if (!isLogin.value) {
+    uni.navigateTo({
+      url: '/pages/login/index',
+    })
+    return
+  }
+
+  // 检查是否在微信小程序环境且第一次进入
+  // #ifdef MP-WEIXIN
+  const hasFetched = uni.getStorageSync('has_fetched_werun')
+  if (!hasFetched) {
+    handleWeRunData()
+  }
+  // #endif
+
   const summaryRes = await getSummary()
   const mealsRes = await getMeals()
 
@@ -61,6 +137,26 @@ onShow(async () => {
   if (mealsRes) {
     meals.value = mealsRes
   }
+})
+
+// 监听添加餐食成功事件
+uni.$on('refresh-diary', async () => {
+  const summaryRes = await getSummary()
+  const mealsRes = await getMeals()
+
+  if (summaryRes) {
+    dailyGoal.value = summaryRes.dailyGoal
+    totalIntake.value = summaryRes.totalIntake
+    burnedCalories.value = summaryRes.burnedCalories
+  }
+
+  if (mealsRes) {
+    meals.value = mealsRes
+  }
+})
+
+onUnmounted(() => {
+  uni.$off('refresh-diary')
 })
 
 function deleteFood(id: string) {
@@ -85,15 +181,27 @@ function handleAddMeal(type: string) {
     url: `/pages/add-meal/index?type=${type}`,
   })
 }
+
+function showBurnTips() {
+  uni.showModal({
+    title: '消耗说明',
+    content: '这里的消耗是根据您的身体指标（性别/身高/体重）和今日步数测算出来的。\n'
+      + '💡 记得开启“微信运动”授权，让计算更精准。\n'
+      + '温馨提示：测算结果仅供参考，请以实际感受为准。',
+    showCancel: false,
+    confirmText: '我知道了',
+    confirmColor: '#10b981',
+  })
+}
 </script>
 
 <template>
   <view class="page-container min-h-screen overflow-x-hidden bg-[var(--page-bg)] pb-20">
     <!-- 顶部卡路里摘要 -->
     <view class="bg-[var(--card-bg)] px-4 pb-8 pt-16 shadow-sm">
-      <view class="mb-6 flex items-center justify-center gap-10">
+      <view class="mb-6 flex items-center justify-between">
         <!-- 摄入 -->
-        <view class="text-center">
+        <view class="flex-1 text-center">
           <view class="mb-1 flex items-center justify-center gap-1 text-[var(--text-sub)]">
             <IconFlame size="14" color="#6b7280" />
             <text class="text-xs">
@@ -109,15 +217,20 @@ function handleAddMeal(type: string) {
         </view>
 
         <!-- 环形进度条 -->
-        <CircularProgress :current="totalIntake.calories" :total="dailyGoal.calories" />
+        <view class="px-4">
+          <CircularProgress :current="totalIntake.calories" :total="dailyGoal.calories" />
+        </view>
 
         <!-- 消耗 -->
-        <view class="text-center">
+        <view class="flex-1 text-center">
           <view class="mb-1 flex items-center justify-center gap-1 text-[var(--text-sub)]">
             <IconTrendingUp size="14" color="#6b7280" />
             <text class="text-xs">
               消耗
             </text>
+            <view class="ml-0.5 flex items-center" @click.stop="showBurnTips">
+              <IconHelpCircle :size="16" color="#9ca3af" />
+            </view>
           </view>
           <view class="text-2xl text-[var(--text-main)] font-bold">
             {{ burnedCalories }}
@@ -238,7 +351,6 @@ function handleAddMeal(type: string) {
 
 <style scoped>
 .page-container {
-  padding-bottom: constant(safe-area-inset-bottom);
   padding-bottom: env(safe-area-inset-bottom);
 }
 .letter-spacing-1 {

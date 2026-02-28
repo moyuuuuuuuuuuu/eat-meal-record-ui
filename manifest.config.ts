@@ -71,6 +71,12 @@ export default defineManifestConfig({
     usingComponents: true,
     darkmode: true,
     themeLocation: 'theme.json',
+    permission: {
+      'scope.userLocation': {
+        desc: '展示发布动态时的地理位置',
+      },
+    },
+    requiredPrivateInfos: ['getLocation'],
   },
   'app-harmony': {},
   'mp-harmony': {},

@@ -118,18 +118,6 @@ export interface Pet {
   status?: 'available' | 'pending' | 'sold';
 }
 
-export interface Order {
-  id?: number;
-  petId?: number;
-  quantity?: number;
-  shipDate?: string;
-  /**
-   * Order Status
-   */
-  status?: 'placed' | 'approved' | 'delivered';
-  complete?: boolean;
-}
-
 export interface User {
   id?: number;
   username?: string;
@@ -142,6 +130,7 @@ export interface User {
    * User Status
    */
   userStatus?: number;
+  goal?: UserGoal;
 }
 
 export interface PaginatedResponse<T> {
@@ -164,19 +153,44 @@ export interface PaginatedResponse<T> {
   total: number;
 }
 
-export interface FeedPost {
-  created_at: any;
-  id: string;
-  author: {
-    nickname: any; name: string; avatar?: string
+export interface FeedAttachment {
+  attach: string | {
+    id: string;
+    calories: string;
+    type: string;
+    foods: string[];
   };
+  type: number; // 0图片 1视频 4餐食记录
+  attachType: string;
+  poster: string | null;
+}
+
+export interface FeedPost {
+  id: number;
   content: string;
-  topics?: string[];
-  mealReference?: { mealType: string; totalCalories: number };
   likes: number;
+  views: number;
+  favs: number;
   comments: number;
-  timestamp: string;
-  isLiked: boolean;
+  status: any;
+  is_like: boolean;
+  is_fav: boolean;
+  created_at: string;
+  author: {
+    id: number;
+    nickname: string;
+    avatar: string | null;
+  };
+  topics?: Topic[];
+  attach: FeedAttachment[];
+  location?: {
+    id: number;
+    blog_id: number;
+    latitude: string;
+    longitude: string;
+    name: string;
+    address: string;
+  } | null;
 }
 
 export interface DiarySummary {
@@ -276,6 +290,7 @@ export interface UserStats {
   height: number;
   age: number;
   gender: string;
+  goal?: UserGoal;
   dailyGoal?: {
     calories: number;
     protein: number;
@@ -284,10 +299,47 @@ export interface UserStats {
   };
 }
 
-export interface ApiResponse {
-  code?: number;
-  type?: string;
-  message?: string;
+export interface UserGoal {
+  daily_calories: number;
+  protein: number;
+  fat: number;
+  carbohydrate: number;
+  weight: number;
+}
+
+export interface DayMeals {
+  date: string;
+  dateLabel: string;
+  meals: MealRecord[];
+}
+
+export interface MealRecord {
+  id: string;
+  mealType: string;
+  items: { name: string; amount: string; calories: number }[];
+  totalCalories: number;
+}
+
+export interface ReverseGeoResponse {
+  address: string;
+  name: string;
+}
+
+export interface FeedCreateData {
+  content: string;
+  visibility: number;
+  attach?: {
+    attach: string;
+    type: number;
+    poster?: string;
+  }[];
+  topic?: number[];
+  location?: {
+    latitude: number;
+    longitude: number;
+    address?: string;
+    name?: string;
+  } | null;
 }
 
 declare global {
@@ -299,6 +351,36 @@ declare global {
       information<Config extends Alova2MethodConfig<any>>(
         config?: Config
       ): Alova2Method<any, 'user.information', Config>;
+      update<Config extends Alova2MethodConfig<any> & {
+        data: {
+          nickname?: string;
+          avatar?: string;
+          sex?: string | number;
+          signature?: string;
+          age?: number;
+          tall?: number | string;
+          weight?: number | string;
+          birthday?: string;
+        }
+      }>(config: Config): Alova2Method<any, 'user.update', Config>;
+      steps<Config extends Alova2MethodConfig<any> & {
+        data: {
+          encryptedData: string;
+          iv: string;
+        }
+      }>(config: Config): Alova2Method<any, 'user.steps', Config>;
+      goal<Config extends Alova2MethodConfig<UserGoal>>(
+        config?: Config
+      ): Alova2Method<UserGoal, 'user.goal', Config>;
+      goalSave<Config extends Alova2MethodConfig<any> & {
+        data: {
+          daily_calories: number;
+          protein: number;
+          fat: number;
+          carbohydrate: number;
+          weight_goal: number;
+        }
+      }>(config: Config): Alova2Method<any, 'user.goalSave', Config>;
     };
     food: {
       list<Config extends Alova2MethodConfig<{
@@ -320,8 +402,21 @@ declare global {
         hasMore: boolean;
         categories: string[];
       }, 'food.list', Config>;
-      recognize<Config extends Alova2MethodConfig<(FoodInfo & { confidence: number })[]>>(
-        config?: Config
+      recognize<Config extends Alova2MethodConfig<(FoodInfo & { confidence: number })[]> & {
+        data: {
+          content: string;
+          type: 'text' | 'image' | 'audio';
+          options?: {
+            model?: string;
+            format?: string;
+            channel?: number;
+            cuid?: string;
+            dev_pid?: number;
+            rate?: number;
+          };
+        }
+      }>(
+        config: Config
       ): Alova2Method<(FoodInfo & { confidence: number })[], 'food.recognize', Config>;
       detail<Config extends Alova2MethodConfig<FoodInfo> & {
         params: { id: string };
@@ -360,12 +455,24 @@ declare global {
         config?: Config
       ): Alova2Method<PaginatedResponse<HistoryItem>, 'diary.history', Config>;
       addFood<
-        Config extends Alova2MethodConfig<FoodItem> & {
-          data: { type: string; food: Omit<FoodItem, 'id'> };
+        Config extends Alova2MethodConfig<any> & {
+          data: {
+            type: number;
+            latitude?: number;
+            longitude?: number;
+            address?: string;
+            foods: {
+              food_id: number | string;
+              unit_id: number | string;
+              number: number;
+              name?: string;
+              image?: string;
+            }[];
+          };
         }
       >(
         config: Config
-      ): Alova2Method<FoodItem, 'diary.addFood', Config>;
+      ): Alova2Method<any, 'diary.addFood', Config>;
       deleteFood<
         Config extends Alova2MethodConfig<{ message: string }> & {
           params: { id: string };
@@ -381,15 +488,20 @@ declare global {
         config?: Config
       ): Alova2Method<PaginatedResponse<FeedPost>, 'feed.list', Config>;
       create<Config extends Alova2MethodConfig<any> & {
-        data: any
+        data: FeedCreateData
       }>(config: Config): Alova2Method<any, 'feed.create', Config>;
       like<
-        Config extends Alova2MethodConfig<{ isLiked: boolean; likes: number }> & {
+        Config extends Alova2MethodConfig<{ isLike: boolean; likes: number }> & {
           data: { id: string };
         }
       >(
         config: Config
-      ): Alova2Method<{ isLiked: boolean; likes: number }, 'feed.like', Config>;
+      ): Alova2Method<{ isLike: boolean; likes: number }, 'feed.like', Config>;
+    };
+    common: {
+      upload<Config extends Alova2MethodConfig<{ url: string }> & {
+        data: { file: any }
+      }>(config: Config): Alova2Method<{ url: string }, 'common.upload', Config>;
     };
     topic: {
       search<Config extends Alova2MethodConfig<any> & {
@@ -400,7 +512,16 @@ declare global {
         data: { title: string }
       }>(config: Config): Alova2Method<Topic, 'topic.create', Config>;
     };
+    meal: {
+      relation<Config extends Alova2MethodConfig<DayMeals[]>>(config?: Config): Alova2Method<DayMeals[], 'meal.relation', Config>;
+    };
+    location: {
+      reverseGeo<Config extends Alova2MethodConfig<ReverseGeoResponse> & {
+        params: { latitude: number; longitude: number };
+      }>(config: Config): Alova2Method<ReverseGeoResponse, 'location.reverseGeo', Config>;
+    };
   }
 
   var Apis: Apis;
+  function uploadByUni(filePath: string): Promise<{ path: string; url: string }>;
 }

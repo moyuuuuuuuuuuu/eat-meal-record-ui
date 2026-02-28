@@ -57,7 +57,15 @@
       "subPackages": true
     },
     "darkmode": true,
-    "themeLocation": "theme.json"
+    "themeLocation": "theme.json",
+    "permission": {
+      "scope.userLocation": {
+        "desc": "展示发布动态时的地理位置"
+      }
+    },
+    "requiredPrivateInfos": [
+      "getLocation"
+    ]
   },
   "mp-alipay": {
     "usingComponents": true,

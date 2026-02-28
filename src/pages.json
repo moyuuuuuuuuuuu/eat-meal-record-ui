@@ -107,7 +107,8 @@
       "layout": "tabbar",
       "style": {
         "navigationBarTitleText": "个人中心",
-        "navigationStyle": "custom"
+        "navigationStyle": "custom",
+        "disableScroll": true
       }
     },
     {

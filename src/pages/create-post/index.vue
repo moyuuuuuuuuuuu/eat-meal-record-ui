@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Topic } from '@/api/globals'
+import type { MealRecord, Topic } from '@/api/globals'
 import { useRequest } from 'alova/client'
 import IconChevronRight from '@/components/icons/IconChevronRight.vue'
 import IconHash from '@/components/icons/IconHash.vue'
@@ -15,31 +15,24 @@ definePage({
   },
 })
 
-interface MealRecord {
-  id: string
-  mealType: string
-  items: { name: string, amount: string, calories: number }[]
-  totalCalories: number
-}
-
-interface DayMeals {
-  date: string
-  dateLabel: string
-  meals: MealRecord[]
-}
-
 const content = ref('')
 const showLocation = ref(false)
+const locationData = ref<{ latitude: number, longitude: number, address?: string, name?: string } | null>(null)
 const selectedTopicIds = ref<number[]>([])
 const customTopics = ref<Topic[]>([])
 const selectedMeals = ref<MealRecord[]>([])
 const showMealSelector = ref(false)
 const showCustomTopicInput = ref(false)
 const customTopicName = ref('')
-const selectedImages = ref<string[]>([])
-const selectedVideo = ref<string | null>(null)
+const selectedImages = ref<{ path: string, url: string }[]>([])
+const selectedVideo = ref<{ path: string, url: string } | null>(null)
 
 const { data: popularTopics, loading: topicLoading } = useRequest(Apis.topic.hot(), {
+  immediate: true,
+  initialData: [],
+})
+
+const { data: weekMeals } = useRequest(Apis.meal.relation(), {
   immediate: true,
   initialData: [],
 })
@@ -52,83 +45,46 @@ const allTopics = computed(() => {
   return [...popularTopics.value, ...customTopics.value]
 })
 
-// 模拟近一周餐食记录
-function getDateLabel(daysAgo: number) {
-  const date = new Date()
-  date.setDate(date.getDate() - daysAgo)
-  if (daysAgo === 0) {
-    return '今天'
-  }
-  if (daysAgo === 1) {
-    return '昨天'
-  }
-  return `${date.getMonth() + 1}月${date.getDate()}日`
-}
-
-const weekMeals: DayMeals[] = [
-  {
-    date: '2026-01-29',
-    dateLabel: getDateLabel(0),
-    meals: [
-      {
-        id: '1-1',
-        mealType: '早餐',
-        items: [
-          { name: '燕麦粥', amount: '200g', calories: 150 },
-          { name: '煮鸡蛋', amount: '1个', calories: 78 },
-        ],
-        totalCalories: 228,
-      },
-      {
-        id: '1-2',
-        mealType: '午餐',
-        items: [
-          { name: '糙米饭', amount: '150g', calories: 171 },
-          { name: '鸡胸肉', amount: '120g', calories: 130 },
-        ],
-        totalCalories: 301,
-      },
-    ],
-  },
-  {
-    date: '2026-01-28',
-    dateLabel: getDateLabel(1),
-    meals: [
-      {
-        id: '2-1',
-        mealType: '晚餐',
-        items: [
-          { name: '蔬菜沙拉', amount: '200g', calories: 85 },
-          { name: '煎牛排', amount: '150g', calories: 250 },
-        ],
-        totalCalories: 335,
-      },
-    ],
-  },
-]
-
 function goBack() {
   uni.navigateBack()
 }
 
-function handleChooseImage() {
+function handleChooseImage(): void {
   uni.chooseImage({
     count: 9 - selectedImages.value.length,
     sizeType: ['original', 'compressed'],
     sourceType: ['album', 'camera'],
-    success: (res) => {
-      selectedImages.value = [...selectedImages.value, ...(res.tempFilePaths as string[])]
+    success: async (res) => {
+      const tempFilePaths = res.tempFilePaths as string[]
+      uni.showLoading({ title: '上传中...' })
+      try {
+        const results = await Promise.all(
+          tempFilePaths.map((path: string) => uploadByUni(path)),
+        )
+        selectedImages.value = [...selectedImages.value, ...results]
+        console.log('上传成功，图片URL：', selectedImages.value)
+      }
+      finally {
+        uni.hideLoading()
+      }
     },
   })
 }
 
-function handleChooseVideo() {
+function handleChooseVideo(): void {
   uni.chooseVideo({
     sourceType: ['album', 'camera'],
     compressed: true,
     maxDuration: 60,
-    success: (res) => {
-      selectedVideo.value = res.tempFilePath
+    success: async (res) => {
+      uni.showLoading({ title: '视频上传中...' })
+      try {
+        const result = await uploadByUni(res.tempFilePath)
+        selectedVideo.value = result
+      }
+      finally {
+        uni.hideLoading()
+      }
     },
   })
 }
@@ -143,7 +99,7 @@ function removeVideo() {
 
 function previewImage(current: string) {
   uni.previewImage({
-    urls: selectedImages.value,
+    urls: selectedImages.value.map(img => img.url),
     current,
   })
 }
@@ -219,19 +175,49 @@ async function handlePublish() {
 
   uni.showLoading({ title: '正在发布...' })
   try {
+    const attach: any[] = []
+
+    // 图片附件 type: 0
+    selectedImages.value.forEach((img) => {
+      attach.push({
+        attach: img.path,
+        type: 0,
+        poster: '',
+      })
+    })
+
+    // 视频附件 type: 1
+    if (selectedVideo.value) {
+      attach.push({
+        attach: selectedVideo.value.path,
+        type: 1,
+        poster: '', // 如果有封面图可以在这里补充
+      })
+    }
+
+    // 餐食记录附件 type: 4 (根据 issue 描述 4 为餐食记录)
+    selectedMeals.value.forEach((meal) => {
+      attach.push({
+        attach: meal.id,
+        type: 4,
+        poster: '',
+      })
+    })
+
     const postData = {
       content: content.value,
-      visibility: 1, // 所有人可见
+      visibility: 1, // 0隐藏 1所有人可见 2仅自己可见 3仅好友可见
+      attach,
       topic: selectedTopicIds.value,
-      images: selectedImages.value,
-      video: selectedVideo.value,
-      meals: selectedMeals.value.map(m => m.id),
+      location: showLocation.value ? locationData.value : null,
     }
 
     await publishPost(postData)
 
     uni.hideLoading()
     uni.showToast({ title: '发布成功', icon: 'success' })
+    // 发送全局事件，通知动态列表页面刷新
+    uni.$emit('refresh-feed')
     setTimeout(() => uni.navigateBack(), 1500)
   }
   catch {
@@ -239,6 +225,102 @@ async function handlePublish() {
     // 错误处理由 alova 全局拦截或在此处理
   }
 }
+
+watch(showLocation, async (val) => {
+  if (val) {
+    uni.showLoading({ title: '获取位置中...' })
+    try {
+      let res: any
+      // #ifdef MP-WEIXIN
+      res = await uni.getLocation({
+        type: 'gcj02',
+      })
+      // #endif
+
+      // #ifdef H5
+      const ua = window.navigator.userAgent.toLowerCase()
+      const isWechat = ua.includes('micromessenger')
+
+      if (isWechat) {
+        // 微信公众号环境下，由于没有集成 JSSDK，这里尝试使用 uni.getLocation，
+        // 在微信浏览器中 uni.getLocation 也会尝试调用微信的位置接口或 H5 原生接口
+        res = await uni.getLocation({
+          type: 'gcj02',
+        })
+      }
+      else {
+        // 普通 H5
+        res = await uni.getLocation({
+          type: 'wgs84',
+        })
+      }
+
+      // H5 环境调用逆地理编码接口
+      try {
+        const geoRes = await Apis.location.reverseGeo({
+          params: {
+            latitude: res.latitude,
+            longitude: res.longitude,
+          },
+        })
+        if (geoRes) {
+          res.address = geoRes.address
+          res.name = geoRes.name
+        }
+      }
+      catch (geoErr) {
+        console.error('H5 逆地理编码失败', geoErr)
+      }
+      // #endif
+
+      // #ifndef MP-WEIXIN || H5
+      res = await uni.getLocation({
+        type: 'gcj02',
+      })
+      // #endif
+      console.log(res)
+      locationData.value = {
+        latitude: res.latitude,
+        longitude: res.longitude,
+        address: res.address || '',
+        name: res.name || '',
+      }
+    }
+    catch (err: any) {
+      console.error('获取位置失败', err)
+      showLocation.value = false
+
+      // #ifdef MP-WEIXIN
+      // 微信小程序中，如果用户拒绝了授权，需要引导用户到设置页开启
+      if (err.errMsg && (err.errMsg.includes('auth deny') || err.errMsg.includes('authorize:fail'))) {
+        uni.showModal({
+          title: '提示',
+          content: '获取位置失败，请在设置中允许使用位置信息',
+          confirmText: '去设置',
+          success: (res) => {
+            if (res.confirm) {
+              uni.openSetting()
+            }
+          },
+        })
+      }
+      else {
+        uni.showToast({ title: '获取位置失败', icon: 'none' })
+      }
+      // #endif
+
+      // #ifndef MP-WEIXIN
+      uni.showToast({ title: '获取位置失败', icon: 'none' })
+      // #endif
+    }
+    finally {
+      uni.hideLoading()
+    }
+  }
+  else {
+    locationData.value = null
+  }
+})
 </script>
 
 <template>
@@ -267,12 +349,23 @@ async function handlePublish() {
             <view v-if="selectedImages.length > 0 || selectedVideo" class="flex flex-wrap gap-2">
               <!-- 图片预览 -->
               <view v-for="(img, index) in selectedImages" :key="index" class="relative h-20 w-20">
-                <image
-                  :src="img"
+                <wd-img
+                  :src="img.url"
                   mode="aspectFill"
                   class="h-full w-full rounded-lg"
-                  @click="previewImage(img)"
-                />
+                  @click="previewImage(img.url)"
+                >
+                  <template #error>
+                    <view class="h-full w-full flex items-center justify-center bg-gray-100 text-[10px] text-gray-400">
+                      加载失败
+                    </view>
+                  </template>
+                  <template #loading>
+                    <view class="h-full w-full flex items-center justify-center bg-gray-50">
+                      <wd-loading size="16px" />
+                    </view>
+                  </template>
+                </wd-img>
                 <view
                   class="absolute h-5 w-5 flex items-center justify-center rounded-full bg-black/50 text-white -right-1.5 -top-1.5"
                   @click.stop="removeImage(index)"
@@ -284,7 +377,7 @@ async function handlePublish() {
               <!-- 视频预览 -->
               <view v-if="selectedVideo" class="relative h-20 w-20">
                 <video
-                  :src="selectedVideo"
+                  :src="selectedVideo.url"
                   class="h-full w-full rounded-lg"
                   :show-center-play-btn="false"
                   :controls="false"
@@ -467,14 +560,21 @@ async function handlePublish() {
         </view>
 
         <!-- 位置信息 -->
-        <view class="flex items-center justify-between rounded-xl bg-[var(--card-bg)] p-4 shadow-sm">
-          <view class="flex items-center gap-3">
-            <IconMapPin size="18" color="#9ca3af" />
-            <text class="text-sm text-[var(--text-main)] font-medium">
-              显示位置
+        <view class="rounded-xl bg-[var(--card-bg)] p-4 shadow-sm">
+          <view class="flex items-center justify-between">
+            <view class="flex items-center gap-3">
+              <IconMapPin size="14" color="#9ca3af" />
+              <text class="text-sm text-[var(--text-main)] font-medium">
+                显示位置
+              </text>
+            </view>
+            <wd-switch v-model="showLocation" size="small" active-color="#10b981" />
+          </view>
+          <view v-if="showLocation && locationData" class="mt-2 pl-7">
+            <text class="text-xs text-emerald-600 font-medium">
+              {{  locationData.address || '正在获取位置...' }}
             </text>
           </view>
-          <wd-switch v-model="showLocation" size="small" active-color="#10b981" />
         </view>
       </view>
     </scroll-view>

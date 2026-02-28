@@ -13,6 +13,10 @@ export const $$userConfigMap = withConfigType({})
 // Create the global Apis object
 const Apis = createApis(alovaInstance, $$userConfigMap)
 
+// Export and mount common functions
+import { uploadByUni } from './common'
+(globalThis as any).uploadByUni = uploadByUni
+
 // Export both default and named export for AutoImport
 export default Apis
-export { Apis }
+export { Apis, uploadByUni }

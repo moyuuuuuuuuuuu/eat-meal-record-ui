@@ -15,19 +15,19 @@ const carbs = ref(225)
 const targetWeight = ref(60)
 
 // 获取当前目标设置
-const { onSuccess } = useRequest(Apis.user.stats(), {
+const { onSuccess } = useRequest(Apis.user.goal(), {
   immediate: true,
 })
 
 onSuccess((event) => {
   const data = event.data
-  if (data.dailyGoal) {
-    dailyCalories.value = data.dailyGoal.calories || 2000
-    protein.value = data.dailyGoal.protein || 150
-    fat.value = data.dailyGoal.fat || 55
-    carbs.value = data.dailyGoal.carbs || 225
+  if (data) {
+    dailyCalories.value = data.daily_calories || 2000
+    protein.value = data.protein || 150
+    fat.value = data.fat || 55
+    carbs.value = data.carbohydrate || 225
+    targetWeight.value = data.weight || 60
   }
-  targetWeight.value = data.targetWeight || 60
 })
 
 // 监听热量变动，动态计算营养素 (国际卡路里标准占比)
@@ -42,14 +42,31 @@ function goBack() {
   uni.navigateBack()
 }
 
-function handleSave() {
-  // 模拟保存逻辑，因为 OpenAPI 中未发现明确的 update 接口
+const { loading: saving, send: saveGoalApi } = useRequest(data => Apis.user.goalSave({ data }), {
+  immediate: false,
+})
+
+async function handleSave() {
+  if (saving.value)
+    return
+
   uni.showLoading({ title: '保存中...' })
-  setTimeout(() => {
+  try {
+    await saveGoalApi({
+      daily_calories: dailyCalories.value,
+      protein: protein.value,
+      fat: fat.value,
+      carbohydrate: carbs.value,
+      weight: targetWeight.value,
+    })
     uni.hideLoading()
     uni.showToast({ title: '保存成功', icon: 'success' })
     setTimeout(() => uni.navigateBack(), 1500)
-  }, 1000)
+  }
+  catch (err) {
+    uni.hideLoading()
+    console.error('保存目标失败', err)
+  }
 }
 </script>
 

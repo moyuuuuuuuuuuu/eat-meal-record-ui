@@ -5,12 +5,23 @@ import IconCamera from '@/components/icons/IconCamera.vue'
 import IconPlus from '@/components/icons/IconPlus.vue'
 import IconSearch from '@/components/icons/IconSearch.vue'
 import IconX from '@/components/icons/IconX.vue'
+import { useAuth } from '@/composables/useAuth'
 
 definePage({
   style: {
     navigationBarTitleText: '选择食物',
     navigationStyle: 'custom',
   },
+})
+
+const { isLogin } = useAuth()
+
+onShow(() => {
+  if (!isLogin.value) {
+    uni.navigateTo({
+      url: '/pages/login/index',
+    })
+  }
 })
 
 const searchQuery = ref('')

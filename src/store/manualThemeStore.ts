@@ -63,10 +63,31 @@ export const useManualThemeStore = defineStore('manualTheme', {
      * 设置导航栏颜色
      */
     setNavigationBarColor() {
-      uni.setNavigationBarColor({
-        frontColor: this.theme === 'light' ? '#000000' : '#ffffff',
-        backgroundColor: this.theme === 'light' ? '#ffffff' : '#000000',
-      })
+      // 检查当前页面是否存在，防止报错
+      const pages = getCurrentPages()
+      if (pages.length === 0) {
+        console.warn('setNavigationBarColor: 无可用页面')
+        return
+      }
+
+      try {
+        uni.setNavigationBarColor({
+          frontColor: this.theme === 'light' ? '#000000' : '#ffffff',
+          backgroundColor: this.theme === 'light' ? '#ffffff' : '#000000',
+          fail: (err) => {
+            // 忽略 'page not found' 错误，这通常发生在页面切换或初始化期间
+            if (err.errMsg && err.errMsg.includes('page not found')) {
+              console.warn('setNavigationBarColor: 页面未找到，忽略错误')
+            }
+            else {
+              console.error('setNavigationBarColor 失败:', err)
+            }
+          },
+        })
+      }
+      catch (error) {
+        console.error('setNavigationBarColor 抛出异常:', error)
+      }
     },
 
     /**

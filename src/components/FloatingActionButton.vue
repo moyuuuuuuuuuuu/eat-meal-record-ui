@@ -1,3 +1,26 @@
+<script setup lang="ts">
+import IconCoffee from './icons/IconCoffee.vue'
+import IconMoon from './icons/IconMoon.vue'
+import IconSun from './icons/IconSun.vue'
+import IconSunrise from './icons/IconSunrise.vue'
+
+const emit = defineEmits(['select'])
+
+const active = ref(false)
+
+const actions = [
+  { type: '加餐', icon: IconCoffee, color: '#92400e' },
+  { type: '晚餐', icon: IconMoon, color: '#6366f1' },
+  { type: '午餐', icon: IconSun, color: '#eab308' },
+  { type: '早餐', icon: IconSunrise, color: '#f97316' },
+]
+
+function handleClick(type: string) {
+  emit('select', type)
+  active.value = false
+}
+</script>
+
 <template>
   <view class="fab-container">
     <wd-fab
@@ -25,29 +48,6 @@
     </wd-fab>
   </view>
 </template>
-
-<script setup lang="ts">
-import IconSunrise from './icons/IconSunrise.vue'
-import IconSun from './icons/IconSun.vue'
-import IconMoon from './icons/IconMoon.vue'
-import IconCoffee from './icons/IconCoffee.vue'
-
-const active = ref(false)
-
-const actions = [
-  { type: '早餐', icon: IconSunrise, color: '#f97316' },
-  { type: '午餐', icon: IconSun, color: '#eab308' },
-  { type: '晚餐', icon: IconMoon, color: '#6366f1' },
-  { type: '加餐', icon: IconCoffee, color: '#92400e' },
-]
-
-const emit = defineEmits(['select'])
-
-function handleClick(type: string) {
-  emit('select', type)
-  active.value = false
-}
-</script>
 
 <style scoped>
 .fab-trigger {
