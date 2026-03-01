@@ -14,9 +14,8 @@ export const $$userConfigMap = withConfigType({})
 const Apis = createApis(alovaInstance, $$userConfigMap)
 
 // Export and mount common functions
-import { uploadByUni } from './common'
-(globalThis as any).uploadByUni = uploadByUni
+
 
 // Export both default and named export for AutoImport
 export default Apis
-export { Apis, uploadByUni }
+export { Apis }

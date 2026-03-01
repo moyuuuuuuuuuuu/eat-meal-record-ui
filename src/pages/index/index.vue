@@ -5,6 +5,9 @@ import IconFlame from '@/components/icons/IconFlame.vue'
 import IconHelpCircle from '@/components/icons/IconHelpCircle.vue'
 import IconTrendingUp from '@/components/icons/IconTrendingUp.vue'
 import { useAuth } from '@/composables/useAuth'
+import { useSystemInfo } from '@/composables/useSystemInfo'
+
+const { totalHeight } = useSystemInfo()
 
 definePage({
   name: 'home',
@@ -110,18 +113,31 @@ function getWeRunDataAndUpload() {
 
 // Combined data fetching
 onShow(async () => {
+  // #ifdef MP-WEIXIN
+  // 登录后第一次返回首页，主动拉起微信运动授权
+  const justLoggedIn = uni.getStorageSync('JUST_LOGGED_IN')
+  if (justLoggedIn) {
+    handleWeRunData()
+    uni.removeStorageSync('JUST_LOGGED_IN')
+  }
+  // #endif
+
   if (!isLogin.value) {
-    uni.navigateTo({
-      url: '/pages/login/index',
-    })
+    // 未登录时，展示默认数据或清空数据
+    totalIntake.value = { calories: 0, protein: 0, fat: 0, carbs: 0 }
+    burnedCalories.value = 0
+    meals.value = { 早餐: [], 午餐: [], 晚餐: [], 加餐: [] }
     return
   }
 
-  // 检查是否在微信小程序环境且第一次进入
   // #ifdef MP-WEIXIN
-  const hasFetched = uni.getStorageSync('has_fetched_werun')
-  if (!hasFetched) {
+  // 登录状态下，每天检查一次微信运动授权
+  const today = new Date().toISOString().split('T')[0]
+  const lastSyncDate = uni.getStorageSync('LAST_WERUN_SYNC_DATE')
+  console.log('登录状态下，每天检查一次微信运动授权', lastSyncDate, today)
+  if (lastSyncDate !== today) {
     handleWeRunData()
+    uni.setStorageSync('LAST_WERUN_SYNC_DATE', today)
   }
   // #endif
 
@@ -198,7 +214,10 @@ function showBurnTips() {
 <template>
   <view class="page-container min-h-screen overflow-x-hidden bg-[var(--page-bg)] pb-20">
     <!-- 顶部卡路里摘要 -->
-    <view class="bg-[var(--card-bg)] px-4 pb-8 pt-16 shadow-sm">
+    <view
+      class="bg-[var(--card-bg)] px-4 pb-8 shadow-sm"
+      :style="{ paddingTop: `${totalHeight + 12}px` }"
+    >
       <view class="mb-6 flex items-center justify-between">
         <!-- 摄入 -->
         <view class="flex-1 text-center">
@@ -262,7 +281,7 @@ function showBurnTips() {
               {{ Number(totalIntake.protein).toFixed(1) || 0 }}
             </text>
             <text class="ml-1 text-[10px] text-[var(--text-sub)]">
-              / {{ dailyGoal.protein }}g
+              / {{ Number(dailyGoal.protein).toFixed(1) }}g
             </text>
           </view>
           <wd-progress :percentage="Math.min(Number(((totalIntake.protein / dailyGoal.protein) * 100).toFixed(1)), 100)" color="#3b82f6" :show-pivot="false" stroke-width="4px" />
@@ -278,7 +297,7 @@ function showBurnTips() {
               {{ Number(totalIntake.fat).toFixed(1) || 0 }}
             </text>
             <text class="ml-1 text-[10px] text-[var(--text-sub)]">
-              / {{ dailyGoal.fat }}g
+              / {{ Number(dailyGoal.fat).toFixed(1) }}g
             </text>
           </view>
           <wd-progress :percentage="Math.min(Number(((totalIntake.fat / dailyGoal.fat) * 100).toFixed(1)), 100)" color="#f59e0b" :show-pivot="false" stroke-width="4px" />
@@ -294,7 +313,7 @@ function showBurnTips() {
               {{ Number(totalIntake.carbs).toFixed(1) || 0 }}
             </text>
             <text class="ml-1 text-[10px] text-[var(--text-sub)]">
-              / {{ dailyGoal.carbs }}g
+              / {{ Number(dailyGoal.carbs).toFixed(1) }}g
             </text>
           </view>
           <wd-progress :percentage="Math.min(Number(((totalIntake.carbs / dailyGoal.carbs) * 100).toFixed(1)), 100)" color="#8b5cf6" :show-pivot="false" stroke-width="4px" />

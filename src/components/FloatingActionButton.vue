@@ -37,7 +37,11 @@ function handleClick(type: string) {
           :style="{ backgroundColor: item.color }"
           @click="handleClick(item.type)"
         >
-          <component :is="item.icon" size="20" color="white" />
+          <IconCoffee v-if="item.icon === IconCoffee" size="20" color="white" />
+          <IconMoon v-else-if="item.icon === IconMoon" size="20" color="white" />
+          <IconSun v-else-if="item.icon === IconSun" size="20" color="white" />
+          <IconSunrise v-else-if="item.icon === IconSunrise" size="20" color="white" />
+          <!--          <component :is="item.icon" size="20" color="white" /> -->
         </view>
       </template>
       <template #trigger>

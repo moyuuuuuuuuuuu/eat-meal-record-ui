@@ -47,18 +47,6 @@ function generateUserStats() {
 }
 
 export default defineMock({
-  // 获取用户统计信息
-  '[GET]/api/v3/user/stats': () => {
-    const stats = generateUserStats()
-    return {
-      code: 200,
-      message: 'success',
-      data: {
-        name: '健康达人',
-        ...stats,
-      },
-    }
-  },
 
   // 批量创建用户（数组输入）
   '[POST]/api/v3/user/createWithArray': ({ data }) => {

@@ -8,6 +8,9 @@ import IconPlus from '@/components/icons/IconPlus.vue'
 import IconSave from '@/components/icons/IconSave.vue'
 import IconX from '@/components/icons/IconX.vue'
 import { useAuth } from '@/composables/useAuth'
+import { useSystemInfo } from '@/composables/useSystemInfo'
+
+const { totalHeight, navBarHeight } = useSystemInfo()
 
 definePage({
   style: {
@@ -112,7 +115,7 @@ async function callRecognizeApi(content: string, type: 'text' | 'image' | 'audio
         rate: 16000,
       },
     })
-    if (res && res.length > 0) {
+    if (res) {
       recognizedFoods.value = res
       showAiResults.value = true
       showAiPopup.value = false
@@ -159,96 +162,77 @@ onShow(async () => {
     })
   }
 })
-
 watch(showLocation, async (val) => {
-  if (val) {
-    uni.showLoading({ title: '获取位置中...' })
+  if (!val) {
+    locationData.value = null
+    return
+  }
+
+  uni.showLoading({ title: '获取位置中...' })
+
+  try {
+    let locType: 'gcj02' | 'wgs84' = 'gcj02'
+
+    // #ifdef H5
+    const ua = window.navigator.userAgent.toLowerCase()
+    const isWechat = ua.includes('micromessenger')
+    if (!isWechat)
+      locType = 'wgs84'
+    // #endif
+
+    const res = await uni.getLocation({ type: locType })
+
+    // 所有平台都调用逆地理编码
     try {
-      let res: any
-      // #ifdef MP-WEIXIN
-      res = await uni.getLocation({
-        type: 'gcj02',
+      const geoRes = await Apis.location.reverseGeo({
+        params: {
+          latitude: res.latitude,
+          longitude: res.longitude,
+        },
       })
-      // #endif
-
-      // #ifdef H5
-      const ua = window.navigator.userAgent.toLowerCase()
-      const isWechat = ua.includes('micromessenger')
-
-      if (isWechat) {
-        res = await uni.getLocation({
-          type: 'gcj02',
-        })
-      }
-      else {
-        res = await uni.getLocation({
-          type: 'wgs84',
-        })
-      }
-
-      // H5 环境调用逆地理编码接口
-      try {
-        const geoRes = await Apis.location.reverseGeo({
-          params: {
-            latitude: res.latitude,
-            longitude: res.longitude,
-          },
-        })
-        if (geoRes) {
-          res.address = geoRes.address
-          res.name = geoRes.name
-        }
-      }
-      catch (geoErr) {
-        console.error('H5 逆地理编码失败', geoErr)
-      }
-      // #endif
-
-      // #ifndef MP-WEIXIN || H5
-      res = await uni.getLocation({
-        type: 'gcj02',
-      })
-      // #endif
-      console.log(res)
-      locationData.value = {
-        latitude: res.latitude,
-        longitude: res.longitude,
-        address: res.address || '',
-        name: res.name || '',
+      if (geoRes) {
+        res.address = geoRes.address
+        res.name = geoRes.name
       }
     }
-    catch (err: any) {
-      console.error('获取位置失败', err)
-      showLocation.value = false
-
-      // #ifdef MP-WEIXIN
-      if (err.errMsg && (err.errMsg.includes('auth deny') || err.errMsg.includes('authorize:fail'))) {
-        uni.showModal({
-          title: '提示',
-          content: '获取位置失败，请在设置中允许使用位置信息',
-          confirmText: '去设置',
-          success: (res) => {
-            if (res.confirm) {
-              uni.openSetting()
-            }
-          },
-        })
-      }
-      else {
-        uni.showToast({ title: '获取位置失败', icon: 'none' })
-      }
-      // #endif
-
-      // #ifndef MP-WEIXIN
-      uni.showToast({ title: '获取位置失败', icon: 'none' })
-      // #endif
+    catch (geoErr) {
+      console.error('逆地理编码失败', geoErr)
     }
-    finally {
-      uni.hideLoading()
+
+    locationData.value = {
+      latitude: res.latitude,
+      longitude: res.longitude,
+      address: res.address || '',
+      name: res.name || '',
     }
   }
-  else {
-    locationData.value = null
+  catch (err: any) {
+    console.error('获取位置失败', err)
+    showLocation.value = false
+
+    // #ifdef MP-WEIXIN
+    const isAuthErr = err.errMsg && (
+      err.errMsg.includes('auth deny')
+      || err.errMsg.includes('authorize:fail')
+    )
+    if (isAuthErr) {
+      uni.showModal({
+        title: '提示',
+        content: '获取位置失败，请在设置中允许使用位置信息',
+        confirmText: '去设置',
+        success: (res) => {
+          if (res.confirm)
+            uni.openSetting()
+        },
+      })
+      return
+    }
+    // #endif
+
+    uni.showToast({ title: '获取位置失败', icon: 'none' })
+  }
+  finally {
+    uni.hideLoading()
   }
 })
 
@@ -337,19 +321,26 @@ async function handleSave() {
 
 <template>
   <view class="page-container h-screen flex flex-col overflow-hidden bg-[var(--page-bg)]">
-    <wd-navbar title="添加餐食" left-arrow @click-left="goBack">
-      <template #right>
-        <view
-          class="save-btn from-emerald-500 to-emerald-600 bg-gradient-to-r" :class="{ disabled: !foodItems.length || saving }"
-          @click="handleSave"
-        >
-          <IconSave size="14" color="white" />
-          <text class="ml-1">
-            {{ saving ? '...' : '保存' }}
-          </text>
+    <wd-navbar title="添加餐食" safe-area-inset-top fixed :custom-style="`--wd-navbar-height: ${navBarHeight}px`">
+      <template #left>
+        <view class="flex items-center gap-2 pl-2">
+          <view class="flex items-center justify-center p-1" @click="goBack">
+            <wd-icon name="arrow-left" size="20" />
+          </view>
+          <view
+            class="save-btn from-emerald-500 to-emerald-600 bg-gradient-to-r"
+            :class="{ disabled: !foodItems.length || saving }"
+            @click="handleSave"
+          >
+            <IconSave size="14" color="white" />
+            <text class="ml-1">
+              {{ saving ? '...' : '保存' }}
+            </text>
+          </view>
         </view>
       </template>
     </wd-navbar>
+    <view :style="{ height: `${totalHeight}px` }" />
 
     <scroll-view scroll-y class="flex-1 px-4 py-4 space-y-4">
       <view class="pb-24 space-y-4">
@@ -375,7 +366,7 @@ async function handleSave() {
             <view
               class="h-10 w-10 flex items-center justify-center rounded-full bg-emerald-50 text-emerald-500 dark:bg-emerald-900/20"
             >
-              <IconPlus size="20" />
+              <IconPlus size="20" color="white" />
             </view>
             <text class="text-sm text-emerald-600 font-bold">
               手动添加
@@ -388,7 +379,7 @@ async function handleSave() {
             <view
               class="h-10 w-10 flex items-center justify-center rounded-full bg-emerald-500 text-white shadow-emerald-200 shadow-lg"
             >
-              <IconCamera size="20" />
+              <IconCamera size="20" color="white" />
             </view>
             <text class="text-sm text-emerald-600 font-bold">
               AI 识别

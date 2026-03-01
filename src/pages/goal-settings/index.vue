@@ -1,5 +1,11 @@
 <script setup lang="ts">
 import { useRequest } from 'alova/client'
+import { ref, watch } from 'vue'
+import { useAuth } from '@/composables/useAuth'
+import { useSystemInfo } from '@/composables/useSystemInfo'
+
+const { totalHeight, navBarHeight } = useSystemInfo()
+const { userInfo } = useAuth()
 
 definePage({
   style: {
@@ -52,13 +58,26 @@ async function handleSave() {
 
   uni.showLoading({ title: '保存中...' })
   try {
-    await saveGoalApi({
+    const res = await saveGoalApi({
       daily_calories: dailyCalories.value,
       protein: protein.value,
       fat: fat.value,
       carbohydrate: carbs.value,
       weight: targetWeight.value,
     })
+
+    // 更新全局用户信息中的目标数据和体重
+    if (res && userInfo.value) {
+      userInfo.value = {
+        ...userInfo.value,
+        daily_calories: res.daily_calories,
+        protein: res.protein,
+        fat: res.fat,
+        carbohydrate: res.carbohydrate,
+        weight: res.weight,
+      }
+    }
+
     uni.hideLoading()
     uni.showToast({ title: '保存成功', icon: 'success' })
     setTimeout(() => uni.navigateBack(), 1500)
@@ -72,15 +91,21 @@ async function handleSave() {
 
 <template>
   <view class="page-container h-screen flex flex-col overflow-hidden bg-[var(--page-bg)]">
-    <wd-navbar title="目标设置" placeholder left-arrow fixed @click-left="goBack">
-      <template #right>
-        <view class="save-btn" @click="handleSave">
-          <text>保存</text>
+    <wd-navbar title="目标设置" safe-area-inset-top fixed :custom-style="`--wd-navbar-height: ${navBarHeight}px`">
+      <template #left>
+        <view class="flex items-center gap-2 pl-2">
+          <view class="flex items-center justify-center p-1" @click="goBack">
+            <wd-icon name="arrow-left" size="20" />
+          </view>
+          <view class="save-btn" @click="handleSave">
+            <text>保存</text>
+          </view>
         </view>
       </template>
     </wd-navbar>
+    <!-- <view :style="{ height: `${totalHeight}px` }" /> -->
 
-    <scroll-view scroll-y class="w-full flex-1">
+    <scroll-view scroll-y class="w-full flex-1" :style="{ paddingTop: `${totalHeight}px` }">
       <view class="w-full px-4 py-4 pb-10 space-y-4">
         <!-- 热量目标 -->
         <view class="rounded-xl bg-[var(--card-bg)] p-4 shadow-sm">

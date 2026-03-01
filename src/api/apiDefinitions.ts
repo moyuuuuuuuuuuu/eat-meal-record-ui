@@ -24,31 +24,42 @@ Some useful links:
  * **Do not edit the file manually.**
  */
 export default {
-  'auth.login': ['POST', '/auth/login'],
-  'auth.sms.login': ['POST', '/auth/sms/login'],
-  'food.list': ['GET', '/food/list'],
-  'food.search': ['GET', '/food/search'],
-  'food.categories': ['GET', '/food/categories'],
-  'food.detail': ['GET', '/food/detail'],
-  'food.recognize': ['POST', '/food/recognize'],
+  // Diary
+  'diary.summary': ['GET', '/diary/summary'],
   'diary.meals': ['GET', '/diary'],
-  'diary.history': ['GET', '/meal/history'],
   'diary.addFood': ['POST', '/diary/meal/add'],
   'diary.deleteFood': ['DELETE', '/diary/meal/food'],
-  'diary.summary': ['GET', '/diary/summary'],
-  'user.stats': ['GET', '/user/stats'],
-  'user.information': ['GET', '/user/information'],
-  'user.update': ['POST', '/user/update'],
+  'diary.history': ['GET', '/diary/history'],
+
+  // Auth
+  'auth.sms.login': ['POST', '/auth/sms/login'],
+  'auth.login': ['POST', '/auth/login'],
+
+  // User (app-specific)
   'user.steps': ['POST', '/user/steps'],
+  'user.update': ['POST', '/user/update'],
+  'user.stats': ['GET', '/user/stats'],
   'user.goal': ['GET', '/user/goal'],
   'user.goalSave': ['POST', '/user/goal/save'],
+
+  // Food
+  'food.recognize': ['POST', '/food/recognize'],
+  'food.search': ['GET', '/food/search'],
+  'food.recommendation': ['GET', '/recommendation'],
+
+  // Feed
   'feed.list': ['GET', '/feed/list'],
   'feed.create': ['POST', '/feed/create'],
   'feed.like': ['POST', '/feed/post/like'],
-  'topic.search': ['GET', '/topic/search'],
+  'feed.detail': ['GET', '/feed/detail'],
+
+  // Location
+  'location.reverseGeo': ['GET', '/location/reverse/geo'],
+
+  // Topic
   'topic.hot': ['GET', '/topic/hot'],
   'topic.create': ['POST', '/topic/create'],
+
+  // Meal
   'meal.relation': ['GET', '/meal/relation'],
-  'location.reverseGeo': ['GET', '/location/reverse/geo'],
-  'common.upload': ['POST', '/upload']
 };

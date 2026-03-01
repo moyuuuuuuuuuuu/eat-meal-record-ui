@@ -6,6 +6,9 @@ import IconPlus from '@/components/icons/IconPlus.vue'
 import IconSearch from '@/components/icons/IconSearch.vue'
 import IconX from '@/components/icons/IconX.vue'
 import { useAuth } from '@/composables/useAuth'
+import { useSystemInfo } from '@/composables/useSystemInfo'
+
+const { statusBarHeight, navBarHeight } = useSystemInfo()
 
 definePage({
   style: {
@@ -110,7 +113,7 @@ function goBack() {
 
 function selectFood(food: FoodInfo) {
   currentFood.value = food
-  selectedUnit.value = availableUnits.value.find(u => u.isDefault)
+  selectedUnit.value = availableUnits.value.find(u => u.isDefault) || availableUnits.value[0]
   quantity.value = 1
   showPopup.value = true
 }
@@ -175,14 +178,14 @@ function handleRecognizedFoodSelect(food: FoodInfo) {
 <template>
   <view class="page-container min-h-screen bg-[var(--page-bg)]">
     <view class="header-container fixed left-0 top-0 z-10 w-full bg-[var(--page-bg)]">
-      <wd-navbar title="选择食物" left-arrow @click-left="goBack" />
-      <view class="border-b border-[var(--border-color)] bg-[var(--card-bg)] px-4 py-3">
+      <wd-navbar title="选择食物" left-arrow safe-area-inset-top @click-left="goBack" />
+      <view class="search-bar-wrap border-b border-[var(--border-color)] bg-[var(--card-bg)] px-4 py-3">
         <wd-search v-model="searchQuery" placeholder="搜索食物..." hide-cancel />
       </view>
     </view>
 
-    <!-- 顶占位 (44px navbar + ~54px search) -->
-    <view class="h-[100px]" />
+    <!-- 顶部占位 (navbar + search bar) -->
+    <view :style="{ height: `${statusBarHeight + navBarHeight + 64}px` }" />
 
     <!-- 食物列表 -->
     <view class="px-4 py-4 pb-32 space-y-3">
@@ -293,7 +296,7 @@ function handleRecognizedFoodSelect(food: FoodInfo) {
             </view>
           </view>
           <text class="mt-2 text-xs text-[var(--text-sub)]">
-            输入数量 ({{ selectedUnit.name }})
+            输入数量 ({{ selectedUnit?.name || '' }})
           </text>
         </view>
 
@@ -303,7 +306,7 @@ function handleRecognizedFoodSelect(food: FoodInfo) {
             v-for="unit in availableUnits"
             :key="unit.name"
             class="border rounded-full px-3 py-1.5 text-xs transition-all"
-            :class="selectedUnit.id === unit.id ? 'bg-emerald-500 border-emerald-500 text-white' : 'bg-[var(--page-bg)] border-[var(--border-color)] text-[var(--text-sub)]'"
+            :class="selectedUnit?.id === unit.id ? 'bg-emerald-500 border-emerald-500 text-white' : 'bg-[var(--page-bg)] border-[var(--border-color)] text-[var(--text-sub)]'"
             @click="selectedUnit = unit"
           >
             <text>

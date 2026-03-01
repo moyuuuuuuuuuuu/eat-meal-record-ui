@@ -8,6 +8,7 @@ type _LocationUrl =
   "/pages/add-meal/index" |
   "/pages/create-post/index" |
   "/pages/feed/index" |
+  "/pages/feed-detail/index" |
   "/pages/food-selector/index" |
   "/pages/goal-settings/index" |
   "/pages/login/index" |

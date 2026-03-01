@@ -7,6 +7,9 @@ import IconImage from '@/components/icons/IconImage.vue'
 import IconMapPin from '@/components/icons/IconMapPin.vue'
 import IconVideo from '@/components/icons/IconVideo.vue'
 import IconX from '@/components/icons/IconX.vue'
+import { useSystemInfo } from '@/composables/useSystemInfo'
+
+const { totalHeight, navBarHeight } = useSystemInfo()
 
 definePage({
   style: {
@@ -256,6 +259,14 @@ watch(showLocation, async (val) => {
       }
 
       // H5 环境调用逆地理编码接口
+
+      // #endif
+
+      // #ifndef MP-WEIXIN || H5
+      res = await uni.getLocation({
+        type: 'gcj02',
+      })
+      // #endif
       try {
         const geoRes = await Apis.location.reverseGeo({
           params: {
@@ -271,14 +282,6 @@ watch(showLocation, async (val) => {
       catch (geoErr) {
         console.error('H5 逆地理编码失败', geoErr)
       }
-      // #endif
-
-      // #ifndef MP-WEIXIN || H5
-      res = await uni.getLocation({
-        type: 'gcj02',
-      })
-      // #endif
-      console.log(res)
       locationData.value = {
         latitude: res.latitude,
         longitude: res.longitude,
@@ -325,13 +328,19 @@ watch(showLocation, async (val) => {
 
 <template>
   <view class="page-container h-screen flex flex-col overflow-hidden bg-[var(--page-bg)]">
-    <wd-navbar title="发布动态" placeholder left-arrow fixed @click-left="goBack">
-      <template #right>
-        <view class="publish-btn" :class="{ disabled: !content.trim() }" @click="handlePublish">
-          <text>发布</text>
+    <wd-navbar title="发布动态" safe-area-inset-top fixed :custom-style="`--wd-navbar-height: ${navBarHeight}px`">
+      <template #left>
+        <view class="flex items-center gap-2 pl-2">
+          <view class="flex items-center justify-center p-1" @click="goBack">
+            <wd-icon name="arrow-left" size="20" />
+          </view>
+          <view class="publish-btn" :class="{ disabled: !content.trim() }" @click="handlePublish">
+            <text>发布</text>
+          </view>
         </view>
       </template>
     </wd-navbar>
+    <view :style="{ height: `${totalHeight}px` }" />
 
     <scroll-view scroll-y class="w-full flex-1">
       <view class="w-full p-4 pb-10 space-y-4">
@@ -572,7 +581,7 @@ watch(showLocation, async (val) => {
           </view>
           <view v-if="showLocation && locationData" class="mt-2 pl-7">
             <text class="text-xs text-emerald-600 font-medium">
-              {{  locationData.address || '正在获取位置...' }}
+              {{ locationData.address || '正在获取位置...' }}
             </text>
           </view>
         </view>

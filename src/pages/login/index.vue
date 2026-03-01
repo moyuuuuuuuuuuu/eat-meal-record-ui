@@ -24,6 +24,7 @@ const code = ref('')
 const countdown = ref(0)
 const isAgree = ref(false)
 
+// 平台检测
 const isMp = ref(false)
 const isWechat = ref(false)
 
@@ -34,8 +35,18 @@ isMp.value = true
 // #ifdef H5
 const ua = window.navigator.userAgent.toLowerCase()
 isWechat.value = ua.includes('micromessenger')
-
 // #endif
+
+// 是否腾讯系环境 (一键登录可见)
+const isTencentEnv = computed(() => isMp.value || isWechat.value)
+// 是否显示手机登录切换按钮 (仅公众号环境)
+const showPhoneToggle = computed(() => isWechat.value)
+// 手机登录表单显示状态
+const showPhoneForm = ref(!isTencentEnv.value)
+
+function togglePhoneForm() {
+  showPhoneForm.value = true
+}
 
 function handleGetCode() {
   if (!phone.value || !/^1[3-9]\d{9}$/.test(phone.value)) {
@@ -72,6 +83,8 @@ function handleLogin() {
   }).then((res) => {
     if (res && res.token) {
       setAuth(res.token, res.userInfo)
+      // 标记为刚刚登录成功，用于首页触发授权
+      uni.setStorageSync('JUST_LOGGED_IN', true)
       showSuccess('登录成功')
       const targetUrl = props.redirect ? decodeURIComponent(props.redirect) : '/pages/index/index'
       setTimeout(() => {
@@ -104,6 +117,8 @@ function handleWxLogin() {
         }).then((res) => {
           if (res && res.token) {
             setAuth(res.token, res.userInfo)
+            // 标记为刚刚登录成功，用于首页触发授权
+            uni.setStorageSync('JUST_LOGGED_IN', true)
             showSuccess('登录成功')
             const targetUrl = props.redirect ? decodeURIComponent(props.redirect) : '/pages/index/index'
             setTimeout(() => {
@@ -142,9 +157,9 @@ function handleWxLogin() {
 </script>
 
 <template>
-  <view class="login-container px-6 pt-20 bg-[var(--page-bg)]">
+  <view class="login-container bg-[var(--page-bg)] px-6 pt-20">
     <view class="mb-12">
-      <view class="mb-2 text-2xl font-bold text-[var(--text-main)]">
+      <view class="mb-2 text-2xl text-[var(--text-main)] font-bold">
         欢迎回来
       </view>
       <view class="text-sm text-[var(--text-sub)]">
@@ -153,9 +168,11 @@ function handleWxLogin() {
     </view>
 
     <!-- 微信登录 (小程序/公众号) -->
-    <template v-if="isMp || isWechat">
+    <template v-if="isTencentEnv">
       <button
-        class="mb-6 h-12 flex items-center justify-center rounded-lg bg-[#07c160] text-white"
+        v-if="!showPhoneForm || isWechat"
+        class="h-12 flex items-center justify-center rounded-lg bg-[#07c160] text-white"
+        :class="{ 'mb-6': !showPhoneForm, 'mb-10': showPhoneForm }"
         :loading="wxLoading"
         @click="handleWxLogin"
       >
@@ -163,7 +180,7 @@ function handleWxLogin() {
         <text>微信一键登录</text>
       </button>
 
-      <view class="mb-10 flex items-center justify-center">
+      <view v-if="showPhoneToggle && !showPhoneForm" class="mb-10 flex items-center justify-center" @click="togglePhoneForm">
         <view class="h-[1px] flex-1 bg-[var(--border-color)]" />
         <view class="mx-4 text-xs text-[var(--text-sub)]">
           或者使用手机号登录
@@ -173,7 +190,7 @@ function handleWxLogin() {
     </template>
 
     <!-- 手机验证码登录 -->
-    <view class="space-y-6">
+    <view v-if="showPhoneForm" class="space-y-6">
       <view class="border-b border-[var(--border-color)] pb-2">
         <input
           v-model="phone"

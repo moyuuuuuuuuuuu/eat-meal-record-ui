@@ -13,6 +13,7 @@ import { UniEcharts } from 'uni-echarts/vite'
 import UnoCSS from 'unocss/vite'
 import AutoImport from 'unplugin-auto-import/vite'
 import { defineConfig } from 'vite'
+import { uniPolyfill } from './uni-polyfill'
 // https://vitejs.dev/config/
 export default defineConfig({
   base: './',
@@ -20,6 +21,7 @@ export default defineConfig({
     exclude: process.env.NODE_ENV === 'development' ? ['wot-design-uni', 'uni-echarts'] : [],
   },
   plugins: [
+    uniPolyfill(),
     // https://github.com/uni-helper/vite-plugin-uni-manifest
     UniHelperManifest(),
     // https://github.com/uni-helper/vite-plugin-uni-pages
@@ -62,12 +64,12 @@ export default defineConfig({
         from: '@wot-ui/router',
         imports: ['createRouter', 'useRouter', 'useRoute'],
       }, {
-          from: 'wot-design-uni',
-          imports: ['useToast', 'useMessage', 'useNotify', 'CommonUtil'],
-        }, {
-          from: 'alova/client',
-          imports: ['usePagination', 'useRequest'],
-        }],
+        from: 'wot-design-uni',
+        imports: ['useToast', 'useMessage', 'useNotify', 'CommonUtil'],
+      }, {
+        from: 'alova/client',
+        imports: ['usePagination', 'useRequest'],
+      }],
       dts: 'src/auto-imports.d.ts',
       dirs: ['src/composables', 'src/store', 'src/utils', 'src/api'],
       vueTemplate: true,

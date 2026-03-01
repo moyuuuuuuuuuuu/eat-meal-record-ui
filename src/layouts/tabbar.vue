@@ -16,7 +16,6 @@ function handleTabbarChange({ value }: { value: string }) {
 }
 
 onMounted(() => {
-  uni.hideTabBar()
   nextTick(() => {
     if (route.name && route.name !== activeTabbar.value.name) {
       setTabbarItemActive(route.name)

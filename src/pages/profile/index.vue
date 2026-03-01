@@ -6,6 +6,9 @@ import IconSettings from '@/components/icons/IconSettings.vue'
 import IconTarget from '@/components/icons/IconTarget.vue'
 import IconUser from '@/components/icons/IconUser.vue'
 import { useAuth } from '@/composables/useAuth'
+import { useSystemInfo } from '@/composables/useSystemInfo'
+
+const { statusBarHeight, navBarHeight } = useSystemInfo()
 
 definePage({
   name: 'profile',
@@ -47,7 +50,10 @@ onShow(() => {
 <template>
   <view class="page-container flex flex-col overflow-hidden bg-[var(--page-bg)] pb-20">
     <!-- 头部渐变背景 -->
-    <view class="header-bg from-emerald-500 to-emerald-600 bg-gradient-to-br px-4 pb-12 pt-16">
+    <view
+      class="header-bg from-emerald-500 to-emerald-600 bg-gradient-to-br px-4 pb-12"
+      :style="{ paddingTop: `${statusBarHeight + navBarHeight}px` }"
+    >
       <view class="flex items-center gap-4">
         <view class="h-16 w-16 flex items-center justify-center overflow-hidden rounded-full bg-white">
           <wd-img v-if="userInfo?.avatar" :src="userInfo.avatar" mode="aspectFill" class="h-full w-full" />
