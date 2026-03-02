@@ -46,15 +46,32 @@ async function handleTextRecognize() {
   await callRecognizeApi(aiInputText.value, 'text')
 }
 
+function blobToBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader: FileReader = new FileReader()
+
+    reader.onloadend = () => {
+      resolve(reader.result as string)
+    }
+
+    reader.onerror = () => {
+      reject(new Error('FileReader error'))
+    }
+
+    reader.readAsDataURL(blob)
+  })
+}
+
 function handleCameraRecognize() {
   uni.chooseImage({
     count: 1,
     sizeType: ['compressed'],
     sourceType: ['camera', 'album'],
-    success: (res) => {
+    success: async (res) => {
       const tempFilePath = res.tempFilePaths[0]
+
       // 将图片转换为 base64
-      // #ifdef MP-WEIXIN || APP-PLUS || H5
+      // #ifdef MP-WEIXIN || APP-PLUS
       uni.getFileSystemManager().readFile({
         filePath: tempFilePath,
         encoding: 'base64',
@@ -62,6 +79,19 @@ function handleCameraRecognize() {
           await callRecognizeApi(fileRes.data as string, 'image')
         },
       })
+      // #endif
+
+      // #ifdef H5
+      const file = res.tempFiles[0]
+
+      if (!(file instanceof Blob)) {
+        console.error('H5 环境未获取到 File 对象')
+        return
+      }
+
+      const base64: string = await blobToBase64(file)
+
+      await callRecognizeApi(base64, 'image')
       // #endif
     },
   })
@@ -364,7 +394,7 @@ async function handleSave() {
             @click="goToFoodSelector"
           >
             <view
-              class="h-10 w-10 flex items-center justify-center rounded-full bg-emerald-50 text-emerald-500 dark:bg-emerald-900/20"
+              class="h-10 w-10 flex items-center justify-center rounded-full bg-blue-500/50 text-emerald-500 dark:bg-emerald-900/20"
             >
               <IconPlus size="20" color="white" />
             </view>
@@ -528,7 +558,7 @@ async function handleSave() {
                 class="flex items-center gap-1 rounded-lg bg-emerald-500 px-4 py-1.5 text-xs text-white font-bold transition-opacity active:opacity-80"
                 @click="handleTextRecognize"
               >
-                <IconMessageCircle size="14" />
+                <IconMessageCircle size="14" color="white" />
                 <text>文字识别</text>
               </view>
             </view>
@@ -540,8 +570,8 @@ async function handleSave() {
               class="flex flex-1 flex-col items-center justify-center gap-2 rounded-xl bg-emerald-50/50 py-6 transition-all active:bg-emerald-100/50"
               @click="handleCameraRecognize"
             >
-              <view class="h-12 w-12 flex items-center justify-center rounded-full bg-white text-emerald-500 shadow-sm">
-                <IconCamera size="24" />
+              <view class="h-12 w-12 flex items-center justify-center rounded-full bg-cyan-500/50 text-emerald-500 shadow-sm">
+                <IconCamera size="24" color="white" />
               </view>
               <text class="text-xs text-emerald-600 font-bold">
                 拍摄照片
@@ -557,9 +587,9 @@ async function handleSave() {
             >
               <view
                 class="h-12 w-12 flex items-center justify-center rounded-full shadow-sm"
-                :class="isRecording ? 'bg-red-500 text-white animate-pulse' : 'bg-white text-emerald-500'"
+                :class="isRecording ? 'bg-red-500 text-white animate-pulse' : 'bg-amber-500/50 text-emerald-500'"
               >
-                <IconMic size="24" />
+                <IconMic size="24" color="white" />
               </view>
               <text class="text-xs font-bold" :class="isRecording ? 'text-red-600' : 'text-emerald-600'">
                 {{ isRecording ? '松开识别' : '按住说话' }}
