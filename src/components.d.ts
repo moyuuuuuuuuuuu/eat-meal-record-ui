@@ -9,6 +9,7 @@ declare module 'vue' {
   export interface GlobalComponents {
     CircularProgress: typeof import('./components/CircularProgress.vue')['default']
     DemoBlock: typeof import('./components/DemoBlock.vue')['default']
+    FeedMediaAttach: typeof import('./components/FeedMediaAttach.vue')['default']
     FloatingActionButton: typeof import('./components/FloatingActionButton.vue')['default']
     FoodSuggestion: typeof import('./components/FoodSuggestion.vue')['default']
     GlobalLoading: typeof import('./components/GlobalLoading.vue')['default']
