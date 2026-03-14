@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onLoad } from '@dcloudio/uni-app'
 import { useRequest } from 'alova/client'
+import FeedMediaAttach from '@/components/FeedMediaAttach.vue'
 import { useSystemInfo } from '@/composables/useSystemInfo'
 
 const { statusBarHeight, navBarHeight } = useSystemInfo()
@@ -63,7 +64,7 @@ function handleLike() {
 
 <template>
   <view class="page-container min-h-screen bg-[var(--page-bg)] pb-10">
-    <wd-navbar title="动态详情" left-arrow fixed safe-area-inset-top @click-left="handleBack" />
+    <wd-navbar title="动态详情" left-arrow safe-area-inset-top fixed @click-left="handleBack" />
 
     <!-- 顶部占位 -->
     <view :style="{ height: `${statusBarHeight + navBarHeight}px` }" />
@@ -82,7 +83,7 @@ function handleLike() {
           <wd-img :src="detail.author?.avatar" mode="aspectFill" class="h-full w-full">
             <template #error>
               <view class="h-full w-full flex items-center justify-center bg-gray-100">
-                <IconUser size="24" color="#9ca3af" />
+                加载失败
               </view>
             </template>
           </wd-img>
@@ -103,55 +104,11 @@ function handleLike() {
       </view>
 
       <!-- 媒体内容 -->
-      <view v-if="detail.attach && detail.attach.length" class="mb-6 space-y-3">
-        <template v-for="(item, index) in detail.attach" :key="index">
-          <!-- 图片 (type 0) -->
-          <view v-if="item.type === 0" class="overflow-hidden rounded-xl shadow-sm">
-            <wd-img
-              :src="item.attach"
-              mode="widthFix"
-              class="w-full"
-              @click="previewImage(item.attach)"
-            />
-          </view>
-          <!-- 视频 (type 1) -->
-          <view v-else-if="item.type === 1" class="aspect-video overflow-hidden rounded-xl bg-black">
-            <video
-              :src="item.attach"
-              :poster="item.poster"
-              class="h-full w-full"
-              controls
-            />
-          </view>
-          <!-- 餐食记录 (type 4) -->
-          <view v-else-if="item.type === 4" class="w-full border border-emerald-500/10 rounded-xl bg-emerald-500/5 p-4 shadow-sm">
-            <view class="mb-2 flex items-center justify-between">
-              <view class="flex items-center gap-2">
-                <view class="h-5 w-5 flex items-center justify-center rounded bg-emerald-500">
-                  <text class="text-[10px] text-white">
-                    餐
-                  </text>
-                </view>
-                <text class="text-sm text-[var(--text-main)] font-semibold">
-                  {{ item.attach.type }}
-                </text>
-              </view>
-              <text class="text-sm text-emerald-600 font-medium">
-                {{ item.attach.calories }} kcal
-              </text>
-            </view>
-            <view class="flex flex-wrap gap-2">
-              <wd-badge
-                v-for="(food, idx) in item.attach.foods"
-                :key="idx"
-                :value="food"
-                type="primary"
-                plain
-              />
-            </view>
-          </view>
-        </template>
-      </view>
+      <FeedMediaAttach
+        :attach="detail.attach"
+        variant="detail"
+        @preview-image="previewImage"
+      />
 
       <!-- 话题标签 -->
       <view v-if="detail.topics && detail.topics.length" class="mb-6 flex flex-wrap gap-2">

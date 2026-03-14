@@ -219,9 +219,11 @@ async function handlePublish() {
 
     uni.hideLoading()
     uni.showToast({ title: '发布成功', icon: 'success' })
-    // 发送全局事件，通知动态列表页面刷新
-    uni.$emit('refresh-feed')
-    setTimeout(() => uni.navigateBack(), 1500)
+    setTimeout(() => {
+      // 先返回让 feed 页面进入 onShow，再 emit 刷新事件
+      uni.navigateBack()
+      uni.$emit('refresh-feed')
+    }, 800)
   }
   catch {
     uni.hideLoading()
@@ -356,25 +358,14 @@ watch(showLocation, async (val) => {
           <view class="mt-4 flex flex-col gap-4 border-b border-[var(--border-color)] pb-4">
             <!-- 媒体预览 -->
             <view v-if="selectedImages.length > 0 || selectedVideo" class="flex flex-wrap gap-2">
-              <!-- 图片预览 -->
+              <!-- 图片预览：原生 image 确保尺寸和圆角可靠生效 -->
               <view v-for="(img, index) in selectedImages" :key="index" class="relative h-20 w-20">
-                <wd-img
+                <image
                   :src="img.url"
                   mode="aspectFill"
-                  class="h-full w-full rounded-lg"
+                  style="width: 80px; height: 80px; border-radius: 8px; display: block;"
                   @click="previewImage(img.url)"
-                >
-                  <template #error>
-                    <view class="h-full w-full flex items-center justify-center bg-gray-100 text-[10px] text-gray-400">
-                      加载失败
-                    </view>
-                  </template>
-                  <template #loading>
-                    <view class="h-full w-full flex items-center justify-center bg-gray-50">
-                      <wd-loading size="16px" />
-                    </view>
-                  </template>
-                </wd-img>
+                />
                 <view
                   class="absolute h-5 w-5 flex items-center justify-center rounded-full bg-black/50 text-white -right-1.5 -top-1.5"
                   @click.stop="removeImage(index)"
