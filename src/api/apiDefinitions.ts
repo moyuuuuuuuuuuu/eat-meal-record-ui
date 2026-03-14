@@ -62,4 +62,6 @@ export default {
 
   // Meal
   'meal.relation': ['GET', '/meal/relation'],
+
+  'nutrition.stats': ['GET', '/nutrition/stats'],
 };

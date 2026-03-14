@@ -9,6 +9,7 @@
  */
 import { defineManifestConfig } from '@uni-helper/vite-plugin-uni-manifest'
 
+// @ts-ignore
 export default defineManifestConfig({
   'name': 'wot-starter',
   'appid': '__UNI__1208592',
@@ -73,9 +74,10 @@ export default defineManifestConfig({
     themeLocation: 'theme.json',
     permission: {
       'scope.userLocation': {
-        desc: '展示发布动态时的地理位置',
+        desc: '用于推荐周边健康餐厅及记录用餐地点',
       },
     },
+    __usePrivacyCheck__: true,
     requiredPrivateInfos: ['getLocation'],
   },
   'app-harmony': {},

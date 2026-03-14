@@ -60,9 +60,10 @@
     "themeLocation": "theme.json",
     "permission": {
       "scope.userLocation": {
-        "desc": "展示发布动态时的地理位置"
+        "desc": "用于推荐周边健康餐厅及记录用餐地点"
       }
     },
+    "__usePrivacyCheck__": true,
     "requiredPrivateInfos": [
       "getLocation"
     ]

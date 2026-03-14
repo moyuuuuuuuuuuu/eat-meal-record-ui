@@ -22,7 +22,6 @@ definePage({
 
 const router = useRouter()
 const { userInfo } = useAuth()
-
 const { data: userStats, send: refreshStats } = useRequest(Apis.user.stats(), {
   initialData: {
     name: '用户',
@@ -56,7 +55,7 @@ onShow(() => {
     >
       <view class="flex items-center gap-4">
         <view class="h-16 w-16 flex items-center justify-center overflow-hidden rounded-full bg-white">
-          <wd-img v-if="userInfo?.avatar" :src="userInfo.avatar" mode="aspectFill" class="h-full w-full" />
+          <wd-img v-if="userInfo?.avatar" :width="100" :height="100" :src="userInfo.avatar" mode="aspectFill" class="h-full w-full" />
           <IconUser v-else size="32" color="#059669" />
         </view>
         <view class="flex-1 text-white">
@@ -101,7 +100,7 @@ onShow(() => {
         <view class="h-10 w-px self-center bg-[var(--border-color)]" />
         <view class="flex-1 text-center">
           <view class="text-2xl text-emerald-600 font-bold">
-            {{ userStats.currentWeight - userStats.targetWeight }}kg
+            {{ Number(userStats.currentWeight - userStats.targetWeight).toFixed(2) }}kg
           </view>
           <view class="mt-1 text-xs text-[var(--text-sub)]">
             距离目标
@@ -119,6 +118,17 @@ onShow(() => {
             <template #icon>
               <view class="mr-2 h-8 w-8 flex items-center justify-center rounded-full bg-emerald-100">
                 <IconBookOpen size="16" color="#059669" />
+              </view>
+            </template>
+          </wd-cell>
+          <wd-cell
+            title="营养统计"
+            is-link
+            @click="handleNavigate('/pages/nutrition-stats/index')"
+          >
+            <template #icon>
+              <view class="mr-2 h-8 w-8 flex items-center justify-center rounded-full bg-amber-100">
+                <IconNutrition size="16" color="#D97706" />
               </view>
             </template>
           </wd-cell>

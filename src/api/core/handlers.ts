@@ -68,7 +68,7 @@ export async function handleAlovaResponse(
       // 小程序和公众号引导到微信授权页面、普通h5引导到手机验证码登录页面
       // 这里统一跳转到 login 页面，由 login 页面内部根据环境展示不同内容
       router.replaceAll({ name: 'login', query: { redirect } })
-    }, 500)
+    }, 1000)
 
     throw new ApiError('登录已过期，请重新登录！', statusCode, data)
   }
@@ -107,7 +107,7 @@ export function handleAlovaError(error: any, method: Method) {
       // 小程序和公众号引导到微信授权页面、普通h5引导到手机验证码登录页面
       // 这里统一跳转到 login 页面，由 login 页面内部根据环境展示不同内容
       router.replaceAll({ name: 'login', query: { redirect } })
-    }, 800)
+    }, 1000)
     throw new ApiError('登录已过期，请重新登录！', error.code, error.data)
   }
 

@@ -1086,6 +1086,11 @@ declare global {
         config?: Config
       ): Alova2Method<any, 'food.recommendation', Config>;
     };
+    nutrition:{
+      stats<Config extends Alova2MethodConfig<any>>(
+        config?: Config
+      ): Alova2Method<any, 'nutrition.stats', Config>;
+    }
   }
 
   var Apis: Apis;

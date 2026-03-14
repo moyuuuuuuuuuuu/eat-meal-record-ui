@@ -93,19 +93,10 @@ async function handleSave() {
       // age: 0, // 如果有年龄字段可以在这里计算或补充
     }
 
-    await updateInfoApi(postData)
-
+    const res = await updateInfoApi(postData)
     // 更新全局用户信息状态
     if (userInfo.value) {
-      userInfo.value = {
-        ...userInfo.value,
-        nickname: name.value,
-        avatar: avatarUrl.value,
-        gender: gender.value,
-        birthday: birthday.value,
-        height: height.value,
-        weight: weight.value,
-      }
+      userInfo.value = res
     }
 
     uni.hideLoading()
@@ -140,7 +131,7 @@ async function handleSave() {
         <!-- 头像 -->
         <view class="flex flex-col items-center rounded-xl bg-[var(--card-bg)] p-6" @click="handleChooseAvatar">
           <view class="mb-3 h-20 w-20 flex items-center justify-center overflow-hidden rounded-full bg-emerald-100">
-            <wd-img v-if="avatarUrl" :src="avatarUrl" mode="aspectFill" class="h-full w-full" />
+            <wd-img v-if="avatarUrl" :width="100" :height="100" :src="avatarUrl" mode="aspectFill" class="h-full w-full" />
             <IconUser v-else size="40" color="#10b981" />
           </view>
           <text class="text-xs text-emerald-600 font-bold">

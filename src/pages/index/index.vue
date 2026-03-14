@@ -60,32 +60,6 @@ const { send: updateSteps } = useRequest(data => Apis.user.steps({ data }), {
   immediate: false,
 })
 
-/**
- * 获取微信运动数据并同步到后端
- */
-async function handleWeRunData() {
-  // #ifdef MP-WEIXIN
-  uni.getSetting({
-    success: (res) => {
-      if (!res.authSetting['scope.werun']) {
-        uni.authorize({
-          scope: 'scope.werun',
-          success: () => {
-            getWeRunDataAndUpload()
-          },
-          fail: () => {
-            console.warn('用户拒绝了微信运动授权')
-          },
-        })
-      }
-      else {
-        getWeRunDataAndUpload()
-      }
-    },
-  })
-  // #endif
-}
-
 function getWeRunDataAndUpload() {
   // #ifdef MP-WEIXIN
   uni.getWeRunData({
@@ -105,23 +79,66 @@ function getWeRunDataAndUpload() {
       }
     },
     fail: (err) => {
-      console.error('获取微信运动数据失败', err)
+      // 用户点击“拒绝”会进入这里
+      console.warn('获取微信运动数据失败或用户拒绝:', err)
+
+      // 如果用户之前拒绝过，再次调用会直接进入 fail，此时需引导去设置页
+      if (err.errMsg.includes('auth deny')) {
+        uni.showModal({
+          title: '授权提示',
+          content: '需要读取微信运动数据以计算消耗，请在设置中开启',
+          confirmText: '去开启',
+          confirmColor: '#10b981', // 使用你喜欢的 emerald-500 绿色
+          success: (modalRes) => {
+            if (modalRes.confirm) {
+              uni.openSetting()
+            }
+          },
+        })
+      }
     },
   })
   // #endif
 }
-
-// Combined data fetching
-onShow(async () => {
-  // #ifdef MP-WEIXIN
-  // 登录后第一次返回首页，主动拉起微信运动授权
-  const justLoggedIn = uni.getStorageSync('JUST_LOGGED_IN')
-  if (justLoggedIn) {
-    handleWeRunData()
-    uni.removeStorageSync('JUST_LOGGED_IN')
-  }
+// 步数同步参数接口
+// 缓存键名枚举（可选，推荐）
+enum StorageKeys {
+  LastWeRunSyncDate = 'LAST_WERUN_SYNC_DATE',
+  JustLoggedIn = 'JUST_LOGGED_IN',
+}
+// 1. 内存锁：防止单次运行期间多次触发（TS 自动推导为 boolean）
+let isWeRunSyncing = false
+/**
+ * 逻辑判断归口
+ */
+async function syncWeRunIfNeeded(): Promise<void> {
+  // #ifndef MP-WEIXIN
+  return
   // #endif
 
+  if (isWeRunSyncing)
+    return
+
+  const today = new Date().toISOString().split('T')[0]
+  const lastSyncDate = uni.getStorageSync(StorageKeys.LastWeRunSyncDate) as string
+  const justLoggedIn = uni.getStorageSync(StorageKeys.JustLoggedIn) as boolean
+
+  // 刚登录或今天未同步时触发
+  if (justLoggedIn || lastSyncDate !== today) {
+    isWeRunSyncing = true
+    try {
+      getWeRunDataAndUpload()
+      if (justLoggedIn)
+        uni.removeStorageSync(StorageKeys.JustLoggedIn)
+    }
+    finally {
+      // 这里的解锁建议放在异步回调之外，或根据实际请求状态调整
+      isWeRunSyncing = false
+    }
+  }
+}
+// Combined data fetching
+onShow(async () => {
   if (!isLogin.value) {
     // 未登录时，展示默认数据或清空数据
     totalIntake.value = { calories: 0, protein: 0, fat: 0, carbs: 0 }
@@ -131,14 +148,7 @@ onShow(async () => {
   }
 
   // #ifdef MP-WEIXIN
-  // 登录状态下，每天检查一次微信运动授权
-  const today = new Date().toISOString().split('T')[0]
-  const lastSyncDate = uni.getStorageSync('LAST_WERUN_SYNC_DATE')
-  console.log('登录状态下，每天检查一次微信运动授权', lastSyncDate, today)
-  if (lastSyncDate !== today) {
-    handleWeRunData()
-    uni.setStorageSync('LAST_WERUN_SYNC_DATE', today)
-  }
+  await syncWeRunIfNeeded()
   // #endif
 
   const summaryRes = await getSummary()
@@ -195,6 +205,22 @@ function deleteFood(id: string) {
 function handleAddMeal(type: string) {
   uni.navigateTo({
     url: `/pages/add-meal/index?type=${type}`,
+  })
+}
+
+const MEAL_SCHEDULE: { from: number, to: number, type: string }[] = [
+  { from: 5, to: 10, type: '早餐' },
+  { from: 11, to: 14, type: '午餐' },
+  { from: 17, to: 21, type: '晚餐' },
+]
+function getMealTypeByTime(): string {
+  const hour = new Date().getHours()
+  return MEAL_SCHEDULE.find(s => hour >= s.from && hour < s.to)?.type ?? '加餐'
+}
+
+function goMealRerecord() {
+  uni.navigateTo({
+    url: `/pages/add-meal/index?type=${getMealTypeByTime()}`,
   })
 }
 
@@ -348,7 +374,7 @@ function showBurnTips() {
             plain
             type="success"
             custom-class="!rounded-full"
-            @click="handleAddMeal('早餐')"
+            @click="goMealRerecord()"
           >
             去记录
           </wd-button>

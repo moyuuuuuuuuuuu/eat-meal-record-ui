@@ -13,6 +13,7 @@ type _LocationUrl =
   "/pages/goal-settings/index" |
   "/pages/login/index" |
   "/pages/meal-history/index" |
+  "/pages/nutrition-stats/index" |
   "/pages/personal-info/index" |
   "/pages/profile/index" |
   "/pages/theme-settings/index" |

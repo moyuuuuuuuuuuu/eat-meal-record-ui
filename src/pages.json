@@ -102,6 +102,14 @@
       }
     },
     {
+      "path": "pages/nutrition-stats/index",
+      "type": "page",
+      "style": {
+        "navigationBarTitleText": "营养统计",
+        "navigationStyle": "custom"
+      }
+    },
+    {
       "path": "pages/personal-info/index",
       "type": "page",
       "style": {

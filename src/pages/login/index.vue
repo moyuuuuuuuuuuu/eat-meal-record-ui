@@ -154,6 +154,15 @@ function handleWxLogin() {
   }
   // #endif
 }
+function openPrivacy(): void {
+  // #ifdef MP-WEIXIN
+  if (wx.openPrivacyContract) {
+    wx.openPrivacyContract({
+      fail: () => uni.showToast({ title: '隐私协议加载失败', icon: 'none' }),
+    })
+  }
+  // #endif
+}
 </script>
 
 <template>
@@ -236,7 +245,7 @@ function handleWxLogin() {
           《用户协议》
         </text>
         与
-        <text class="text-blue-500">
+        <text class="text-blue-500" @click="openPrivacy">
           《隐私政策》
         </text>
       </view>

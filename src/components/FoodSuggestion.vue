@@ -47,7 +47,7 @@ async function handleRefresh() {
       </view>
       <view class="flex flex-wrap items-center gap-2">
         <text class="text-xs font-medium opacity-90">
-          约 {{ Math.round(Number(currentSuggestion.calories)) }} kcal
+          约 {{ Math.round(Number(currentSuggestion.kcal)) }} kcal
         </text>
         <view class="flex flex-wrap gap-1.5">
           <text

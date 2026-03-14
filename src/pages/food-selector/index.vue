@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { FoodInfo, TmpFoodUnit } from '@/api/globals'
 import { usePagination } from 'alova/client'
-import IconCamera from '@/components/icons/IconCamera.vue'
 import IconPlus from '@/components/icons/IconPlus.vue'
 import IconSearch from '@/components/icons/IconSearch.vue'
 import IconX from '@/components/icons/IconX.vue'
@@ -21,15 +20,12 @@ const { isLogin } = useAuth()
 
 onShow(() => {
   if (!isLogin.value) {
-    uni.navigateTo({
-      url: '/pages/login/index',
-    })
+    uni.navigateTo({ url: '/pages/login/index' })
   }
 })
 
 const searchQuery = ref('')
 
-// 使用 usePagination 处理分页请求
 const {
   loading,
   data: foodList,
@@ -38,11 +34,7 @@ const {
 } = usePagination(
   (page, pageSize) => Apis.food.search({ params: { page, pageSize, name: searchQuery.value } }),
   {
-    initialData: {
-      total: 0,
-      data: [],
-    },
-    // 将 API 返回的 PaginatedResponse 映射到 usePagination 要求的结构
+    initialData: { total: 0, data: [] },
     data: res => res.data,
     total: res => res.total,
     initialPageSize: 15,
@@ -61,15 +53,12 @@ const currentFood = ref<FoodInfo | null>(null)
 const quantity = ref(1)
 const selectedUnit = ref<TmpFoodUnit>()
 const loadingProps = inject('globalLoadingProps')
-
 const hasReachedBottom = ref(false)
 
-// 上拉加载更多
 onReachBottom(() => {
   hasReachedBottom.value = true
-  if (!isLastPage.value && !loading.value) {
+  if (!isLastPage.value && !loading.value)
     page.value++
-  }
 })
 
 const availableUnits = computed<TmpFoodUnit[]>(() => {
@@ -86,21 +75,18 @@ const availableUnits = computed<TmpFoodUnit[]>(() => {
 const popupNutrition = computed(() => {
   if (!currentFood.value)
     return { calories: 0, protein: 0, fat: 0, carbs: 0 }
-
   const unit = availableUnits.value.find(u => u.name === selectedUnit.value?.name)
   if (!unit)
     return { calories: 0, protein: 0, fat: 0, carbs: 0 }
-
   const q = Number.parseFloat(quantity.value.toString()) || 0
   return {
     calories: Math.round(Number(unit.nutrition.calories) * q),
     protein: (Number(unit.nutrition.protein) * q).toFixed(1),
-    fat: (Number(unit.nutrition.fibers || 0) * q).toFixed(1), // 注意：示例响应中是 fibers，暂且对应到原有的 fat/fibers 逻辑
+    fat: (Number(unit.nutrition.fibers || 0) * q).toFixed(1),
     carbs: (Number(unit.nutrition.carbs) * q).toFixed(1),
   }
 })
 
-// 下拉刷新
 onPullDownRefresh(async () => {
   page.value = 1
   hasReachedBottom.value = false
@@ -119,13 +105,9 @@ function selectFood(food: FoodInfo) {
 }
 
 function confirmSelect() {
-  if (!currentFood.value)
-    return
-
+  if (!currentFood.value) return
   const unit = selectedUnit.value
-  if (!unit)
-    return
-
+  if (!unit) return
   const q = Number.parseFloat(quantity.value.toString()) || 0
   const selectedFood = {
     ...currentFood.value,
@@ -141,54 +123,23 @@ function confirmSelect() {
   showPopup.value = false
   setTimeout(() => uni.navigateBack(), 1000)
 }
-
-const showCameraGuide = ref(false)
-const showRecognitionResults = ref(false)
-const recognizedFoods = ref<(FoodInfo & { confidence: number })[]>([])
-
-function handleCamera() {
-  showCameraGuide.value = true
-}
-
-async function handleCameraRecognition() {
-  uni.showLoading({ title: 'AI 识别中...' })
-  try {
-    const res = await Apis.food.recognize().send()
-    if (res) {
-      recognizedFoods.value = res
-    }
-  }
-  catch (e) {
-    console.error('[food-selector] recognize error', e)
-    uni.showToast({ title: '识别失败', icon: 'error' })
-  }
-  finally {
-    uni.hideLoading()
-    showCameraGuide.value = false
-    showRecognitionResults.value = true
-  }
-}
-
-function handleRecognizedFoodSelect(food: FoodInfo) {
-  showRecognitionResults.value = false
-  selectFood(food)
-}
 </script>
 
 <template>
   <view class="page-container min-h-screen bg-[var(--page-bg)]">
-    <view class="header-container fixed left-0 top-0 z-10 w-full bg-[var(--page-bg)]">
+    <!-- 顶部固定区：导航 + 搜索栏 -->
+    <view class="fixed left-0 top-0 z-10 w-full bg-[var(--page-bg)]">
       <wd-navbar title="选择食物" left-arrow safe-area-inset-top @click-left="goBack" />
-      <view class="search-bar-wrap border-b border-[var(--border-color)] bg-[var(--card-bg)] px-4 py-3">
+      <view class="border-b border-[var(--border-color)] bg-[var(--card-bg)] px-4 py-3">
         <wd-search v-model="searchQuery" placeholder="搜索食物..." hide-cancel />
       </view>
     </view>
 
-    <!-- 顶部占位 (navbar + search bar) -->
+    <!-- 顶部占位 -->
     <view :style="{ height: `${statusBarHeight + navBarHeight + 64}px` }" />
 
     <!-- 食物列表 -->
-    <view class="px-4 py-4 pb-32 space-y-3">
+    <view class="px-4 py-4 pb-10 space-y-2">
       <!-- 骨架屏 -->
       <template v-if="showSkeleton">
         <view v-for="i in 5" :key="i" class="w-full rounded-xl bg-[var(--card-bg)] p-4 shadow-sm">
@@ -197,107 +148,102 @@ function handleRecognizedFoodSelect(food: FoodInfo) {
       </template>
 
       <template v-else>
+        <!-- 空状态 -->
+        <view v-if="!loading && foodList.length === 0" class="flex flex-col items-center justify-center py-24 space-y-4">
+          <view class="h-20 w-20 flex items-center justify-center rounded-full bg-teal-50 dark:bg-teal-900/20">
+            <IconSearch size="36" color="#0d9488" class="opacity-60" />
+          </view>
+          <view class="space-y-1 text-center">
+            <text class="block text-sm text-[var(--text-main)] font-semibold">没有找到相关食物</text>
+            <text class="block text-xs text-[var(--text-sub)]">换个关键词试试吧</text>
+          </view>
+        </view>
+
+        <!-- 列表项 -->
         <view
           v-for="(food, index) in foodList"
           :key="index"
-          class="w-full flex items-center justify-between rounded-xl bg-[var(--card-bg)] p-4 shadow-sm active:bg-[var(--page-bg)]"
+          class="w-full flex items-center justify-between rounded-xl border border-[var(--border-color)] bg-[var(--card-bg)] p-4 shadow-sm transition-all active:border-teal-200 active:bg-teal-50/40 dark:active:border-teal-800/50 dark:active:bg-teal-950/20"
           @click="selectFood(food)"
         >
-          <view>
-            <view class="mb-1 text-sm text-[var(--text-main)] font-bold">
+          <view class="min-w-0 flex-1">
+            <view class="mb-1.5 text-sm text-[var(--text-main)] font-bold">
               {{ food.name }}
             </view>
-            <view class="flex gap-3 text-[10px] text-[var(--text-sub)]">
-              <text>{{ food.calories }}kcal / {{ food.unit }}</text>
-              <text>
-                蛋白质:{{ food.protein || 0 }}/g 脂肪:{{ food.fat || 0 }}/g
-                碳水:{{ food.carbs || 0 }}/g
+            <view class="flex flex-wrap gap-x-3 gap-y-0.5">
+              <view class="flex items-center gap-1">
+                <view class="h-1.5 w-1.5 rounded-full bg-teal-400" />
+                <text class="text-[10px] text-teal-600 font-medium dark:text-teal-400">
+                  {{ food.calories }} kcal / {{ food.unit }}
+                </text>
+              </view>
+              <text class="text-[10px] text-[var(--text-sub)]">
+                蛋白 {{ food.protein || 0 }}g · 脂肪 {{ food.fat || 0 }}g · 碳水 {{ food.carbs || 0 }}g
               </text>
             </view>
           </view>
-          <IconPlus size="16" color="#10b981" />
+          <view class="ml-3 h-8 w-8 flex flex-shrink-0 items-center justify-center rounded-full bg-teal-50 dark:bg-teal-900/30">
+            <IconPlus size="15" color="#0d9488" />
+          </view>
         </view>
       </template>
 
       <!-- 加载更多 -->
       <wd-loadmore
         v-if="!showSkeleton && hasReachedBottom"
-        :state="isLastPage ? 'finished' : (loading ? 'loading' : 'ready')" finished-text="我是有底线的"
-        loading-text="加载中" :loading-props="loadingProps"
+        :state="isLastPage ? 'finished' : (loading ? 'loading' : 'ready')"
+        finished-text="我是有底线的"
+        loading-text="加载中"
+        :loading-props="loadingProps"
       />
-
-      <!-- 空状态 -->
-      <view v-if="!loading && foodList.length === 0" class="py-20 text-center">
-        <view class="mb-2 text-gray-400">
-          <IconSearch size="48" class="mx-auto mb-4 opacity-20" />
-          <view class="text-sm">
-            未找到相关食物
-          </view>
-        </view>
-      </view>
     </view>
 
+    <!-- ── 食物详情弹窗 ── -->
     <wd-popup
-      v-model="showPopup" position="bottom" :z-index="50"
+      v-model="showPopup"
+      position="bottom"
+      :z-index="50"
       custom-style="border-radius: 20px 20px 0 0; background: var(--card-bg);"
     >
       <view v-if="currentFood" class="p-5">
-        <view class="mb-6 flex items-center justify-between">
-          <view class="p-1" @click="showPopup = false">
-            <IconX size="20" color="var(--text-main)" />
+        <!-- 标题栏 -->
+        <view class="mb-5 flex items-center justify-between">
+          <view
+            class="h-8 w-8 flex items-center justify-center rounded-full  active:opacity-70"
+            @click="showPopup = false"
+          >
+            <IconX size="16" color="var(--text-main)" />
           </view>
-          <text class="text-base text-[var(--text-main)] font-bold">
-            {{ currentFood.name }}
-          </text>
-          <view class="w-7" />
+          <text class="text-base text-[var(--text-main)] font-bold">{{ currentFood.name }}</text>
+          <view class="w-8" />
         </view>
 
-        <!-- 营养概览 -->
-        <view class="grid grid-cols-4 mb-6 gap-2 text-center">
+        <!-- 营养概览四格 -->
+        <view class="mb-6 grid grid-cols-4 gap-2 rounded-xl bg-teal-50/60 p-3 text-center dark:bg-teal-900/15">
           <view>
-            <view class="text-base text-[var(--text-main)] font-bold">
-              {{ popupNutrition.calories }}
-            </view>
-            <view class="text-[9px] text-[var(--text-sub)]">
-              千卡
-            </view>
+            <text class="block text-base text-teal-600 font-bold dark:text-teal-400">{{ popupNutrition.calories }}</text>
+            <text class="text-[9px] text-[var(--text-sub)]">千卡</text>
           </view>
           <view>
-            <view class="text-base text-[var(--text-main)] font-bold">
-              {{ popupNutrition.carbs }}
-            </view>
-            <view class="text-[9px] text-[var(--text-sub)]">
-              碳水
-            </view>
+            <text class="block text-base text-[var(--text-main)] font-bold">{{ popupNutrition.carbs }}</text>
+            <text class="text-[9px] text-[var(--text-sub)]">碳水</text>
           </view>
           <view>
-            <view class="text-base text-[var(--text-main)] font-bold">
-              {{ popupNutrition.protein }}
-            </view>
-            <view class="text-[9px] text-[var(--text-sub)]">
-              蛋白质
-            </view>
+            <text class="block text-base text-[var(--text-main)] font-bold">{{ popupNutrition.protein }}</text>
+            <text class="text-[9px] text-[var(--text-sub)]">蛋白质</text>
           </view>
           <view>
-            <view class="text-base text-[var(--text-main)] font-bold">
-              {{ popupNutrition.fat }}
-            </view>
-            <view class="text-[9px] text-[var(--text-sub)]">
-              脂肪
-            </view>
+            <text class="block text-base text-[var(--text-main)] font-bold">{{ popupNutrition.fat }}</text>
+            <text class="text-[9px] text-[var(--text-sub)]">脂肪</text>
           </view>
         </view>
 
         <!-- 数量输入 -->
         <view class="mb-6 flex flex-col items-center">
-          <view class="flex items-center gap-4">
-            <view class="border-b-2 border-[var(--border-color)] px-4 pb-1 font-bold">
-              <input v-model="quantity" type="digit" class="h-24 w-40 text-center text-7xl text-[var(--text-main)]">
-            </view>
+          <view class="border-b-2 border-teal-200 px-4 pb-1 dark:border-teal-700">
+            <input v-model="quantity" type="digit" class="h-24 w-40 text-center text-7xl text-[var(--text-main)]">
           </view>
-          <text class="mt-2 text-xs text-[var(--text-sub)]">
-            输入数量 ({{ selectedUnit?.name || '' }})
-          </text>
+          <text class="mt-2 text-xs text-[var(--text-sub)]">输入数量 ({{ selectedUnit?.name || '' }})</text>
         </view>
 
         <!-- 单位选择 -->
@@ -305,162 +251,35 @@ function handleRecognizedFoodSelect(food: FoodInfo) {
           <view
             v-for="unit in availableUnits"
             :key="unit.name"
-            class="border rounded-full px-3 py-1.5 text-xs transition-all"
-            :class="selectedUnit?.id === unit.id ? 'bg-emerald-500 border-emerald-500 text-white' : 'bg-[var(--page-bg)] border-[var(--border-color)] text-[var(--text-sub)]'"
+            class="rounded-full border px-3 py-1.5 text-xs transition-all"
+            :class="selectedUnit?.id === unit.id
+              ? 'border-teal-500 bg-teal-500 text-white'
+              : 'border-[var(--border-color)] bg-[var(--page-bg)] text-[var(--text-sub)]'"
             @click="selectedUnit = unit"
           >
-            <text>
-              {{ unit.name }}
-            </text>
+            <text>{{ unit.name }}</text>
           </view>
         </view>
 
-        <wd-button
-          block type="success" size="large"
-          class="from-emerald-500 to-emerald-600 bg-gradient-to-r !border-none !text-white"
+        <!-- 确定按钮 -->
+        <view
+          class="flex h-12 w-full items-center justify-center rounded-xl bg-teal-500 active:opacity-80"
           @click="confirmSelect"
         >
-          确定
-        </wd-button>
-      </view>
-    </wd-popup>
-
-    <!-- 拍照识别按钮 -->
-    <view
-      class="fixed bottom-10 right-6 z-20 h-14 w-14 flex items-center justify-center rounded-full from-emerald-500 to-emerald-600 bg-gradient-to-r shadow-lg transition-all active:opacity-80"
-      @click="handleCamera"
-    >
-      <IconCamera size="24" color="white" />
-    </view>
-
-    <!-- AI 识别引导 -->
-    <wd-popup
-      v-model="showCameraGuide"
-      position="bottom"
-      :z-index="50"
-      custom-style="border-radius: 24px 24px 0 0; background: var(--card-bg);"
-      overlay-style="background-color: rgba(0, 0, 0, 0.5);"
-    >
-      <view class="p-6">
-        <view class="mb-8 flex items-center justify-between">
-          <view class="p-2" @click="showCameraGuide = false">
-            <IconX size="20" color="var(--text-main)" />
-          </view>
-          <text class="text-lg text-[var(--text-main)] font-bold">
-            AI 识别食物
-          </text>
-          <view class="w-10" />
+          <text class="text-base text-white font-semibold">确定添加</text>
         </view>
-
-        <view class="mb-10 flex flex-col items-center">
-          <view class="mb-6 h-20 w-20 flex items-center justify-center rounded-full bg-emerald-50">
-            <IconCamera size="40" class="text-emerald-500" />
-          </view>
-          <text class="mb-4 text-xl text-[var(--text-main)] font-bold">
-            拍照一键识别
-          </text>
-
-          <view class="w-full space-y-4">
-            <view class="flex items-start gap-4">
-              <view class="mt-0.5 h-6 w-6 flex flex-shrink-0 items-center justify-center rounded-full bg-emerald-500">
-                <text class="text-xs text-white">
-                  1
-                </text>
-              </view>
-              <text class="text-sm text-[var(--text-sub)]">
-                对准餐盘拍摄清晰照片
-              </text>
-            </view>
-            <view class="flex items-start gap-4">
-              <view class="mt-0.5 h-6 w-6 flex flex-shrink-0 items-center justify-center rounded-full bg-emerald-500">
-                <text class="text-xs text-white">
-                  2
-                </text>
-              </view>
-              <text class="text-sm text-[var(--text-sub)]">
-                系统自动识别盘中多种食物
-              </text>
-            </view>
-            <view class="flex items-start gap-4">
-              <view class="mt-0.5 h-6 w-6 flex flex-shrink-0 items-center justify-center rounded-full bg-emerald-500">
-                <text class="text-xs text-white">
-                  3
-                </text>
-              </view>
-              <text class="text-sm text-[var(--text-sub)]">
-                确认并快速添加到今日餐食
-              </text>
-            </view>
-          </view>
-        </view>
-
-        <view class="space-y-3">
-          <wd-button block size="large" type="success" custom-class="confirm-btn" @click="handleCameraRecognition">
-            开始识别
-          </wd-button>
-          <wd-button size="large" plain type="success" block @click="showCameraGuide = false">
-            返回
-          </wd-button>
-        </view>
-      </view>
-    </wd-popup>
-
-    <!-- 识别结果展示 -->
-    <wd-popup
-      v-model="showRecognitionResults"
-      position="bottom"
-      :z-index="50"
-      custom-style="border-radius: 24px 24px 0 0; background: var(--card-bg);"
-      overlay-style="background-color: rgba(0, 0, 0, 0.5);"
-    >
-      <view class="p-6">
-        <view class="mb-6 flex items-center justify-between">
-          <view class="p-2" @click="showRecognitionResults = false">
-            <IconX size="20" color="var(--text-main)" />
-          </view>
-          <text class="text-lg text-[var(--text-main)] font-bold">
-            识别结果
-          </text>
-          <view class="w-10" />
-        </view>
-
-        <view class="grid grid-cols-2 mb-8 gap-3">
-          <view
-            v-for="(food, idx) in recognizedFoods"
-            :key="idx"
-            class="border border-[var(--border-color)] rounded-xl bg-[var(--card-bg)] p-3 font-sans transition-all active:border-emerald-500"
-            @click="handleRecognizedFoodSelect(food)"
-          >
-            <view class="mb-1 text-sm text-[var(--text-main)] font-bold">
-              {{ food.name }}
-            </view>
-            <view class="mb-2 text-[10px] text-[var(--text-sub)]">
-              {{ food.unit }} | {{ food.calories }}kcal
-            </view>
-            <view class="flex items-center justify-between">
-              <text class="text-[9px] text-emerald-600 font-bold">
-                匹配度 {{ food.confidence || 98 }}%
-              </text>
-              <IconPlus size="12" class="text-emerald-500" />
-            </view>
-          </view>
-        </view>
-
-        <wd-button size="large" type="success" plain block @click="showRecognitionResults = false">
-          重新拍摄
-        </wd-button>
       </view>
     </wd-popup>
   </view>
 </template>
 
 <style scoped>
+.page-container {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
 :deep(.wd-search) {
   padding: 0;
   background: transparent;
-}
-
-:deep(.confirm-btn) {
-  --at-apply: "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white border-none";
 }
 </style>

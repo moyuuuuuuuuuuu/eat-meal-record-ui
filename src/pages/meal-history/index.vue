@@ -19,7 +19,6 @@ definePage({
 const expandedDay = ref<string | number | null>(null)
 const hasReachedBottom = ref(false)
 
-// 使用 usePagination 处理分页请求
 const {
   loading,
   data: history,
@@ -46,19 +45,32 @@ const showSkeleton = computed(() => {
 function goBack() {
   uni.navigateBack()
 }
+const MEAL_SCHEDULE: { from: number, to: number, type: string }[] = [
+  { from: 5, to: 10, type: '早餐' },
+  { from: 11, to: 14, type: '午餐' },
+  { from: 17, to: 21, type: '晚餐' },
+]
+function getMealTypeByTime(): string {
+  const hour = new Date().getHours()
+  return MEAL_SCHEDULE.find(s => hour >= s.from && hour < s.to)?.type ?? '加餐'
+}
+
+function goMealRerecord() {
+  uni.navigateTo({
+    url: `/pages/add-meal/index?type=${getMealTypeByTime()}`,
+  })
+}
 
 function toggleDay(id: string | number) {
   expandedDay.value = expandedDay.value === id ? null : id
 }
 
-// 下拉刷新
 onPullDownRefresh(async () => {
   page.value = 1
   hasReachedBottom.value = false
   uni.stopPullDownRefresh()
 })
 
-// 上拉加载更多
 onReachBottom(() => {
   hasReachedBottom.value = true
   if (!isLastPage.value && !loading.value) {
@@ -84,32 +96,77 @@ onReachBottom(() => {
 
       <!-- 列表内容 -->
       <template v-else>
-        <view v-for="day in history" :key="day.id" class="day-card relative w-full overflow-hidden border border-[var(--border-color)] rounded-2xl bg-[var(--card-bg)] shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.2)]">
-          <!-- 左侧装饰条 -->
-          <view class="absolute left-0 top-0 h-full w-1 from-emerald-400 to-emerald-600 bg-gradient-to-b" />
+        <!-- ── 空状态 ── -->
+        <view v-if="!loading && history.length === 0" class="flex flex-col items-center justify-center py-24 space-y-5">
+          <view class="h-24 w-24 flex items-center justify-center rounded-full bg-teal-50 dark:bg-teal-900/20">
+            <text class="text-5xl">
+              🍽️
+            </text>
+          </view>
+          <view class="text-center space-y-1.5">
+            <text class="block text-base text-[var(--text-main)] font-semibold">
+              还没有餐食记录
+            </text>
+            <text class="block text-sm text-[var(--text-sub)]">
+              快去记录今天的第一餐吧
+            </text>
+          </view>
+          <view class="rounded-full bg-teal-500 px-7 py-2.5 active:opacity-75" @click="goMealRerecord">
+            <text class="text-sm text-white font-medium">
+              去记录
+            </text>
+          </view>
+        </view>
+
+        <!-- ── 日期卡片列表 ── -->
+        <view
+          v-for="day in history"
+          :key="day.id"
+          class="day-card relative w-full overflow-hidden border border-[var(--border-color)] rounded-2xl bg-[var(--card-bg)] shadow-[0_2px_12px_rgba(0,0,0,0.05)] transition-all dark:shadow-[0_2px_12px_rgba(0,0,0,0.20)]"
+        >
+          <!-- 左侧装饰条：展开 teal，收起 slate -->
+          <!--          <view class="absolute left-0 top-0 h-full w-1 from-green-100 to-emerald-200 bg-gradient-to-b dark:from-slate-600 dark:to-slate-700" /> -->
 
           <!-- 日期头部 -->
-          <view class="flex flex-col p-5 active:bg-[var(--page-bg)]/50" @click="toggleDay(day.id)">
+          <view class="flex flex-col p-5 active:opacity-80" @click="toggleDay(day.id)">
             <view class="mb-4 flex items-center justify-between">
               <view class="flex items-center gap-2">
                 <text class="text-base text-[var(--text-main)] font-bold">
                   {{ day.date }}
                 </text>
-                <view class="rounded-full bg-emerald-50 px-2 py-0.5 dark:bg-emerald-900/30">
-                  <text class="text-[10px] text-emerald-600 font-medium">
+                <!-- 餐次 badge：展开 teal，收起 slate -->
+                <view
+                  class="rounded-full bg-slate-100 px-2 py-0.5 dark:bg-slate-700/50"
+                >
+                  <text
+                    class="text-[10px] text-slate-500 font-medium dark:text-slate-400"
+                  >
                     {{ day.mealCount }}餐
                   </text>
                 </view>
               </view>
-              <view class="h-6 w-6 flex items-center justify-center rounded-full bg-gray-50 dark:bg-gray-800">
-                <IconChevronDown size="14" color="#9ca3af" :style="{ transform: expandedDay === day.id ? 'rotate(180deg)' : 'rotate(0)', transition: 'all 0.3s' }" />
+              <!-- 箭头按钮：展开 teal，收起 gray -->
+              <view
+                class="h-6 w-6 flex items-center justify-center rounded-full bg-gray-50 dark:bg-gray-800"
+              >
+                <IconChevronDown
+                  size="14"
+                  color="#9ca3af"
+                  :style="{ transform: expandedDay === day.id ? 'rotate(180deg)' : 'rotate(0)', transition: 'all 0.3s' }"
+                />
               </view>
             </view>
 
-            <view class="flex items-center justify-around rounded-xl bg-gray-50/50 p-3 dark:bg-gray-800/20">
+            <!-- 数据行：展开时背景淡白，收起时 gray -->
+            <view
+              class="flex items-center justify-around rounded-xl p-3 bg-gray-50/60 dark:bg-gray-800/20"
+            >
+              <!-- 摄入 -->
               <view class="flex items-center gap-3">
-                <view class="h-10 w-10 flex items-center justify-center rounded-full bg-white shadow-sm dark:bg-gray-800">
-                  <IconFlame size="18" color="#10b981" />
+                <view
+                  class="h-10 w-10 flex items-center justify-center rounded-full shadow-sm bg-white dark:bg-gray-800"
+                >
+                  <IconFlame size="18" color="#10b981"/>
                 </view>
                 <view>
                   <text class="block text-[10px] text-[var(--text-sub)] tracking-wider uppercase">
@@ -123,8 +180,11 @@ onReachBottom(() => {
 
               <view class="h-8 w-px bg-[var(--border-color)]" />
 
+              <!-- 消耗 -->
               <view class="flex items-center gap-3">
-                <view class="h-10 w-10 flex items-center justify-center rounded-full bg-white shadow-sm dark:bg-gray-800">
+                <view
+                  class="h-10 w-10 flex items-center justify-center rounded-full shadow-sm bg-white dark:bg-gray-800"
+                >
                   <IconTrendingUp size="18" color="#3b82f6" />
                 </view>
                 <view>
@@ -139,34 +199,53 @@ onReachBottom(() => {
 
               <view class="h-8 w-px bg-[var(--border-color)]" />
 
+              <!-- 净摄入 -->
               <view class="text-right">
                 <text class="block text-[10px] text-[var(--text-sub)] tracking-wider uppercase">
                   净摄入
                 </text>
-                <text class="text-lg text-emerald-600 font-black">
+                <text
+                  class="text-lg font-black text-emerald-600"
+                >
                   {{ day.totalIntake }}
                 </text>
               </view>
             </view>
           </view>
 
-          <!-- 餐食详情 (展开) -->
-          <view v-if="expandedDay === day.id" class="border-t border-[var(--border-color)] bg-gray-50/30 p-3 space-y-2 dark:bg-gray-900/10">
-            <view v-for="meal in day.meals" :key="meal.id" class="relative overflow-hidden border border-[var(--border-color)] rounded-xl bg-[var(--card-bg)] p-4 shadow-sm">
-              <view class="mb-3 flex items-center justify-between">
+          <!-- ── 餐食详情（展开区域）── -->
+          <view
+            v-if="expandedDay === day.id"
+            class="border-t border-teal-100 bg-teal-50/30 p-3 space-y-2 dark:border-teal-900/40 dark:bg-teal-950/20"
+          >
+            <view
+              v-for="meal in day.meals"
+              :key="meal.id"
+              class="relative overflow-hidden border border-teal-100/80 rounded-xl bg-white p-4 shadow-sm dark:border-teal-800/30 dark:bg-[#0f2420]/60"
+            >
+              <view class="mb-3 flex items-center justify-between pl-3">
                 <view class="flex items-center gap-2">
-                  <view class="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]" />
+                  <view class="h-1.5 w-1.5 rounded-full bg-teal-400 dark:bg-teal-500" />
                   <text class="text-sm text-[var(--text-main)] font-bold">
                     {{ meal.mealType }}
                   </text>
                 </view>
-                <text class="text-xs text-emerald-600 font-medium">
-                  {{ meal.totalCalories }} kcal
-                </text>
+                <!-- kcal badge -->
+                <view class="rounded-full bg-teal-50 px-2.5 py-0.5 dark:bg-teal-900/50">
+                  <text class="text-[10px] text-teal-600 font-medium dark:text-teal-400">
+                    {{ meal.totalCalories }} kcal
+                  </text>
+                </view>
               </view>
-              <view class="flex flex-wrap gap-2">
-                <view v-for="(item, idx) in meal.items" :key="idx" class="rounded-lg bg-emerald-50/50 px-2 py-1 dark:bg-emerald-900/20">
-                  <text class="text-[10px] text-emerald-700 dark:text-emerald-400">
+
+              <!-- 食物 tag chips -->
+              <view class="flex flex-wrap gap-1.5 pl-3">
+                <view
+                  v-for="(item, idx) in meal.items"
+                  :key="idx"
+                  class="rounded-lg bg-teal-50/80 px-2 py-1 dark:bg-teal-900/30"
+                >
+                  <text class="text-[10px] text-teal-700 dark:text-teal-400">
                     {{ item.name }} {{ item.amount }}
                   </text>
                 </view>
@@ -176,7 +255,11 @@ onReachBottom(() => {
         </view>
       </template>
 
-      <wd-loadmore v-if="!showSkeleton && hasReachedBottom" :state="isLastPage ? 'finished' : (loading ? 'loading' : 'ready')" finished-text="上拉加载下一页" />
+      <wd-loadmore
+        v-if="!showSkeleton && hasReachedBottom"
+        :state="isLastPage ? 'finished' : (loading ? 'loading' : 'ready')"
+        finished-text="上拉加载下一页"
+      />
     </view>
   </view>
 </template>
