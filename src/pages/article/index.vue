@@ -79,7 +79,7 @@ function formatRichText(html: string) {
         发布时间：{{ detail.created_at }}
       </view>
 
-      <view class="rich-text-wrapper">
+      <view class="rich-text-wrapper text-[var(--text-main)]">
         <rich-text :nodes="detail.content" />
       </view>
 
@@ -104,5 +104,23 @@ function formatRichText(html: string) {
 :deep(.rich-text-wrapper img) {
   max-width: 100% !important;
   height: auto !important;
+}
+@media (prefers-color-scheme: dark) {
+  .page-container {
+    --text-rich: #d1d5db; /* 深色模式下的高亮色 */
+  }
+}
+
+.rich-text-wrapper {
+  color: var(--text-rich);
+}
+
+/* 核心：强制覆盖富文本内的行内颜色 */
+:deep(.rich-text-wrapper) ._span,
+:deep(.rich-text-wrapper) ._p,
+:deep(.rich-text-wrapper) ._div,
+:deep(.rich-text-wrapper) ._font {
+  /* 使用 initial 或 inherit 视情况而定，这里建议强制继承父级变量 */
+  color: inherit !important;
 }
 </style>
