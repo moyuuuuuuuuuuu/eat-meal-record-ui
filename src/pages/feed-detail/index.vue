@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onLoad } from '@dcloudio/uni-app'
+import { onLoad, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app'
 import { useRequest } from 'alova/client'
 import FeedMediaAttach from '@/components/FeedMediaAttach.vue'
 import { useSystemInfo } from '@/composables/useSystemInfo'
@@ -60,6 +60,38 @@ function handleLike() {
     detail.value.likes = res.likes
   })
 }
+
+// #ifdef MP-WEIXIN
+onShareAppMessage(() => {
+  const post = detail.value
+  let imageUrl = 'https://bos.eatclear.moyuu.cn/wot-design-uni-assets/share.jpg'
+  const firstAttach = post.attach?.find((item: any) => item.type === 0 || item.poster)
+  if (firstAttach) {
+    const sourceUrl = firstAttach.type === 0 ? firstAttach.attach : firstAttach.poster
+    imageUrl = `${sourceUrl}?x-bce-process=style/share`
+  }
+  return {
+    title: post.content.substring(0, 30) || '分享一条精彩动态',
+    path: `/pages/feed-detail/index?id=${post.id}`,
+    imageUrl,
+  }
+})
+
+onShareTimeline(() => {
+  const post = detail.value
+  let imageUrl = 'https://bos.eatclear.moyuu.cn/wot-design-uni-assets/share.jpg'
+  const firstAttach = post.attach?.find((item: any) => item.type === 0 || item.poster)
+  if (firstAttach) {
+    const sourceUrl = firstAttach.type === 0 ? firstAttach.attach : firstAttach.poster
+    imageUrl = `${sourceUrl}?x-bce-process=style/share`
+  }
+  return {
+    title: post.content.substring(0, 30) || '分享一条精彩动态',
+    path: `/pages/feed-detail/index?id=${post.id}`,
+    imageUrl,
+  }
+})
+// #endif
 </script>
 
 <template>
@@ -80,7 +112,7 @@ function handleLike() {
       <!-- 作者信息 -->
       <view class="mb-4 flex items-center gap-3">
         <view class="h-12 w-12 overflow-hidden rounded-full ring-2 ring-emerald-500/20">
-          <wd-img :src="detail.author?.avatar" mode="aspectFill" class="h-full w-full">
+          <wd-img :width="50" :height="50" :src="detail.author?.avatar" mode="aspectFill" class="h-full w-full">
             <template #error>
               <view class="h-full w-full flex items-center justify-center bg-gray-100">
                 加载失败
@@ -155,14 +187,14 @@ function handleLike() {
       </view>
 
       <!-- 评论列表占位 -->
-      <view class="comments-section">
+      <!-- <view class="comments-section">
         <view class="mb-4 text-sm text-[var(--text-main)] font-bold">
           评论 ({{ detail.comment_list?.length || 0 }})
         </view>
         <view v-if="!detail.comment_list || detail.comment_list.length === 0" class="py-10 text-center text-xs text-[var(--text-sub)]">
           暂无评论，快来抢沙发吧~
         </view>
-      </view>
+      </view> -->
     </view>
 
     <view v-else-if="error" class="mt-20 flex flex-col items-center justify-center opacity-50">

@@ -146,7 +146,7 @@ onShareAppMessage((res) => {
       const firstAttach = post.attach?.find((item: any) => item.type === 0 || item.poster)
       if (firstAttach) {
         const sourceUrl = firstAttach.type === 0 ? firstAttach.attach : firstAttach.poster
-        imageUrl = `${sourceUrl}?x-bce-process=image/style/share`
+        imageUrl = `${sourceUrl}?x-bce-process=style/share`
       }
       return {
         title: post.content.substring(0, 30) || '分享一条精彩动态',
@@ -219,9 +219,16 @@ onShareTimeline(() => {
           <!-- 作者信息 -->
           <view class="mb-3 flex items-center gap-3">
             <view
-              class="h-10 w-10 flex items-center justify-center rounded-full from-emerald-400 to-teal-500 bg-gradient-to-br"
+              class="h-10 w-10 rounded-full from-emerald-400 to-teal-500 bg-gradient-to-br"
             >
-              <IconUser size="20" color="white" />
+              <wd-img v-if="post.author.avatar" round :width="41" :height="41" :src="post.author?.avatar" mode="aspectFill" class="h-full w-full">
+                <template #error>
+                  <view class="h-full w-full flex items-center justify-center bg-gray-100">
+                    加载失败
+                  </view>
+                </template>
+              </wd-img>
+              <IconUser v-else size="20" color="white" />
             </view>
             <view class="flex-1">
               <view class="text-[var(--text-main)] font-medium">
