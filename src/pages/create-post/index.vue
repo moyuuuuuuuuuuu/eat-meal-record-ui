@@ -221,8 +221,8 @@ async function handlePublish() {
     uni.showToast({ title: '发布成功', icon: 'success' })
     setTimeout(() => {
       // 先返回让 feed 页面进入 onShow，再 emit 刷新事件
-      uni.navigateBack()
       uni.$emit('refresh-feed')
+      uni.navigateBack()
     }, 800)
   }
   catch {

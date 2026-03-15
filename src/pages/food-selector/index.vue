@@ -105,9 +105,11 @@ function selectFood(food: FoodInfo) {
 }
 
 function confirmSelect() {
-  if (!currentFood.value) return
+  if (!currentFood.value)
+    return
   const unit = selectedUnit.value
-  if (!unit) return
+  if (!unit)
+    return
   const q = Number.parseFloat(quantity.value.toString()) || 0
   const selectedFood = {
     ...currentFood.value,
@@ -139,10 +141,10 @@ function confirmSelect() {
     <view :style="{ height: `${statusBarHeight + navBarHeight + 64}px` }" />
 
     <!-- 食物列表 -->
-    <view class="px-4 py-4 pb-10 space-y-2">
+    <view class="mt-6 px-4 pb-10 space-y-2">
       <!-- 骨架屏 -->
       <template v-if="showSkeleton">
-        <view v-for="i in 5" :key="i" class="w-full rounded-xl bg-[var(--card-bg)] p-4 shadow-sm">
+        <view v-for="i in 5" :key="i" class="mt-6 w-full rounded-xl bg-[var(--card-bg)] shadow-sm">
           <wd-skeleton title :row="1" loading />
         </view>
       </template>
@@ -153,9 +155,13 @@ function confirmSelect() {
           <view class="h-20 w-20 flex items-center justify-center rounded-full bg-teal-50 dark:bg-teal-900/20">
             <IconSearch size="36" color="#0d9488" class="opacity-60" />
           </view>
-          <view class="space-y-1 text-center">
-            <text class="block text-sm text-[var(--text-main)] font-semibold">没有找到相关食物</text>
-            <text class="block text-xs text-[var(--text-sub)]">换个关键词试试吧</text>
+          <view class="text-center space-y-1">
+            <text class="block text-sm text-[var(--text-main)] font-semibold">
+              没有找到相关食物
+            </text>
+            <text class="block text-xs text-[var(--text-sub)]">
+              换个关键词试试吧
+            </text>
           </view>
         </view>
 
@@ -163,7 +169,7 @@ function confirmSelect() {
         <view
           v-for="(food, index) in foodList"
           :key="index"
-          class="w-full flex items-center justify-between rounded-xl border border-[var(--border-color)] bg-[var(--card-bg)] p-4 shadow-sm transition-all active:border-teal-200 active:bg-teal-50/40 dark:active:border-teal-800/50 dark:active:bg-teal-950/20"
+          class="w-full flex items-center justify-between border border-[var(--border-color)] rounded-xl bg-[var(--card-bg)] p-4 shadow-sm transition-all active:border-teal-200 active:bg-teal-50/40 dark:active:border-teal-800/50 dark:active:bg-teal-950/20"
           @click="selectFood(food)"
         >
           <view class="min-w-0 flex-1">
@@ -209,32 +215,50 @@ function confirmSelect() {
         <!-- 标题栏 -->
         <view class="mb-5 flex items-center justify-between">
           <view
-            class="h-8 w-8 flex items-center justify-center rounded-full  active:opacity-70"
+            class="h-8 w-8 flex items-center justify-center rounded-full active:opacity-70"
             @click="showPopup = false"
           >
             <IconX size="16" color="var(--text-main)" />
           </view>
-          <text class="text-base text-[var(--text-main)] font-bold">{{ currentFood.name }}</text>
+          <text class="text-base text-[var(--text-main)] font-bold">
+            {{ currentFood.name }}
+          </text>
           <view class="w-8" />
         </view>
 
         <!-- 营养概览四格 -->
-        <view class="mb-6 grid grid-cols-4 gap-2 rounded-xl bg-teal-50/60 p-3 text-center dark:bg-teal-900/15">
+        <view class="grid grid-cols-4 mb-6 gap-2 rounded-xl bg-teal-50/60 p-3 text-center dark:bg-teal-900/15">
           <view>
-            <text class="block text-base text-teal-600 font-bold dark:text-teal-400">{{ popupNutrition.calories }}</text>
-            <text class="text-[9px] text-[var(--text-sub)]">千卡</text>
+            <text class="block text-base text-teal-600 font-bold dark:text-teal-400">
+              {{ popupNutrition.calories }}
+            </text>
+            <text class="text-[9px] text-[var(--text-sub)]">
+              千卡
+            </text>
           </view>
           <view>
-            <text class="block text-base text-[var(--text-main)] font-bold">{{ popupNutrition.carbs }}</text>
-            <text class="text-[9px] text-[var(--text-sub)]">碳水</text>
+            <text class="block text-base text-[var(--text-main)] font-bold">
+              {{ popupNutrition.carbs }}
+            </text>
+            <text class="text-[9px] text-[var(--text-sub)]">
+              碳水
+            </text>
           </view>
           <view>
-            <text class="block text-base text-[var(--text-main)] font-bold">{{ popupNutrition.protein }}</text>
-            <text class="text-[9px] text-[var(--text-sub)]">蛋白质</text>
+            <text class="block text-base text-[var(--text-main)] font-bold">
+              {{ popupNutrition.protein }}
+            </text>
+            <text class="text-[9px] text-[var(--text-sub)]">
+              蛋白质
+            </text>
           </view>
           <view>
-            <text class="block text-base text-[var(--text-main)] font-bold">{{ popupNutrition.fat }}</text>
-            <text class="text-[9px] text-[var(--text-sub)]">脂肪</text>
+            <text class="block text-base text-[var(--text-main)] font-bold">
+              {{ popupNutrition.fat }}
+            </text>
+            <text class="text-[9px] text-[var(--text-sub)]">
+              脂肪
+            </text>
           </view>
         </view>
 
@@ -243,7 +267,9 @@ function confirmSelect() {
           <view class="border-b-2 border-teal-200 px-4 pb-1 dark:border-teal-700">
             <input v-model="quantity" type="digit" class="h-24 w-40 text-center text-7xl text-[var(--text-main)]">
           </view>
-          <text class="mt-2 text-xs text-[var(--text-sub)]">输入数量 ({{ selectedUnit?.name || '' }})</text>
+          <text class="mt-2 text-xs text-[var(--text-sub)]">
+            输入数量 ({{ selectedUnit?.name || '' }})
+          </text>
         </view>
 
         <!-- 单位选择 -->
@@ -251,7 +277,7 @@ function confirmSelect() {
           <view
             v-for="unit in availableUnits"
             :key="unit.name"
-            class="rounded-full border px-3 py-1.5 text-xs transition-all"
+            class="border rounded-full px-3 py-1.5 text-xs transition-all"
             :class="selectedUnit?.id === unit.id
               ? 'border-teal-500 bg-teal-500 text-white'
               : 'border-[var(--border-color)] bg-[var(--page-bg)] text-[var(--text-sub)]'"
@@ -263,10 +289,12 @@ function confirmSelect() {
 
         <!-- 确定按钮 -->
         <view
-          class="flex h-12 w-full items-center justify-center rounded-xl bg-teal-500 active:opacity-80"
+          class="h-12 w-full flex items-center justify-center rounded-xl bg-teal-500 active:opacity-80"
           @click="confirmSelect"
         >
-          <text class="text-base text-white font-semibold">确定添加</text>
+          <text class="text-base text-white font-semibold">
+            确定添加
+          </text>
         </view>
       </view>
     </wd-popup>

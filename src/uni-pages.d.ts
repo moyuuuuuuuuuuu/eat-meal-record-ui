@@ -6,6 +6,7 @@
 type _LocationUrl =
   "/pages/index/index" |
   "/pages/add-meal/index" |
+  "/pages/article/index" |
   "/pages/create-post/index" |
   "/pages/feed/index" |
   "/pages/feed-detail/index" |

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { onPullDownRefresh, onReachBottom, onShareAppMessage, onShareTimeline, onShow } from '@dcloudio/uni-app'
+import { onPageScroll, onPullDownRefresh, onReachBottom, onShareAppMessage, onShareTimeline, onShow } from '@dcloudio/uni-app'
 import { usePagination, useRequest } from 'alova/client'
-import { computed, inject, onMounted, onUnmounted, ref } from 'vue'
+import { computed, inject, onMounted, onUnmounted, ref, watch } from 'vue'
 import FeedMediaAttach from '@/components/FeedMediaAttach.vue'
 import { usePlatform } from '@/composables/usePlatform'
 import { useSystemInfo } from '@/composables/useSystemInfo'
@@ -15,6 +15,7 @@ definePage({
   style: {
     navigationBarTitleText: '动态广场',
     navigationStyle: 'custom',
+    enablePullDownRefresh: true,
   },
 })
 
@@ -37,6 +38,8 @@ const {
 )
 
 const hasReachedBottom = ref(false)
+const scrollTop = ref(0)
+const showBackTop = computed(() => scrollTop.value > 400)
 
 const showSkeleton = computed(() => {
   return loading.value && page.value === 1 && posts.value.length === 0
@@ -50,8 +53,17 @@ function refreshList() {
   reload()
 }
 
-onPullDownRefresh(() => {
+onPullDownRefresh(async () => {
   refreshList()
+  // 等待本次请求完成后再停止下拉动画
+  await new Promise<void>((resolve) => {
+    const stop = watch(loading, (val) => {
+      if (!val) {
+        stop()
+        resolve()
+      }
+    })
+  })
   uni.stopPullDownRefresh()
 })
 
@@ -79,6 +91,14 @@ onReachBottom(() => {
     page.value++
   }
 })
+
+onPageScroll(({ scrollTop: top }) => {
+  scrollTop.value = top
+})
+
+function scrollToTop() {
+  uni.pageScrollTo({ scrollTop: 0, duration: 300 })
+}
 
 function handleLike(post: any) {
   if (post) {
@@ -159,7 +179,7 @@ onShareTimeline(() => {
 
     <view :style="{ height: `${statusBarHeight + navBarHeight + 52.5}px` }" />
 
-    <view class="posts-list mt-4 pb-20 space-y-2">
+    <view class="posts-list mt-6 pb-20 space-y-2">
       <template v-if="showSkeleton">
         <view v-for="i in 3" :key="i" class="bg-[var(--card-bg)] px-4 py-4">
           <wd-skeleton title avatar :row="3" loading />
@@ -256,10 +276,11 @@ onShareTimeline(() => {
     </view>
 
     <view
-      class="fixed bottom-24 right-6 h-14 w-14 flex items-center justify-center rounded-full from-emerald-500 to-teal-500 bg-gradient-to-r shadow-lg"
-      @click="handleCreatePost"
+      v-if="showBackTop"
+      class="fixed bottom-24 right-6 h-14 w-14 flex items-center justify-center rounded-full from-emerald-500 to-teal-500 bg-gradient-to-r shadow-lg transition-opacity duration-300"
+      @click="scrollToTop"
     >
-      <IconPlus size="24" color="white" />
+      <IconArrowUp size="24" color="white" />
     </view>
   </view>
 </template>

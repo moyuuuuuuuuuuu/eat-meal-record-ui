@@ -39,6 +39,10 @@ const meals = ref<Record<string, FoodItem[]>>({
   晚餐: [],
   加餐: [],
 })
+const notices = ref<string[]>([])
+const { send: getNotice } = useRequest(Apis.article.notices(), {
+  immediate: true,
+})
 
 const isAllMealsEmpty = computed(() => {
   return Object.values(meals.value).every(mealList => mealList.length === 0)
@@ -116,9 +120,9 @@ async function syncWeRunIfNeeded(): Promise<void> {
   return
   // #endif
 
-  if (isWeRunSyncing)
+  if (isWeRunSyncing) {
     return
-
+  }
   const today = new Date().toISOString().split('T')[0]
   const lastSyncDate = uni.getStorageSync(StorageKeys.LastWeRunSyncDate) as string
   const justLoggedIn = uni.getStorageSync(StorageKeys.JustLoggedIn) as boolean
@@ -139,6 +143,11 @@ async function syncWeRunIfNeeded(): Promise<void> {
 }
 // Combined data fetching
 onShow(async () => {
+  const noticesRes = await getNotice()
+
+  if (noticesRes) {
+    notices.value = noticesRes
+  }
   if (!isLogin.value) {
     // 未登录时，展示默认数据或清空数据
     totalIntake.value = { calories: 0, protein: 0, fat: 0, carbs: 0 }
@@ -150,10 +159,10 @@ onShow(async () => {
   // #ifdef MP-WEIXIN
   await syncWeRunIfNeeded()
   // #endif
+  console.log('Check 2')
 
   const summaryRes = await getSummary()
   const mealsRes = await getMeals()
-
   if (summaryRes) {
     dailyGoal.value = summaryRes.dailyGoal
     totalIntake.value = summaryRes.totalIntake
@@ -244,6 +253,19 @@ function showBurnTips() {
       class="bg-[var(--card-bg)] px-4 pb-8 shadow-sm"
       :style="{ paddingTop: `${totalHeight + 12}px` }"
     >
+      <view
+        v-if="notices.length > 0"
+        class="notice"
+      >
+        <wd-notice-bar
+          :text="notices"
+          prefix="check-outline"
+          closable
+          color="#34D19D"
+          background-color="#f0f9eb"
+          closeable
+        />
+      </view>
       <view class="mb-6 flex items-center justify-between">
         <!-- 摄入 -->
         <view class="flex-1 text-center">
@@ -290,7 +312,6 @@ function showBurnTips() {
         目标: {{ dailyGoal.calories }} kcal/天
       </view>
     </view>
-
     <!-- 营养素摘要 -->
     <view class="mt-4 px-4">
       <view class="mb-3 ml-1 text-xs text-[var(--text-sub)] font-bold tracking-wider uppercase">
@@ -400,5 +421,8 @@ function showBurnTips() {
 }
 .letter-spacing-1 {
   letter-spacing: 0.1em;
+}
+.notice{
+  margin-bottom: 20rpx;
 }
 </style>

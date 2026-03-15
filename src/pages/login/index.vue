@@ -163,6 +163,11 @@ function openPrivacy(): void {
   }
   // #endif
 }
+function goUserAgreement() {
+  uni.navigateTo({
+    url: '/pages/article/index?type=1',
+  })
+}
 </script>
 
 <template>
@@ -241,7 +246,7 @@ function openPrivacy(): void {
       <wd-checkbox v-model="isAgree" shape="square" size="14px" />
       <view class="text-xs text-[var(--text-sub)] leading-tight">
         我已阅读并同意
-        <text class="text-blue-500">
+        <text class="text-blue-500" @click="goUserAgreement">
           《用户协议》
         </text>
         与

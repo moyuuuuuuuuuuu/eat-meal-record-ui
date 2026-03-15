@@ -104,11 +104,11 @@ function startVoiceRecognize() {
   }
   isRecording.value = true
   recorderManager.value.start({
-    duration: 60000,
+    duration: 20000,
     sampleRate: 16000,
     numberOfChannels: 1,
     encodeBitRate: 48000,
-    format: 'aac', // 根据实际后端支持调整
+    format: 'wav', // 根据实际后端支持调整
   })
 
   recorderManager.value.onStop(async (res) => {
@@ -118,7 +118,7 @@ function startVoiceRecognize() {
       filePath: res.tempFilePath,
       encoding: 'base64',
       success: async (fileRes) => {
-        await callRecognizeApi(fileRes.data as string, 'audio', { format: 'aac' })
+        await callRecognizeApi(fileRes.data as string, 'audio', { format: 'wav' })
       },
     })
   })
@@ -128,10 +128,12 @@ function stopVoiceRecognize() {
   if (recorderManager.value) {
     recorderManager.value.stop()
   }
+  isRecording.value = false
 }
 
 const { send: recognizeApi } = useRequest(data => Apis.food.recognize({ data }), {
   immediate: false,
+  timeout: 120000,
 })
 
 async function callRecognizeApi(content: string, type: 'text' | 'image' | 'audio', options: any = {}) {

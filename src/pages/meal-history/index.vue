@@ -159,14 +159,14 @@ onReachBottom(() => {
 
             <!-- 数据行：展开时背景淡白，收起时 gray -->
             <view
-              class="flex items-center justify-around rounded-xl p-3 bg-gray-50/60 dark:bg-gray-800/20"
+              class="flex items-center justify-around rounded-xl bg-gray-50/60 p-3 dark:bg-gray-800/20"
             >
               <!-- 摄入 -->
               <view class="flex items-center gap-3">
                 <view
-                  class="h-10 w-10 flex items-center justify-center rounded-full shadow-sm bg-white dark:bg-gray-800"
+                  class="h-10 w-10 flex items-center justify-center rounded-full bg-white shadow-sm dark:bg-gray-800"
                 >
-                  <IconFlame size="18" color="#10b981"/>
+                  <IconFlame size="18" color="#10b981" />
                 </view>
                 <view>
                   <text class="block text-[10px] text-[var(--text-sub)] tracking-wider uppercase">
@@ -183,7 +183,7 @@ onReachBottom(() => {
               <!-- 消耗 -->
               <view class="flex items-center gap-3">
                 <view
-                  class="h-10 w-10 flex items-center justify-center rounded-full shadow-sm bg-white dark:bg-gray-800"
+                  class="h-10 w-10 flex items-center justify-center rounded-full bg-white shadow-sm dark:bg-gray-800"
                 >
                   <IconTrendingUp size="18" color="#3b82f6" />
                 </view>
@@ -205,7 +205,7 @@ onReachBottom(() => {
                   净摄入
                 </text>
                 <text
-                  class="text-lg font-black text-emerald-600"
+                  class="text-lg text-emerald-600 font-black"
                 >
                   {{ day.totalIntake }}
                 </text>
@@ -258,14 +258,11 @@ onReachBottom(() => {
       <wd-loadmore
         v-if="!showSkeleton && hasReachedBottom"
         :state="isLastPage ? 'finished' : (loading ? 'loading' : 'ready')"
-        finished-text="上拉加载下一页"
+        finished-text="我是有底线的"
       />
     </view>
   </view>
 </template>
 
 <style scoped>
-.page-container {
-  padding-bottom: env(safe-area-inset-bottom);
-}
 </style>

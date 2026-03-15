@@ -64,4 +64,8 @@ export default {
   'meal.relation': ['GET', '/meal/relation'],
 
   'nutrition.stats': ['GET', '/nutrition/stats'],
+  // Article
+  'article.notices':['GET','article/notice'],
+  'article.userAgreement': ['GET', '/article/user-agreement'],
+  'article.info': ['GET', '/article/info'],
 };

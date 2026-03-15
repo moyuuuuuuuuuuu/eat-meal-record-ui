@@ -43,6 +43,14 @@
       }
     },
     {
+      "path": "pages/article/index",
+      "type": "page",
+      "name": "article",
+      "style": {
+        "navigationBarTitleText": "文章详情"
+      }
+    },
+    {
       "path": "pages/create-post/index",
       "type": "page",
       "style": {
@@ -57,7 +65,8 @@
       "layout": "tabbar",
       "style": {
         "navigationBarTitleText": "动态广场",
-        "navigationStyle": "custom"
+        "navigationStyle": "custom",
+        "enablePullDownRefresh": true
       }
     },
     {
