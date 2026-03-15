@@ -2,11 +2,14 @@
 import { onLoad } from '@dcloudio/uni-app'
 import { useRequest } from 'alova/client'
 import { ref } from 'vue'
+import { useSystemInfo } from '@/composables/useSystemInfo'
+
+const { statusBarHeight, navBarHeight } = useSystemInfo()
 
 definePage({
   name: 'article',
   style: {
-    navigationBarTitleText: '首页',
+    navigationBarTitleText: '文章详情',
     navigationStyle: 'custom',
   },
 })
@@ -42,7 +45,9 @@ onLoad(async (options) => {
     }
   }
 })
-
+function handleBack() {
+  uni.navigateBack()
+}
 /**
  * 格式化富文本：为 img 标签添加 max-width 防止图片溢出
  */
@@ -59,7 +64,12 @@ function formatRichText(html: string) {
 </script>
 
 <template>
-  <view class="detail-page min-h-screen bg-white">
+  <view class="page-container min-h-screen bg-[var(--page-bg)] pb-10">
+    <wd-navbar :title="detail.title" left-arrow safe-area-inset-top fixed @click-left="handleBack" />
+
+    <!-- 顶部占位 -->
+    <view :style="{ height: `${statusBarHeight + navBarHeight}px` }" />
+
     <view v-if="loading" class="flex justify-center">
       <wd-loading />
     </view>

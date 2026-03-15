@@ -47,7 +47,8 @@
       "type": "page",
       "name": "article",
       "style": {
-        "navigationBarTitleText": "文章详情"
+        "navigationBarTitleText": "文章详情",
+        "navigationStyle": "custom"
       }
     },
     {
