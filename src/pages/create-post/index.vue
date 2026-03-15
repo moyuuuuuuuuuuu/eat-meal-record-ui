@@ -133,6 +133,12 @@ async function confirmCreateTopic() {
   if (!title || creatingTopic.value)
     return
 
+  if (title.length > 10) {
+    uni.showToast({
+      title: '话题太长啦，浓缩的才是精华哦。',
+    })
+    return
+  }
   // 检查是否已存在同名话题
   const exists = allTopics.value.find(t => t.title === title)
   if (exists) {

@@ -142,17 +142,24 @@ onShareAppMessage((res) => {
   if (res.from === 'button') {
     const post = res.target?.dataset?.post
     if (post) {
+      let imageUrl = 'https://bos.eatclear.moyuu.cn/wot-design-uni-assets/share.jpg'
+      const firstAttach = post.attach?.find((item: any) => item.type === 0 || item.poster)
+      if (firstAttach) {
+        const sourceUrl = firstAttach.type === 0 ? firstAttach.attach : firstAttach.poster
+        imageUrl = `${sourceUrl}?x-bce-process=image/style/share`
+      }
       return {
         title: post.content.substring(0, 30) || '分享一条精彩动态',
         path: `/pages/feed-detail/index?id=${post.id}`,
+        imageUrl,
       }
     }
   }
-  return { title: '动态广场', path: '/pages/feed/index' }
+  return { title: '动态广场', path: '/pages/feed/index', imageUrl: 'https://bos.eatclear.moyuu.cn/wot-design-uni-assets/share.jpg' }
 })
 
 onShareTimeline(() => {
-  return { title: '动态广场', path: '/pages/feed/index' }
+  return { title: '动态广场', path: '/pages/feed/index', imageUrl: 'https://bos.eatclear.moyuu.cn/wot-design-uni-assets/share.jpg' }
 })
 // #endif
 </script>
@@ -185,7 +192,25 @@ onShareTimeline(() => {
           <wd-skeleton title avatar :row="3" loading />
         </view>
       </template>
-
+      <template v-else-if="posts.length <= 0">
+        <view class="flex flex-col items-center justify-center py-20">
+          <wd-status-tip
+            image="content"
+            tip="广场空空如也，快去分享第一条动态吧"
+          />
+          <view class="mt-4">
+            <wd-button
+              size="small"
+              plain
+              type="success"
+              custom-class="!rounded-full"
+              @click="handleCreatePost"
+            >
+              去发布
+            </wd-button>
+          </view>
+        </view>
+      </template>
       <template v-else>
         <view
           v-for="post in posts" :key="post.id" class="post-card bg-[var(--card-bg)] px-4 py-4"
