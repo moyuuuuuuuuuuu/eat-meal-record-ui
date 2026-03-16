@@ -298,7 +298,7 @@ declare global {
   const useSupported: typeof import('@vueuse/core')['useSupported']
   const useSwipe: typeof import('@vueuse/core')['useSwipe']
   const useSystemInfo: typeof import('./composables/useSystemInfo')['useSystemInfo']
-  const useTabbar: typeof import('./composables/useTabbar')['useTabbar']
+  const useTabbar: typeof import('./composables/useTabbar')['default']
   const useTemplateRef: typeof import('vue')['useTemplateRef']
   const useTemplateRefsList: typeof import('@vueuse/core')['useTemplateRefsList']
   const useTextDirection: typeof import('@vueuse/core')['useTextDirection']
@@ -652,7 +652,7 @@ declare module 'vue' {
     readonly useSupported: UnwrapRef<typeof import('@vueuse/core')['useSupported']>
     readonly useSwipe: UnwrapRef<typeof import('@vueuse/core')['useSwipe']>
     readonly useSystemInfo: UnwrapRef<typeof import('./composables/useSystemInfo')['useSystemInfo']>
-    readonly useTabbar: UnwrapRef<typeof import('./composables/useTabbar')['useTabbar']>
+    readonly useTabbar: UnwrapRef<typeof import('./composables/useTabbar')['default']>
     readonly useTemplateRefsList: UnwrapRef<typeof import('@vueuse/core')['useTemplateRefsList']>
     readonly useTextDirection: UnwrapRef<typeof import('@vueuse/core')['useTextDirection']>
     readonly useTextSelection: UnwrapRef<typeof import('@vueuse/core')['useTextSelection']>

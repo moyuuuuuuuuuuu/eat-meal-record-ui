@@ -4,15 +4,16 @@ export interface TabbarItem {
   active: boolean
   title: string
   icon: string
+  page: string
 }
 
 const tabbarItems = ref<TabbarItem[]>([
-  { name: 'home', value: null, active: true, title: '首页', icon: 'home' },
-  { name: 'feed', value: null, active: false, title: '动态', icon: 'list' },
-  { name: 'profile', value: null, active: false, title: '我的', icon: 'user' },
+  { name: 'home', value: null, active: true, title: '首页', icon: 'home', page: '/pages/index/index' },
+  // { name: 'feed', value: null, active: false, title: '动态', icon: 'list' , page: '/pages/feed/index'},
+  { name: 'profile', value: null, active: false, title: '我的', icon: 'user', page: '/pages/profile/index' },
 ])
 
-export function useTabbar() {
+function useTabbar() {
   const tabbarList = computed(() => tabbarItems.value)
 
   const activeTabbar = computed(() => {
@@ -31,16 +32,22 @@ export function useTabbar() {
       tabbarItem.value = value
     }
   }
-
+  const updateTabbarFromRemote = (remoteData: any[]) => {
+    const currentActiveName = activeTabbar.value?.name
+    tabbarItems.value = remoteData.map(item => ({
+      ...item,
+      value: null,
+      active: item.name === currentActiveName,
+    }))
+  }
   const setTabbarItemActive = (name: string) => {
+    let activeItem: TabbarItem | undefined
     tabbarItems.value.forEach((item) => {
-      if (item.name === name) {
-        item.active = true
-      }
-      else {
-        item.active = false
-      }
+      item.active = item.name === name
+      if (item.active)
+        activeItem = item
     })
+    return activeItem
   }
 
   return {
@@ -49,5 +56,8 @@ export function useTabbar() {
     getTabbarItemValue,
     setTabbarItem,
     setTabbarItemActive,
+    updateTabbarFromRemote,
   }
 }
+
+export default useTabbar

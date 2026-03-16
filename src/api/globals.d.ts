@@ -349,6 +349,9 @@ declare global {
       summary<Config extends Alova2MethodConfig<any>>(
         config?: Config
       ):Alova2Method<any, 'diary.summary', Config>;
+    },
+    option:{
+      [x: string]: any;
     }
   }
 

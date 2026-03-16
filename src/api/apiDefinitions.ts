@@ -68,4 +68,5 @@ export default {
   'article.notices':['GET','article/notice'],
   'article.userAgreement': ['GET', '/article/user-agreement'],
   'article.info': ['GET', '/article/info'],
+  'option.tabbar':['GET', '/option/tabbar'],
 };

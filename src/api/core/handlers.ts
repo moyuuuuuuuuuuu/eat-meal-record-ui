@@ -24,6 +24,7 @@ interface ApiResponse {
   success?: boolean
   total?: number
   more?: boolean
+  isAudit?: string
 }
 
 // Handle successful responses
