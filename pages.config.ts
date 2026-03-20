@@ -47,9 +47,6 @@ export default defineUniPages({
       pagePath: 'pages/index/index',
       text: '首页',
     }, {
-      pagePath: 'pages/feed/index',
-      text: '动态',
-    }, {
       pagePath: 'pages/profile/index',
       text: '我的',
     }],

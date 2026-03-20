@@ -11,7 +11,6 @@ const { isMp, isWechat, isTencentEnv } = usePlatform()
 
 definePage({
   name: 'feed',
-  layout: 'tabbar',
   style: {
     navigationBarTitleText: '动态广场',
     navigationStyle: 'custom',
