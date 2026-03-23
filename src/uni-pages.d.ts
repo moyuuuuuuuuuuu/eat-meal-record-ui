@@ -17,26 +17,7 @@ type _LocationUrl =
   "/pages/nutrition-stats/index" |
   "/pages/personal-info/index" |
   "/pages/profile/index" |
-  "/pages/theme-settings/index" |
-  "/subPages/ci/index" |
-  "/subPages/create-uni/index" |
-  "/subPages/feedback/index" |
-  "/subPages/icon/index" |
-  "/subPages/pinia/index" |
-  "/subPages/request/index" |
-  "/subPages/router/demo-aftereach" |
-  "/subPages/router/demo-guard" |
-  "/subPages/router/demo-object" |
-  "/subPages/router/demo-params" |
-  "/subPages/router/demo-protected" |
-  "/subPages/router/demo-query" |
-  "/subPages/router/demo-string" |
-  "/subPages/router/index" |
-  "/subPages/skills/index" |
-  "/subPages/styles/index" |
-  "/subPages/uni-ku-root/index" |
-  "/subEcharts/echarts/index" |
-  "/subAsyncEcharts/asyncEcharts/index";
+  "/pages/theme-settings/index";
 
 interface NavigateToOptions {
   url: _LocationUrl;
@@ -44,7 +25,7 @@ interface NavigateToOptions {
 interface RedirectToOptions extends NavigateToOptions {}
 
 interface SwitchTabOptions {
-  url: "/pages/index/index" | "/pages/feed/index" | "/pages/profile/index"
+  url: "/pages/index/index" | "/pages/profile/index"
 }
 
 type ReLaunchOptions = NavigateToOptions | SwitchTabOptions;
