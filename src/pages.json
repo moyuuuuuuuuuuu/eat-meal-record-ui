@@ -42,33 +42,6 @@
       }
     },
     {
-      "path": "pages/create-post/index",
-      "type": "page",
-      "style": {
-        "navigationBarTitleText": "发布动态",
-        "navigationStyle": "custom"
-      }
-    },
-    {
-      "path": "pages/feed/index",
-      "type": "page",
-      "name": "feed",
-      "style": {
-        "navigationBarTitleText": "动态广场",
-        "navigationStyle": "custom",
-        "enablePullDownRefresh": true
-      }
-    },
-    {
-      "path": "pages/feed-detail/index",
-      "type": "page",
-      "name": "feed-detail",
-      "style": {
-        "navigationBarTitleText": "动态详情",
-        "navigationStyle": "custom"
-      }
-    },
-    {
       "path": "pages/food-selector/index",
       "type": "page",
       "style": {

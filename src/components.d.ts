@@ -56,8 +56,6 @@ declare module 'vue' {
     IconX: typeof import('./components/icons/IconX.vue')['default']
     MealRecord: typeof import('./components/MealRecord.vue')['default']
     PrivacyPopup: typeof import('./components/PrivacyPopup.vue')['default']
-    UniEcharts: typeof import('uni-echarts')['default']
-    WdBadge: typeof import('wot-design-uni/components/wd-badge/wd-badge.vue')['default']
     WdButton: typeof import('wot-design-uni/components/wd-button/wd-button.vue')['default']
     WdCell: typeof import('wot-design-uni/components/wd-cell/wd-cell.vue')['default']
     WdCellGroup: typeof import('wot-design-uni/components/wd-cell-group/wd-cell-group.vue')['default']
