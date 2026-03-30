@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import IconCoffee from './icons/IconCoffee.vue'
+import IconLayoutGrid from './icons/IconLayoutGrid.vue'
 import IconMoon from './icons/IconMoon.vue'
 import IconSun from './icons/IconSun.vue'
 import IconSunrise from './icons/IconSunrise.vue'
@@ -9,14 +10,15 @@ const emit = defineEmits(['select'])
 const active = ref(false)
 
 const actions = [
-  { type: '加餐', icon: IconCoffee, color: '#92400e' },
-  { type: '晚餐', icon: IconMoon, color: '#6366f1' },
-  { type: '午餐', icon: IconSun, color: '#eab308' },
-  { type: '早餐', icon: IconSunrise, color: '#f97316' },
+  { type: '早餐', icon: IconSunrise, color: '#f97316', url: '/pages/add-meal/index?type=早餐' },
+  { type: '午餐', icon: IconSun, color: '#eab308', url: '/pages/add-meal/index?type=午餐' },
+  { type: '晚餐', icon: IconMoon, color: '#6366f1', url: '/pages/add-meal/index?type=晚餐' },
+  { type: '加餐', icon: IconCoffee, color: '#92400e', url: '/pages/add-meal/index?type=加餐' },
+  { type: '动态', icon: IconLayoutGrid, color: '#10b981', url: `/pages/webview/index?url=${encodeURIComponent('http://test.eat.test/pages/feed/index')}&title=${encodeURIComponent('动态广场')}` },
 ]
 
-function handleClick(type: string) {
-  emit('select', type)
+function handleClick(item: any) {
+  emit('select', item)
   active.value = false
 }
 </script>
@@ -35,12 +37,13 @@ function handleClick(type: string) {
           :key="index"
           class="fab-item"
           :style="{ backgroundColor: item.color }"
-          @click="handleClick(item.type)"
+          @click="handleClick(item)"
         >
           <IconCoffee v-if="item.icon === IconCoffee" size="20" color="white" />
           <IconMoon v-else-if="item.icon === IconMoon" size="20" color="white" />
           <IconSun v-else-if="item.icon === IconSun" size="20" color="white" />
           <IconSunrise v-else-if="item.icon === IconSunrise" size="20" color="white" />
+          <IconLayoutGrid v-else-if="item.icon === IconLayoutGrid" size="20" color="white" />
           <!--          <component :is="item.icon" size="20" color="white" /> -->
         </view>
       </template>

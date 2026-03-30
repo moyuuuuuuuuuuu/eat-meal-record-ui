@@ -93,7 +93,9 @@ function handleCameraRecognize() {
       // #endif
 
       // #ifdef H5
-      const file = res.tempFiles[0]
+      let file: any
+      // eslint-disable-next-line prefer-const
+      file = res.tempFiles[0]
 
       if (!(file instanceof Blob)) {
         console.error('H5 环境未获取到 File 对象')

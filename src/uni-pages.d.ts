@@ -14,7 +14,8 @@ type _LocationUrl =
   "/pages/nutrition-stats/index" |
   "/pages/personal-info/index" |
   "/pages/profile/index" |
-  "/pages/theme-settings/index";
+  "/pages/theme-settings/index" |
+  "/pages/webview/index";
 
 interface NavigateToOptions {
   url: _LocationUrl;

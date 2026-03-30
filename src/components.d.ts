@@ -31,6 +31,7 @@ declare module 'vue' {
     IconHelpCircle: typeof import('./components/icons/IconHelpCircle.vue')['default']
     IconHouse: typeof import('./components/icons/IconHouse.vue')['default']
     IconImage: typeof import('./components/icons/IconImage.vue')['default']
+    IconLayoutGrid: typeof import('./components/icons/IconLayoutGrid.vue')['default']
     IconList: typeof import('./components/icons/IconList.vue')['default']
     IconMapPin: typeof import('./components/icons/IconMapPin.vue')['default']
     IconMessageCircle: typeof import('./components/icons/IconMessageCircle.vue')['default']

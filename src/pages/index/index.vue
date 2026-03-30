@@ -211,9 +211,9 @@ function deleteFood(id: string) {
   })
 }
 
-function handleAddMeal(type: string) {
+function handleAddMeal(item: any) {
   uni.navigateTo({
-    url: `/pages/add-meal/index?type=${type}`,
+    url: item.url,
   })
 }
 
