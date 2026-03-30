@@ -214,7 +214,7 @@ async function callRecognizeApi(content: string, type: 'text' | 'image' | 'audio
             return
           }
 
-          const result = await getRecognizeResultApi(res.taskId)
+          const result = await taskEnquireResultApi(res.taskId)
           if (result && result.status === 'completed') {
             recognizedFoods.value = result.data
             showAiResults.value = true
@@ -259,10 +259,7 @@ async function callRecognizeApi(content: string, type: 'text' | 'image' | 'audio
   }
 }
 
-function addRecognizedFood(food: any) {
-  // 这里需要模拟 food-selector 的逻辑，将 food 转为 foodItems 格式
-  // 由于 recognize 返回的是 FoodInfo & { confidence: number }
-  // 我们默认选择其第一个单位，数量为 1
+function addRecognizedFood(food: any, idx: int) {
   const unit = food.units && food.units.length > 0
     ? food.units[0]
     : {
@@ -286,6 +283,7 @@ function addRecognizedFood(food: any) {
     totalCarbs: food.carbs,
   }
   foodItems.value.push(selectedFood)
+  recognizedFoods.value.splice(idx, 1)
   uni.showToast({ title: `已添加 ${food.name}`, icon: 'success' })
 }
 
@@ -398,8 +396,27 @@ function goToFoodSelector() {
   })
 }
 
+const toFixed1 = (num: number | string) => Number(Number(num).toFixed(1))
+
+function mergeFoodItem(target: any, source: any) {
+  target.quantity = Number(target.quantity) + Number(source.quantity)
+  target.totalCalories = toFixed1(Number(target.totalCalories) + Number(source.totalCalories))
+  target.totalCarbs = toFixed1(Number(target.totalCarbs) + Number(source.totalCarbs))
+  target.totalFat = toFixed1(Number(target.totalFat) + Number(source.totalFat))
+  target.totalProtein = toFixed1(Number(target.totalProtein) + Number(source.totalProtein))
+}
+
 onMounted(() => {
   uni.$on('add-food-item', (item: any) => {
+    const index = foodItems.value.findIndex(food => food.id === item.id)
+
+    if (index > -1) {
+      const current = { ...foodItems.value[index] }
+      mergeFoodItem(current, item)
+      foodItems.value[index] = current
+      return
+    }
+
     foodItems.value.push(item)
   })
 })
@@ -455,7 +472,7 @@ async function handleSave() {
 </script>
 
 <template>
-  <view class="page-container h-screen flex flex-col overflow-hidden bg-[var(--page-bg)]">
+  <view class="page-container flex flex-col bg-[var(--page-bg)]">
     <wd-navbar title="添加餐食" safe-area-inset-top fixed :custom-style="`--wd-navbar-height: ${navBarHeight}px`">
       <template #left>
         <view class="flex items-center gap-2 pl-2">
@@ -478,7 +495,7 @@ async function handleSave() {
     <view :style="{ height: `${totalHeight}px` }" />
 
     <scroll-view scroll-y class="flex-1 px-4 py-4 space-y-4">
-      <view class="pb-24 space-y-4">
+      <view class="space-y-4">
         <!-- 餐次提示 -->
         <view
           class="flex items-center gap-3 border border-emerald-100 rounded-xl bg-emerald-50 p-3 dark:border-emerald-800 dark:bg-emerald-900/20"
@@ -734,7 +751,7 @@ async function handleSave() {
             v-for="(food, idx) in recognizedFoods"
             :key="idx"
             class="flex items-center justify-between border border-[var(--border-color)] rounded-xl bg-[var(--page-bg)] p-4 transition-all active:border-emerald-500"
-            @click="addRecognizedFood(food)"
+            @click="addRecognizedFood(food, idx)"
           >
             <view>
               <view class="mb-1 flex items-center gap-2">
