@@ -1,17 +1,37 @@
 <script setup lang="ts">
-import { onPageScroll, onPullDownRefresh, onReachBottom, onShareAppMessage, onShareTimeline, onShow } from '@dcloudio/uni-app'
+import { onLoad, onPageScroll, onPullDownRefresh, onReachBottom, onShareAppMessage, onShareTimeline, onShow } from '@dcloudio/uni-app'
 import { usePagination, useRequest } from 'alova/client'
 import { computed, inject, onMounted, onUnmounted, ref, watch } from 'vue'
 import FeedMediaAttach from '@/components/FeedMediaAttach.vue'
+import { useAuth } from '@/composables/useAuth'
 import { usePlatform } from '@/composables/usePlatform'
 import { useSystemInfo } from '@/composables/useSystemInfo'
 
 const { statusBarHeight, navBarHeight } = useSystemInfo()
 const { isMp, isWechat, isTencentEnv } = usePlatform()
+const { login } = useAuth()
+const themeStore = useThemeStore()
+const manualThemeStore = useManualThemeStore()
+
+onLoad((options) => {
+  console.log(options)
+  if (options && options.token) {
+    login(options.token)
+  }
+  if (options && options.mode) {
+    if (options.mode === 'light' || options.mode === 'dark') {
+      themeStore.setTheme(options.mode)
+      manualThemeStore.toggleTheme(options.mode)
+    }
+  }
+  else {
+    themeStore.initSystemTheme()
+  }
+})
 
 definePage({
   name: 'feed',
-  layout: 'tabbar',
+  layout: 'default',
   style: {
     navigationBarTitleText: '动态广场',
     navigationStyle: 'custom',

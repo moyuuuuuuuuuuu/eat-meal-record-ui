@@ -10,7 +10,20 @@
 import { defineUniPages } from '@uni-helper/vite-plugin-uni-pages'
 
 export default defineUniPages({
-  pages: [],
+  pages: [
+    {
+      path: 'pages/feed/index',
+      type: 'home',
+    },
+    {
+      path: 'pages/create-post/index',
+      type: 'page',
+    },
+    {
+      path: 'pages/feed-detail/index',
+      type: 'page',
+    },
+  ],
   globalStyle: {
     // 导航栏配置
     navigationBarBackgroundColor: '@navBgColor',
@@ -30,28 +43,5 @@ export default defineUniPages({
     // 动画配置
     animationType: 'pop-in',
     animationDuration: 300,
-  },
-  tabBar: {
-    custom: true,
-    // #ifdef MP-ALIPAY
-    customize: true,
-    // 暂时不生效。4.71.2025061206-alpha已修复：https://uniapp.dcloud.net.cn/release-note-alpha.html#_4-71-2025061206-alpha，我们等正式版发布后更新。
-    overlay: true,
-    // #endif
-    height: '0',
-    color: '@tabColor',
-    selectedColor: '@tabSelectedColor',
-    backgroundColor: '@tabBgColor',
-    borderStyle: '@tabBorderStyle',
-    list: [{
-      pagePath: 'pages/index/index',
-      text: '首页',
-    }, {
-      pagePath: 'pages/feed/index',
-      text: '动态',
-    }, {
-      pagePath: 'pages/profile/index',
-      text: '我的',
-    }],
   },
 })

@@ -55,11 +55,12 @@ export const useThemeStore = defineStore('theme', {
     },
 
     /**
-     * 设置主题（仅内部使用）
+     * 设置主题
      * @param theme 主题模式
      */
     setTheme(theme: ThemeMode) {
       this.theme = theme
+      console.log('主题已切换至:', theme)
     },
 
     /**

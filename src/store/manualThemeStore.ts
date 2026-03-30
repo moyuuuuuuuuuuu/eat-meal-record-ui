@@ -66,7 +66,7 @@ export const useManualThemeStore = defineStore('manualTheme', {
       // 检查当前页面是否存在，防止报错
       const pages = getCurrentPages()
       if (pages.length === 0) {
-        console.warn('setNavigationBarColor: 无可用页面')
+        // console.warn('setNavigationBarColor: 无可用页面')
         return
       }
 
