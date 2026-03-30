@@ -32,6 +32,16 @@ const recorderManager = ref<UniApp.RecorderManager | null>(null)
 const recognizedFoods = ref<any[]>([])
 const showAiResults = ref(false)
 const hasBindRecorderStop = ref(false)
+const isAiRecognizing = ref(false)
+const aiLoadingStep = ref(0)
+const aiLoadingTips = [
+  '正在理解你的输入',
+  '正在分析食物特征',
+  '正在计算营养估值',
+  '马上就好，请再等一下',
+]
+let aiLoadingTimer: ReturnType<typeof setInterval> | null = null
+
 // #ifdef MP-WEIXIN || APP-PLUS
 recorderManager.value = uni.getRecorderManager()
 
@@ -151,8 +161,26 @@ const { send: recognizeApi } = useRequest(data => Apis.food.recognize({ data, ti
   immediate: false
 })
 
+function startAiLoading() {
+  isAiRecognizing.value = true
+  aiLoadingStep.value = 0
+  if (aiLoadingTimer)
+    clearInterval(aiLoadingTimer)
+  aiLoadingTimer = setInterval(() => {
+    aiLoadingStep.value = (aiLoadingStep.value + 1) % aiLoadingTips.length
+  }, 1800)
+}
+
+function stopAiLoading() {
+  isAiRecognizing.value = false
+  if (aiLoadingTimer) {
+    clearInterval(aiLoadingTimer)
+    aiLoadingTimer = null
+  }
+}
+
 async function callRecognizeApi(content: string, type: 'text' | 'image' | 'audio', options: any = {}) {
-  uni.showLoading({ title: 'AI 识别中...' })
+  startAiLoading()
   try {
     const res = await recognizeApi({
       content,
@@ -171,8 +199,9 @@ async function callRecognizeApi(content: string, type: 'text' | 'image' | 'audio
     }
   } catch (err) {
     console.error('AI 识别失败', err)
-  } finally {
-    uni.hideLoading()
+  }
+  finally {
+    stopAiLoading()
   }
 }
 
@@ -318,6 +347,7 @@ onMounted(() => {
 
 onUnload(() => {
   uni.$off('add-food-item')
+  stopAiLoading()
 })
 
 const { loading: saving, send: addMealApi } = useRequest(data => Apis.diary.addFood({ data }), {
@@ -674,6 +704,23 @@ async function handleSave() {
         </view>
       </view>
     </wd-popup>
+
+    <view v-if="isAiRecognizing" class="ai-loading-mask">
+      <view class="ai-loading-card">
+        <view class="ai-orbit">
+          <view class="ai-core" />
+          <view class="ai-dot dot-1" />
+          <view class="ai-dot dot-2" />
+          <view class="ai-dot dot-3" />
+        </view>
+        <text class="ai-loading-title">
+          AI 正在识别中
+        </text>
+        <text class="ai-loading-tip">
+          {{ aiLoadingTips[aiLoadingStep] }}
+        </text>
+      </view>
+    </view>
   </view>
 </template>
 
@@ -692,5 +739,94 @@ async function handleSave() {
 .save-btn.disabled {
   opacity: 0.5;
   background-color: #9ca3af;
+}
+
+.ai-loading-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(6, 21, 18, 0.38);
+  backdrop-filter: blur(2px);
+}
+
+.ai-loading-card {
+  width: 250px;
+  border-radius: 18px;
+  padding: 22px 18px;
+  background: linear-gradient(160deg, #f3fbf8 0%, #e7f6f0 100%);
+  box-shadow: 0 12px 30px rgba(16, 185, 129, 0.26);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.ai-orbit {
+  position: relative;
+  width: 70px;
+  height: 70px;
+  margin-bottom: 12px;
+  animation: spin 2.2s linear infinite;
+}
+
+.ai-core {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle at 30% 30%, #b5edd8, #7ad8b5 75%);
+  box-shadow: 0 0 0 7px rgba(122, 216, 181, 0.22);
+}
+
+.ai-dot {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #53c89f;
+  box-shadow: 0 0 10px rgba(83, 200, 159, 0.55);
+}
+
+.dot-1 {
+  top: 0;
+  left: 29px;
+}
+
+.dot-2 {
+  right: 3px;
+  bottom: 16px;
+}
+
+.dot-3 {
+  left: 3px;
+  bottom: 16px;
+}
+
+.ai-loading-title {
+  font-size: 15px;
+  line-height: 1.5;
+  font-weight: 700;
+  color: #128567;
+}
+
+.ai-loading-tip {
+  margin-top: 4px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #3a8d75;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>
