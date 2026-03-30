@@ -4,13 +4,13 @@
  * Swagger Petstore - OpenAPI 3.0 - version 1.0.27
  *
  * This is a sample Pet Store Server based on the OpenAPI 3.0 specification.  You can find out more about
-Swagger at [https://swagger.io](https://swagger.io). In the third iteration of the pet store, we&#x27;ve switched to the design first approach!
-You can now help us improve the API whether it&#x27;s by making changes to the definition itself or to the code.
-That way, with time, we can improve the API in general, and expose some of the new features in OAS3.
+ Swagger at [https://swagger.io](https://swagger.io). In the third iteration of the pet store, we&#x27;ve switched to the design first approach!
+ You can now help us improve the API whether it&#x27;s by making changes to the definition itself or to the code.
+ That way, with time, we can improve the API in general, and expose some of the new features in OAS3.
 
-Some useful links:
-- [The Pet Store repository](https://github.com/swagger-api/swagger-petstore)
-- [The source API definition for the Pet Store](https://github.com/swagger-api/swagger-petstore/blob/master/src/main/resources/openapi.yaml)
+ Some useful links:
+ - [The Pet Store repository](https://github.com/swagger-api/swagger-petstore)
+ - [The source API definition for the Pet Store](https://github.com/swagger-api/swagger-petstore/blob/master/src/main/resources/openapi.yaml)
  *
  * OpenAPI version: 3.0.4
  *
@@ -31,25 +31,25 @@ type UserMethodConfigMap = typeof $$userConfigMap;
 
 type Alova2MethodConfig<Responded> =
   CollapsedAlova extends Alova<
-    AlovaGenerics<
-      any,
-      any,
-      infer RequestConfig,
-      infer Response,
-      infer ResponseHeader,
-      infer L1Cache,
-      infer L2Cache,
-      infer SE
-    >
-  >
-    ? Omit<
-        AlovaMethodCreateConfig<
-          AlovaGenerics<Responded, any, RequestConfig, Response, ResponseHeader, L1Cache, L2Cache, SE>,
-          any,
-          Responded
-        >,
-        'params'
+      AlovaGenerics<
+        any,
+        any,
+        infer RequestConfig,
+        infer Response,
+        infer ResponseHeader,
+        infer L1Cache,
+        infer L2Cache,
+        infer SE
       >
+    >
+    ? Omit<
+      AlovaMethodCreateConfig<
+        AlovaGenerics<Responded, any, RequestConfig, Response, ResponseHeader, L1Cache, L2Cache, SE>,
+        any,
+        Responded
+      >,
+      'params'
+    >
     : never;
 
 // Extract the return type of transform function that define in $$userConfigMap, if it not exists, use the default type.
@@ -67,43 +67,45 @@ type Alova2Method<
   CurrentConfig extends Alova2MethodConfig<any>
 > =
   CollapsedAlova extends Alova<
-    AlovaGenerics<
-      any,
-      any,
-      infer RequestConfig,
-      infer Response,
-      infer ResponseHeader,
-      infer L1Cache,
-      infer L2Cache,
-      infer SE
-    >
-  >
-    ? Method<
-        AlovaGenerics<
-          CurrentConfig extends undefined
-            ? ExtractUserDefinedTransformed<DefinitionKey, Responded>
-            : CurrentConfig['transform'] extends (...args: any[]) => any
-              ? Awaited<ReturnType<CurrentConfig['transform']>>
-              : ExtractUserDefinedTransformed<DefinitionKey, Responded>,
-          any,
-          RequestConfig,
-          Response,
-          ResponseHeader,
-          L1Cache,
-          L2Cache,
-          SE
-        >
+      AlovaGenerics<
+        any,
+        any,
+        infer RequestConfig,
+        infer Response,
+        infer ResponseHeader,
+        infer L1Cache,
+        infer L2Cache,
+        infer SE
       >
+    >
+    ? Method<
+      AlovaGenerics<
+        CurrentConfig extends undefined
+          ? ExtractUserDefinedTransformed<DefinitionKey, Responded>
+          : CurrentConfig['transform'] extends (...args: any[]) => any
+            ? Awaited<ReturnType<CurrentConfig['transform']>>
+            : ExtractUserDefinedTransformed<DefinitionKey, Responded>,
+        any,
+        RequestConfig,
+        Response,
+        ResponseHeader,
+        L1Cache,
+        L2Cache,
+        SE
+      >
+    >
     : never;
 
 export interface Category {
   id?: number;
   name?: string;
 }
+
 export interface Tag {
   id?: number;
   name?: string;
 }
+
 export interface Pet {
   id?: number;
   name: string;
@@ -115,6 +117,7 @@ export interface Pet {
    */
   status?: 'available' | 'pending' | 'sold';
 }
+
 export interface Order {
   id?: number;
   petId?: number;
@@ -126,6 +129,7 @@ export interface Order {
   status?: 'placed' | 'approved' | 'delivered';
   complete?: boolean;
 }
+
 export interface User {
   id?: number;
   username?: string;
@@ -139,14 +143,17 @@ export interface User {
    */
   userStatus?: number;
 }
+
 export interface ApiResponse {
   code?: number;
   type?: string;
   message?: string;
 }
+
 declare global {
   interface Apis {
     [x: string]: any;
+
     feed: {
       /**
        * Get feed list
@@ -327,30 +334,38 @@ declare global {
       recommendation<Config extends Alova2MethodConfig<any>>(
         config?: Config
       ): Alova2Method<any, 'food.recommendation', Config>;
+      /**
+       * Get food recognition result by task id
+       */
     };
-    nutrition:{
+    task: {
+      enquire<Config extends Alova2MethodConfig<any> & { params: { taskId: string | number } }>(
+        config: Config
+      ): Alova2Method<{ status: 'pending' | 'completed' | 'failed'; data?: any }, 'task.enquire', Config>;
+    }
+    nutrition: {
       stats<Config extends Alova2MethodConfig<any>>(
         config?: Config
       ): Alova2Method<any, 'nutrition.stats', Config>;
     },
-    article:{
+    article: {
       notices<Config extends Alova2MethodConfig<any>>(
         config?: Config
-      ):Alova2Method<any, 'article.notices', Config>;
+      ): Alova2Method<any, 'article.notices', Config>;
       userAgreement<Config extends Alova2MethodConfig<any>>(
         config?: Config
       ): Alova2Method<any, 'article.userAgreement', Config>;
       info<Config extends Alova2MethodConfig<any>>(
-        config?: { params: { id: any ,type: any} }
+        config?: { params: { id: any, type: any } }
       ): Alova2Method<any, "article.info", Config>;
     },
-    diary:{
+    diary: {
       [x: string]: any;
       summary<Config extends Alova2MethodConfig<any>>(
         config?: Config
-      ):Alova2Method<any, 'diary.summary', Config>;
+      ): Alova2Method<any, 'diary.summary', Config>;
     },
-    option:{
+    option: {
       [x: string]: any;
     }
   }

@@ -5,13 +5,13 @@
  * Swagger Petstore - OpenAPI 3.0 - version 1.0.27
  *
  * This is a sample Pet Store Server based on the OpenAPI 3.0 specification.  You can find out more about
-Swagger at [https://swagger.io](https://swagger.io). In the third iteration of the pet store, we&#x27;ve switched to the design first approach!
-You can now help us improve the API whether it&#x27;s by making changes to the definition itself or to the code.
-That way, with time, we can improve the API in general, and expose some of the new features in OAS3.
+ Swagger at [https://swagger.io](https://swagger.io). In the third iteration of the pet store, we&#x27;ve switched to the design first approach!
+ You can now help us improve the API whether it&#x27;s by making changes to the definition itself or to the code.
+ That way, with time, we can improve the API in general, and expose some of the new features in OAS3.
 
-Some useful links:
-- [The Pet Store repository](https://github.com/swagger-api/swagger-petstore)
-- [The source API definition for the Pet Store](https://github.com/swagger-api/swagger-petstore/blob/master/src/main/resources/openapi.yaml)
+ Some useful links:
+ - [The Pet Store repository](https://github.com/swagger-api/swagger-petstore)
+ - [The source API definition for the Pet Store](https://github.com/swagger-api/swagger-petstore/blob/master/src/main/resources/openapi.yaml)
  *
  * OpenAPI version: 3.0.4
  *
@@ -46,7 +46,7 @@ export default {
   'food.recognize': ['POST', '/food/recognize'],
   'food.search': ['GET', '/food/search'],
   'food.recommendation': ['GET', '/recommendation'],
-
+  'task.enquire': ['GET', '/task/enquire'],
   // Feed
   'feed.list': ['GET', '/feed/list'],
   'feed.create': ['POST', '/feed/create'],
@@ -65,8 +65,8 @@ export default {
 
   'nutrition.stats': ['GET', '/nutrition/stats'],
   // Article
-  'article.notices':['GET','article/notice'],
+  'article.notices': ['GET', 'article/notice'],
   'article.userAgreement': ['GET', '/article/user-agreement'],
   'article.info': ['GET', '/article/info'],
-  'option.tabbar':['GET', '/option/tabbar'],
+  'option.tabbar': ['GET', '/option/tabbar'],
 };
