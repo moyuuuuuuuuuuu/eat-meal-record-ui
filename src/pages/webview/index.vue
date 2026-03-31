@@ -15,7 +15,7 @@ const url = ref<string>('')
 const title = ref<string>('')
 
 const { token } = useAuth()
-
+const { theme } = useTheme()
 onLoad((options) => {
   if (options?.url) {
     let finalUrl = decodeURIComponent(options.url)
@@ -25,6 +25,10 @@ onLoad((options) => {
       if (token.value) {
         const separator = finalUrl.includes('?') ? '&' : '?'
         finalUrl = `${finalUrl}${separator}token=${token.value}`
+      }
+      if (theme.value) {
+        const separator = finalUrl.includes('?') ? '&' : '?'
+        finalUrl = `${finalUrl}${separator}theme=${theme.value}`
       }
     }
     url.value = finalUrl

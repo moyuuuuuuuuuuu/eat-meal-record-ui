@@ -24,7 +24,7 @@ interface ApiResponse {
   success?: boolean
   total?: number
   more?: boolean
-  isAudit?: string
+  s?: boolean
 }
 
 // Handle successful responses
@@ -32,7 +32,7 @@ export async function handleAlovaResponse(
   response: UniApp.RequestSuccessCallbackResult | UniApp.UploadFileSuccessCallbackResult | UniApp.DownloadSuccessData,
 ) {
   const globalToast = useGlobalToast()
-  const { logout } = useAuth()
+  const { logout, isAudit } = useAuth()
   // Extract status code and data from UniApp response
   const { statusCode, data } = response as UniNamespace.RequestSuccessCallbackResult
 
@@ -78,6 +78,11 @@ export async function handleAlovaResponse(
   if (json.code !== 0 && json.code !== 200) {
     globalToast.error(json.msg || json.message || '请求失败')
     throw new ApiError(json.msg || json.message || 'Request failed', json.code || statusCode, data)
+  }
+
+  // 更新审核状态
+  if (typeof json.s === 'boolean') {
+    isAudit.value = json.s
   }
 
   // Return data for successful responses

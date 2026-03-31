@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useAuth } from '@/composables/useAuth'
 import IconCoffee from './icons/IconCoffee.vue'
 import IconLayoutGrid from './icons/IconLayoutGrid.vue'
 import IconMoon from './icons/IconMoon.vue'
@@ -6,16 +7,29 @@ import IconSun from './icons/IconSun.vue'
 import IconSunrise from './icons/IconSunrise.vue'
 
 const emit = defineEmits(['select'])
-
+const feedUrl = ref(import.meta.env.VITE_WEB_BASE_URL as string)
 const active = ref(false)
+const { isAudit } = useAuth()
 
-const actions = [
-  { type: '早餐', icon: IconSunrise, color: '#f97316', url: '/pages/add-meal/index?type=早餐' },
-  { type: '午餐', icon: IconSun, color: '#eab308', url: '/pages/add-meal/index?type=午餐' },
-  { type: '晚餐', icon: IconMoon, color: '#6366f1', url: '/pages/add-meal/index?type=晚餐' },
-  { type: '加餐', icon: IconCoffee, color: '#92400e', url: '/pages/add-meal/index?type=加餐' },
-  { type: '动态', icon: IconLayoutGrid, color: '#10b981', url: `/pages/webview/index?url=${encodeURIComponent('http://test.eat.test/pages/feed/index')}&title=${encodeURIComponent('动态广场')}` },
-]
+const actions = computed(() => {
+  const list = [
+    { type: '早餐', icon: IconSunrise, color: '#f97316', url: '/pages/add-meal/index?type=早餐' },
+    { type: '午餐', icon: IconSun, color: '#eab308', url: '/pages/add-meal/index?type=午餐' },
+    { type: '晚餐', icon: IconMoon, color: '#6366f1', url: '/pages/add-meal/index?type=晚餐' },
+    { type: '加餐', icon: IconCoffee, color: '#92400e', url: '/pages/add-meal/index?type=加餐' },
+  ]
+
+  if (!isAudit.value) {
+    return list.push({
+      type: '动态',
+      icon: IconLayoutGrid,
+      color: '#10b981',
+      url: `/pages/webview/index?url=${encodeURIComponent(feedUrl.value)}&title=${encodeURIComponent('动态广场')}`,
+    })
+  }
+
+  return list
+})
 
 function handleClick(item: any) {
   emit('select', item)
@@ -49,7 +63,10 @@ function handleClick(item: any) {
       </template>
       <template #trigger>
         <view class="fab-trigger" @click="active = !active">
-          <IconPlus :size="active ? 28 : 24" color="white" :style="{ transform: active ? 'rotate(135deg)' : 'rotate(0)', transition: 'all 0.3s' }" />
+          <IconPlus
+            :size="active ? 28 : 24" color="white"
+            :style="{ transform: active ? 'rotate(135deg)' : 'rotate(0)', transition: 'all 0.3s' }"
+          />
         </view>
       </template>
     </wd-fab>
@@ -67,6 +84,7 @@ function handleClick(item: any) {
   justify-content: center;
   box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
 }
+
 .fab-item {
   width: 44px;
   height: 44px;

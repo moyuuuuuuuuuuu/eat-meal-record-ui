@@ -13,6 +13,7 @@ export const useAuth = createGlobalState(() => {
 
   const token = ref(getStorage('token') || '')
   const userInfo = ref(getStorage('userInfo') || null)
+  const isAudit = ref(getStorage('isAudit') || false)
 
   watch(token, (val) => {
     uni.setStorageSync('token', val)
@@ -21,6 +22,10 @@ export const useAuth = createGlobalState(() => {
   watch(userInfo, (val) => {
     uni.setStorageSync('userInfo', val)
   }, { deep: true })
+
+  watch(isAudit, (val) => {
+    uni.setStorageSync('isAudit', val)
+  })
 
   const isLogin = computed(() => !!token.value)
 
@@ -35,13 +40,16 @@ export const useAuth = createGlobalState(() => {
   const logout = () => {
     token.value = ''
     userInfo.value = null
+    isAudit.value = false
     uni.removeStorageSync('token')
     uni.removeStorageSync('userInfo')
+    uni.removeStorageSync('isAudit')
   }
 
   return {
     token,
     userInfo,
+    isAudit,
     isLogin,
     login,
     logout,
