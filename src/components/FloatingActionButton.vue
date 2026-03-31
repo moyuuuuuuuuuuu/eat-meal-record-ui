@@ -53,7 +53,11 @@ function handleClick(item: any) {
           :style="{ backgroundColor: item.color }"
           @click="handleClick(item)"
         >
-          <component :is="item.icon" size="20" color="white" />
+          <IconSunrise v-if="item.type === '早餐'" size="20" color="white" />
+          <IconSun v-else-if="item.type === '午餐'" size="20" color="white" />
+          <IconMoon v-else-if="item.type === '晚餐'" size="20" color="white" />
+          <IconCoffee v-else-if="item.type === '加餐'" size="20" color="white" />
+          <IconLayoutGrid v-else-if="item.type === '动态'" size="20" color="white" />
         </view>
       </template>
       <template #trigger>
