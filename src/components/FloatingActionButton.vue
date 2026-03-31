@@ -3,6 +3,7 @@ import { useAuth } from '@/composables/useAuth'
 import IconCoffee from './icons/IconCoffee.vue'
 import IconLayoutGrid from './icons/IconLayoutGrid.vue'
 import IconMoon from './icons/IconMoon.vue'
+import IconPlus from './icons/IconPlus.vue'
 import IconSun from './icons/IconSun.vue'
 import IconSunrise from './icons/IconSunrise.vue'
 
@@ -20,14 +21,13 @@ const actions = computed(() => {
   ]
 
   if (!isAudit.value) {
-    return list.push({
+    list.push({
       type: '动态',
       icon: IconLayoutGrid,
       color: '#10b981',
       url: `/pages/webview/index?url=${encodeURIComponent(feedUrl.value)}&title=${encodeURIComponent('动态广场')}`,
     })
   }
-
   return list
 })
 
@@ -53,12 +53,7 @@ function handleClick(item: any) {
           :style="{ backgroundColor: item.color }"
           @click="handleClick(item)"
         >
-          <IconCoffee v-if="item.icon === IconCoffee" size="20" color="white" />
-          <IconMoon v-else-if="item.icon === IconMoon" size="20" color="white" />
-          <IconSun v-else-if="item.icon === IconSun" size="20" color="white" />
-          <IconSunrise v-else-if="item.icon === IconSunrise" size="20" color="white" />
-          <IconLayoutGrid v-else-if="item.icon === IconLayoutGrid" size="20" color="white" />
-          <!--          <component :is="item.icon" size="20" color="white" /> -->
+          <component :is="item.icon" size="20" color="white" />
         </view>
       </template>
       <template #trigger>
