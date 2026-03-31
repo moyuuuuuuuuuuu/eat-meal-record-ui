@@ -60,7 +60,6 @@ declare module 'vue' {
     WdButton: typeof import('wot-design-uni/components/wd-button/wd-button.vue')['default']
     WdConfigProvider: typeof import('wot-design-uni/components/wd-config-provider/wd-config-provider.vue')['default']
     WdGap: typeof import('wot-design-uni/components/wd-gap/wd-gap.vue')['default']
-    WdIcon: typeof import('wot-design-uni/components/wd-icon/wd-icon.vue')['default']
     WdImg: typeof import('wot-design-uni/components/wd-img/wd-img.vue')['default']
     WdLoading: typeof import('wot-design-uni/components/wd-loading/wd-loading.vue')['default']
     WdLoadmore: typeof import('wot-design-uni/components/wd-loadmore/wd-loadmore.vue')['default']

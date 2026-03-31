@@ -4,11 +4,7 @@ import { usePagination, useRequest } from 'alova/client'
 import { computed, inject, onMounted, onUnmounted, ref, watch } from 'vue'
 import FeedMediaAttach from '@/components/FeedMediaAttach.vue'
 import { useAuth } from '@/composables/useAuth'
-import { usePlatform } from '@/composables/usePlatform'
-import { useSystemInfo } from '@/composables/useSystemInfo'
 
-const { statusBarHeight, navBarHeight } = useSystemInfo()
-const { isMp, isWechat, isTencentEnv } = usePlatform()
 const { login } = useAuth()
 const themeStore = useThemeStore()
 const manualThemeStore = useManualThemeStore()
@@ -34,7 +30,6 @@ definePage({
   layout: 'default',
   style: {
     navigationBarTitleText: '动态广场',
-    navigationStyle: 'custom',
     enablePullDownRefresh: true,
   },
 })
@@ -186,25 +181,20 @@ onShareTimeline(() => {
 
 <template>
   <view class="page-container min-h-screen bg-[var(--page-bg)] pb-20">
-    <view class="header-container fixed left-0 top-0 z-10 w-full bg-[var(--page-bg)]">
-      <wd-navbar title="动态广场" safe-area-inset-top />
-      <view class="border-b border-[var(--border-color)] bg-[var(--card-bg)] px-4 py-2">
-        <view class="flex items-center gap-3 rounded-xl bg-[var(--page-bg)] px-4 py-2" @click="handleCreatePost">
-          <view class="h-8 w-8 flex items-center justify-center rounded-full bg-emerald-500">
-            <IconUser size="16" color="white" />
-          </view>
-          <text class="text-sm text-[var(--text-sub)]">
-            分享你的饮食心得...
-          </text>
-          <view class="ml-auto flex items-center gap-2">
-            <IconImage size="18" color="#9ca3af" />
-            <IconVideo size="18" color="#9ca3af" />
-          </view>
+    <view class="border-b border-[var(--border-color)] bg-[var(--card-bg)] px-4 py-2">
+      <view class="flex items-center gap-3 rounded-xl bg-[var(--page-bg)] px-4 py-2" @click="handleCreatePost">
+        <view class="h-8 w-8 flex items-center justify-center rounded-full bg-emerald-500">
+          <IconUser size="16" color="white" />
+        </view>
+        <text class="text-sm text-[var(--text-sub)]">
+          分享你的饮食心得...
+        </text>
+        <view class="ml-auto flex items-center gap-2">
+          <IconImage size="18" color="#9ca3af" />
+          <IconVideo size="18" color="#9ca3af" />
         </view>
       </view>
     </view>
-
-    <view :style="{ height: `${statusBarHeight + navBarHeight + 52.5}px` }" />
 
     <view class="posts-list mt-6 pb-20 space-y-2">
       <template v-if="showSkeleton">

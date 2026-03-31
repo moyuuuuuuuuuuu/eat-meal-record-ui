@@ -2,15 +2,11 @@
 import { onLoad, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app'
 import { useRequest } from 'alova/client'
 import FeedMediaAttach from '@/components/FeedMediaAttach.vue'
-import { useSystemInfo } from '@/composables/useSystemInfo'
-
-const { statusBarHeight, navBarHeight } = useSystemInfo()
 
 definePage({
   name: 'feed-detail',
   style: {
     navigationBarTitleText: '动态详情',
-    navigationStyle: 'custom',
   },
 })
 
@@ -29,16 +25,6 @@ onLoad((options) => {
     getDetail(options.id)
   }
 })
-
-function handleBack() {
-  const pages = getCurrentPages()
-  if (pages.length > 1) {
-    uni.navigateBack()
-  }
-  else {
-    uni.reLaunch({ url: '/pages/index/index' })
-  }
-}
 
 function previewImage(current: string) {
   if (!detail.value?.attach)
@@ -96,11 +82,6 @@ onShareTimeline(() => {
 
 <template>
   <view class="page-container min-h-screen bg-[var(--page-bg)] pb-10">
-    <wd-navbar title="动态详情" left-arrow safe-area-inset-top fixed @click-left="handleBack" />
-
-    <!-- 顶部占位 -->
-    <view :style="{ height: `${statusBarHeight + navBarHeight}px` }" />
-
     <view v-if="loading" class="mt-20 flex flex-col items-center justify-center opacity-50">
       <wd-loading size="24px" />
       <text class="mt-2 text-xs">
