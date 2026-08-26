@@ -31,12 +31,22 @@ const isRecording = ref(false)
 const recorderManager = ref<UniApp.RecorderManager | null>(null)
 const recognizedFoods = ref<any[]>([])
 const showAiResults = ref(false)
+const aiQuota = ref<{ used: number, limit: number, remaining: number, reset_at: number } | null>(null)
+const aiTaskId = ref('')
+const aiTaskStatus = ref<'idle' | 'submitting' | 'running' | 'failed'>('idle')
+const aiTaskStage = ref('')
+const aiTaskMessage = ref('')
+const aiTaskRetryable = ref(true)
+const AI_TASK_STORAGE_KEY = 'PENDING_AI_RECOGNIZE_TASK_ID'
+let pollTimer: ReturnType<typeof setTimeout> | undefined
+let pollingStartedAt = 0
+const isAiBusy = computed(() => aiTaskStatus.value === 'submitting' || aiTaskStatus.value === 'running')
 
 // #ifdef MP-WEIXIN || APP-PLUS
 recorderManager.value = uni.getRecorderManager()
 recorderManager.value.onStop(async (res) => {
   isRecording.value = false
-  uni.showLoading({ title: '语音解析中...' })
+  aiTaskMessage.value = '正在读取录音...'
   uni.getFileSystemManager().readFile({
     filePath: res.tempFilePath,
     encoding: 'base64',
@@ -44,19 +54,25 @@ recorderManager.value.onStop(async (res) => {
       await callRecognizeApi(fileRes.data as string, 'audio', { format: 'wav' })
     },
     fail: () => {
-      uni.hideLoading()
+      aiTaskStatus.value = 'idle'
       uni.showToast({ title: '读取录音失败', icon: 'none' })
     },
   })
 })
 // #endif
 
-function handleAiRecognize() {
+async function handleAiRecognize() {
   showAiPopup.value = true
+  try {
+    aiQuota.value = await Apis.food.recognizeQuota()
+  }
+  catch (err) {
+    console.error('获取 AI 额度失败', err)
+  }
 }
 
 async function handleTextRecognize() {
-  if (!aiInputText.value.trim())
+  if (!aiInputText.value.trim() || isAiBusy.value)
     return
   await callRecognizeApi(aiInputText.value, 'text')
 }
@@ -78,6 +94,8 @@ function blobToBase64(blob: Blob): Promise<string> {
 }
 
 function handleCameraRecognize() {
+  if (isAiBusy.value)
+    return
   uni.chooseImage({
     count: 1,
     sizeType: ['compressed'],
@@ -113,6 +131,8 @@ function handleCameraRecognize() {
 }
 
 function startVoiceRecognize() {
+  if (isAiBusy.value)
+    return
   if (!recorderManager.value) {
     uni.showToast({ title: '当前环境不支持语音识别', icon: 'none' })
     return
@@ -136,11 +156,77 @@ function stopVoiceRecognize() {
 
 const { send: recognizeApi } = useRequest(data => Apis.food.recognize({ data }), {
   immediate: false,
-  timeout: 120000,
+  timeout: 60000,
 })
 
+function stopTaskPolling() {
+  if (pollTimer) {
+    clearTimeout(pollTimer)
+    pollTimer = undefined
+  }
+}
+
+function clearPendingTask() {
+  stopTaskPolling()
+  aiTaskId.value = ''
+  uni.removeStorageSync(AI_TASK_STORAGE_KEY)
+}
+
+function scheduleTaskPolling() {
+  stopTaskPolling()
+  const elapsed = Date.now() - pollingStartedAt
+  pollTimer = setTimeout(pollAiTask, elapsed < 15000 ? 2000 : 5000)
+}
+
+async function pollAiTask() {
+  if (!aiTaskId.value)
+    return
+  try {
+    const result = await Apis.task.enquire({ params: { taskId: aiTaskId.value } })
+    aiTaskStage.value = result.stage || ''
+    aiTaskMessage.value = result.message || 'AI 正在识别餐食'
+    if (result.status === 'completed') {
+      recognizedFoods.value = Array.isArray(result.data) ? result.data : []
+      clearPendingTask()
+      aiTaskStatus.value = 'idle'
+      showAiPopup.value = false
+      if (recognizedFoods.value.length) {
+        showAiResults.value = true
+      }
+      else {
+        uni.showToast({ title: '未识别到有效食物', icon: 'none' })
+      }
+      return
+    }
+    if (result.status === 'failed') {
+      clearPendingTask()
+      aiTaskStatus.value = 'failed'
+      aiTaskRetryable.value = result.retryable !== false
+      showAiPopup.value = true
+      return
+    }
+    aiTaskStatus.value = 'running'
+    scheduleTaskPolling()
+  }
+  catch (err) {
+    console.error('查询 AI 识别任务失败', err)
+    aiTaskMessage.value = '网络不稳定，正在继续查询识别结果'
+    scheduleTaskPolling()
+  }
+}
+
+function resetAiFailure() {
+  aiTaskStatus.value = 'idle'
+  aiTaskStage.value = ''
+  aiTaskMessage.value = ''
+}
+
 async function callRecognizeApi(content: string, type: 'text' | 'image' | 'audio', options: any = {}) {
-  uni.showLoading({ title: 'AI 识别中...' })
+  if (isAiBusy.value)
+    return
+  aiTaskStatus.value = 'submitting'
+  aiTaskMessage.value = type === 'image' ? '正在上传图片...' : type === 'audio' ? '正在上传录音...' : '正在提交描述...'
+  aiTaskRetryable.value = true
   try {
     const res = await recognizeApi({
       content,
@@ -150,20 +236,24 @@ async function callRecognizeApi(content: string, type: 'text' | 'image' | 'audio
         rate: 16000,
       },
     })
-    if (res) {
-      recognizedFoods.value = res
-      showAiResults.value = true
-      showAiPopup.value = false
+    if (res?.taskId) {
+      aiTaskId.value = String(res.taskId)
+      aiTaskStatus.value = 'running'
+      aiTaskMessage.value = res.reused ? '正在读取上次识别结果...' : '任务已提交，正在等待处理'
+      pollingStartedAt = Date.now()
+      uni.setStorageSync(AI_TASK_STORAGE_KEY, aiTaskId.value)
+      await pollAiTask()
     }
     else {
+      aiTaskStatus.value = 'failed'
+      aiTaskMessage.value = '任务创建失败，请稍后再试'
       uni.showToast({ title: '未识别到食物', icon: 'none' })
     }
   }
   catch (err) {
     console.error('AI 识别失败', err)
-  }
-  finally {
-    uni.hideLoading()
+    aiTaskStatus.value = 'failed'
+    aiTaskMessage.value = '提交失败，请检查网络后重试'
   }
 }
 
@@ -195,8 +285,20 @@ onShow(async () => {
     uni.navigateTo({
       url: '/pages/login/index',
     })
+    return
+  }
+  const pendingTaskId = uni.getStorageSync(AI_TASK_STORAGE_KEY)
+  if (pendingTaskId) {
+    aiTaskId.value = String(pendingTaskId)
+    aiTaskStatus.value = 'running'
+    if (!aiTaskMessage.value)
+      aiTaskMessage.value = '正在恢复上次识别任务...'
+    pollingStartedAt = Date.now()
+    await pollAiTask()
   }
 })
+
+onHide(stopTaskPolling)
 watch(showLocation, async (val) => {
   if (!val) {
     locationData.value = null
@@ -306,6 +408,7 @@ function handleFoodItemAdded(item: any) {
 onMounted(() => uni.$on('add-food-item', handleFoodItemAdded))
 
 onUnload(() => {
+  stopTaskPolling()
   if (isRecording.value)
     recorderManager.value?.stop()
   uni.$off('add-food-item', handleFoodItemAdded)
@@ -422,6 +525,27 @@ async function handleSave() {
               AI 识别
             </text>
           </view>
+        </view>
+
+        <!-- 可离开页面继续执行的 AI 任务提示 -->
+        <view
+          v-if="isAiBusy && !showAiPopup"
+          class="flex items-center justify-between border border-emerald-100 rounded-xl bg-emerald-50 p-4 dark:border-emerald-800 dark:bg-emerald-900/20"
+          aria-label="查看 AI 识别进度"
+          @click="showAiPopup = true"
+        >
+          <view class="min-w-0 flex items-center gap-3">
+            <wd-loading color="#10b981" />
+            <view class="min-w-0">
+              <text class="block text-sm text-emerald-700 font-bold dark:text-emerald-300">
+                AI 识别进行中
+              </text>
+              <text class="mt-1 block truncate text-xs text-[var(--text-sub)]">
+                {{ aiTaskMessage }}
+              </text>
+            </view>
+          </view>
+          <wd-icon name="arrow-right" size="16" color="#10b981" />
         </view>
 
         <!-- 位置信息 -->
@@ -554,7 +678,50 @@ async function handleSave() {
           <view class="w-7" />
         </view>
 
-        <view class="space-y-6">
+        <view
+          v-if="aiQuota"
+          class="mb-4 flex items-center justify-between rounded-lg bg-emerald-50 px-3 py-2 dark:bg-emerald-900/20"
+        >
+          <text class="text-xs text-[var(--text-sub)]">
+            今日 AI 识别
+          </text>
+          <text class="text-xs text-emerald-600 font-bold">
+            剩余 {{ aiQuota.remaining }} / {{ aiQuota.limit }} 次
+          </text>
+        </view>
+
+        <view v-if="isAiBusy" class="py-8 text-center">
+          <wd-loading color="#10b981" size="36px" />
+          <text class="mt-5 block text-base text-[var(--text-main)] font-bold">
+            {{ aiTaskStatus === 'submitting' ? '正在提交' : 'AI 识别中' }}
+          </text>
+          <text class="mx-auto mt-2 block max-w-64 text-xs text-[var(--text-sub)] leading-5">
+            {{ aiTaskMessage }}
+          </text>
+          <text class="mt-5 block text-[10px] text-[var(--text-sub)]/70">
+            可以关闭此窗口，识别会在后台继续
+          </text>
+        </view>
+
+        <view v-else-if="aiTaskStatus === 'failed'" class="py-5 text-center">
+          <view class="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-red-50 dark:bg-red-900/20">
+            <wd-icon name="warning" size="24" color="#ef4444" />
+          </view>
+          <text class="mt-4 block text-base text-[var(--text-main)] font-bold">
+            识别未完成
+          </text>
+          <text class="mx-auto mt-2 block max-w-64 text-xs text-[var(--text-sub)] leading-5">
+            {{ aiTaskMessage }}
+          </text>
+          <wd-button v-if="aiTaskRetryable" custom-class="mt-5" type="success" @click="resetAiFailure">
+            重新识别
+          </wd-button>
+          <wd-button v-else custom-class="mt-5" plain type="success" @click="goToFoodSelector">
+            手动添加食物
+          </wd-button>
+        </view>
+
+        <view v-else class="space-y-6">
           <!-- 文字输入 -->
           <view class="rounded-xl bg-[var(--page-bg)] p-3">
             <textarea
@@ -565,6 +732,8 @@ async function handleSave() {
             <view class="mt-2 flex justify-end">
               <view
                 class="flex items-center gap-1 rounded-lg bg-emerald-500 px-4 py-1.5 text-xs text-white font-bold transition-opacity active:opacity-80"
+                :class="{ 'opacity-50': !aiInputText.trim() }"
+                aria-label="提交文字进行 AI 识别"
                 @click="handleTextRecognize"
               >
                 <IconMessageCircle size="14" color="white" />
@@ -577,6 +746,7 @@ async function handleSave() {
           <view class="flex gap-4">
             <view
               class="flex flex-1 flex-col items-center justify-center gap-2 rounded-xl bg-emerald-50/50 py-6 transition-all active:bg-emerald-100/50"
+              aria-label="拍照或从相册选择图片识别"
               @click="handleCameraRecognize"
             >
               <view class="h-12 w-12 flex items-center justify-center rounded-full bg-cyan-500/50 text-emerald-500 shadow-sm">
@@ -590,6 +760,7 @@ async function handleSave() {
             <view
               class="flex flex-1 flex-col items-center justify-center gap-2 rounded-xl py-6 transition-all"
               :class="isRecording ? 'bg-red-50' : 'bg-emerald-50/50 active:bg-emerald-100/50'"
+              aria-label="按住录音进行 AI 识别"
               @touchstart="startVoiceRecognize"
               @touchend="stopVoiceRecognize"
               @touchcancel="stopVoiceRecognize"
@@ -606,7 +777,7 @@ async function handleSave() {
             </view>
           </view>
         </view>
-        <view class="mt-8 text-center text-[10px] text-[var(--text-sub)]/60">
+        <view v-if="!isAiBusy" class="mt-8 text-center text-[10px] text-[var(--text-sub)]/60">
           AI 识别结果仅供参考，请以实际为准
         </view>
       </view>

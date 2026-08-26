@@ -46,8 +46,12 @@ export default {
 
   // Food
   'food.recognize': ['POST', '/food/recognize'],
+  'food.recognizeQuota': ['GET', '/food/recognize/quota'],
   'food.search': ['GET', '/food/search'],
   'food.recommendation': ['GET', '/recommendation'],
+
+  // Task
+  'task.enquire': ['GET', '/task/enquire'],
 
   // Feed
   'feed.list': ['GET', '/feed/list'],
