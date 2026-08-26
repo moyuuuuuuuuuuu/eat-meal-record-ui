@@ -212,24 +212,34 @@ onReachBottom(() => {
           <!-- ── 餐食详情（展开区域）── -->
           <view
             v-if="expandedDay === day.id"
-            class="border-t border-slate-100 bg-white p-3 space-y-2 dark:border-slate-800 dark:bg-slate-950/20"
+            class="border-t border-slate-100 bg-slate-50/60 px-4 pb-3 pt-2 dark:border-slate-800 dark:bg-slate-950/20"
           >
+            <view class="flex items-center justify-between py-2">
+              <text class="text-[11px] text-slate-500 font-medium tracking-wide dark:text-slate-400">
+                餐食明细
+              </text>
+              <text class="text-[10px] text-slate-400">
+                共 {{ day.mealCount }} 餐
+              </text>
+            </view>
             <view
               v-for="meal in day.meals"
               :key="meal.id"
-              class="relative overflow-hidden border border-teal-100/80 rounded-xl bg-white p-4 shadow-sm dark:border-teal-800/30 dark:bg-[#0f2420]/60"
+              class="border-t border-slate-100 py-3 first:border-t-0 dark:border-slate-800"
             >
-              <view class="mb-3 flex items-center justify-between pl-3">
+              <view class="mb-2 flex items-center justify-between">
                 <view class="flex items-center gap-2">
-                  <view class="h-1.5 w-1.5 rounded-full bg-teal-400 dark:bg-teal-500" />
+                  <view class="h-6 w-1 rounded-full bg-teal-400 dark:bg-teal-500" />
                   <text class="text-sm text-[var(--text-main)] font-bold">
                     {{ meal.mealType }}
                   </text>
                 </view>
-                <!-- kcal badge -->
-                <view class="rounded-full bg-teal-50 px-2.5 py-0.5 dark:bg-teal-900/50">
-                  <text class="text-[10px] text-teal-600 font-medium dark:text-teal-400">
-                    {{ meal.totalCalories }} kcal
+                <view class="flex items-baseline gap-1">
+                  <text class="text-sm text-teal-600 font-bold dark:text-teal-400">
+                    {{ meal.totalCalories }}
+                  </text>
+                  <text class="text-[9px] text-teal-600/70 dark:text-teal-400/70">
+                    kcal
                   </text>
                 </view>
               </view>
@@ -239,9 +249,9 @@ onReachBottom(() => {
                 <view
                   v-for="(item, idx) in meal.items"
                   :key="idx"
-                  class="rounded-lg bg-teal-50/80 px-2 py-1 dark:bg-teal-900/30"
+                  class="border border-teal-100/70 rounded-md bg-white px-2 py-1 dark:border-teal-900/40 dark:bg-teal-950/20"
                 >
-                  <text class="text-[10px] text-teal-700 dark:text-teal-400">
+                  <text class="text-[10px] text-slate-600 dark:text-slate-300">
                     {{ item.name }} {{ item.amount }}
                   </text>
                 </view>
