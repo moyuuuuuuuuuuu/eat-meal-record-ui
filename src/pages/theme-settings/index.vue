@@ -54,26 +54,26 @@ function setTheme(val: string) {
           class="flex items-center gap-4 border-b border-[var(--border-color)] p-4 last:border-none active:bg-[var(--page-bg)]"
           @click="setTheme(option.value)"
         >
-          <view class="h-10 w-10 flex items-center justify-center rounded-full" :class="currentThemeValue === option.value ? 'bg-emerald-100' : 'bg-gray-100'">
+          <view class="h-10 w-10 flex items-center justify-center rounded-full" :class="currentThemeValue === option.value ? 'bg-[var(--brand-soft)]' : 'bg-[var(--surface-subtle)]'">
             <IconSun
               v-if="option.icon === 'sun'"
               size="20"
-              :color="currentThemeValue === option.value ? '#10b981' : '#6b7280'"
+              :color="currentThemeValue === option.value ? 'var(--brand)' : 'var(--text-sub)'"
             />
             <IconMoon
               v-else-if="option.icon === 'moon'"
               size="20"
-              :color="currentThemeValue === option.value ? '#10b981' : '#6b7280'"
+              :color="currentThemeValue === option.value ? 'var(--brand)' : 'var(--text-sub)'"
             />
             <IconMonitor
               v-else-if="option.icon === 'monitor'"
               size="20"
-              :color="currentThemeValue === option.value ? '#10b981' : '#6b7280'"
+              :color="currentThemeValue === option.value ? 'var(--brand)' : 'var(--text-sub)'"
             />
           </view>
 
           <view class="flex-1">
-            <view class="text-sm text-[var(--text-main)] font-bold" :class="{ 'text-emerald-600': currentThemeValue === option.value }">
+            <view class="text-sm text-[var(--text-main)] font-bold" :class="{ 'text-[var(--brand)]': currentThemeValue === option.value }">
               {{ option.label }}
             </view>
             <view class="text-xs text-[var(--text-sub)]">
@@ -81,12 +81,12 @@ function setTheme(val: string) {
             </view>
           </view>
 
-          <IconCheck v-if="currentThemeValue === option.value" size="18" color="#10b981" />
+          <IconCheck v-if="currentThemeValue === option.value" size="18" color="var(--brand)" />
         </view>
       </view>
 
-      <view class="mt-4 border border-blue-100/20 rounded-xl bg-blue-50/10 p-4">
-        <text class="text-xs text-blue-500 leading-relaxed">
+      <view class="mt-4 border border-[var(--border-color)] rounded-xl bg-[var(--surface-subtle)] p-4">
+        <text class="text-xs text-[var(--text-sub)] leading-relaxed">
           💡 提示：深色模式会在夜间自动调整屏幕亮度，减少用眼疲劳。
         </text>
       </view>
@@ -97,7 +97,7 @@ function setTheme(val: string) {
         </text>
         <view class="rounded-xl bg-[var(--card-bg)] p-4 shadow-sm">
           <view class="flex items-center gap-3">
-            <view class="h-10 w-10 rounded-full bg-emerald-500" />
+            <view class="h-10 w-10 rounded-full bg-[var(--brand)]" />
             <view class="flex-1 space-y-2">
               <view class="h-4 w-3/4 rounded bg-[var(--page-bg)]" />
               <view class="h-3 w-1/2 rounded bg-[var(--page-bg)]" />

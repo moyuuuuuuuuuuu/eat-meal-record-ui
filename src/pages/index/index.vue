@@ -297,7 +297,7 @@ function showBurnTips() {
           <view class="text-2xl text-[var(--text-main)] font-bold">
             {{ totalIntake.calories }}
           </view>
-          <view class="text-[10px] text-[var(--text-sub)]">
+          <view class="text-xs text-[var(--text-sub)]">
             kcal
           </view>
         </view>
@@ -321,13 +321,13 @@ function showBurnTips() {
           <view class="text-2xl text-[var(--text-main)] font-bold">
             {{ burnedCalories }}
           </view>
-          <view class="text-[10px] text-[var(--text-sub)]">
+          <view class="text-xs text-[var(--text-sub)]">
             kcal
           </view>
         </view>
       </view>
 
-      <view class="text-center text-[10px] text-[var(--text-sub)]">
+      <view class="text-center text-xs text-[var(--text-sub)]">
         目标: {{ dailyGoal.calories }} kcal/天
       </view>
     </view>
@@ -338,15 +338,15 @@ function showBurnTips() {
       </view>
       <view class="grid grid-cols-3 gap-3">
         <!-- 蛋白质 -->
-        <view class="rounded-xl bg-[var(--card-bg)] p-3 shadow-sm">
-          <view class="mb-1 text-[10px] text-[var(--text-sub)] uppercase">
+        <view class="border border-[var(--border-color)] rounded-xl bg-[var(--card-bg)] p-3">
+          <view class="mb-1 text-[11px] text-[var(--text-sub)]">
             蛋白质
           </view>
           <view class="mb-2">
             <text class="text-base text-[var(--text-main)] font-bold">
               {{ Number(totalIntake.protein).toFixed(1) || 0 }}
             </text>
-            <text class="ml-1 text-[10px] text-[var(--text-sub)]">
+            <text class="ml-1 text-[11px] text-[var(--text-sub)]">
               / {{ Number(dailyGoal.protein).toFixed(1) }}g
             </text>
           </view>
@@ -354,15 +354,15 @@ function showBurnTips() {
         </view>
 
         <!-- 脂肪 -->
-        <view class="rounded-xl bg-[var(--card-bg)] p-3 shadow-sm">
-          <view class="mb-1 text-[10px] text-[var(--text-sub)] uppercase">
+        <view class="border border-[var(--border-color)] rounded-xl bg-[var(--card-bg)] p-3">
+          <view class="mb-1 text-[11px] text-[var(--text-sub)]">
             脂肪
           </view>
           <view class="mb-2">
             <text class="text-base text-[var(--text-main)] font-bold">
               {{ Number(totalIntake.fat).toFixed(1) || 0 }}
             </text>
-            <text class="ml-1 text-[10px] text-[var(--text-sub)]">
+            <text class="ml-1 text-[11px] text-[var(--text-sub)]">
               / {{ Number(dailyGoal.fat).toFixed(1) }}g
             </text>
           </view>
@@ -370,15 +370,15 @@ function showBurnTips() {
         </view>
 
         <!-- 碳水 -->
-        <view class="rounded-xl bg-[var(--card-bg)] p-3 shadow-sm">
-          <view class="mb-1 text-[10px] text-[var(--text-sub)] uppercase">
+        <view class="border border-[var(--border-color)] rounded-xl bg-[var(--card-bg)] p-3">
+          <view class="mb-1 text-[11px] text-[var(--text-sub)]">
             碳水
           </view>
           <view class="mb-2">
             <text class="text-base text-[var(--text-main)] font-bold">
               {{ Number(totalIntake.carbs).toFixed(1) || 0 }}
             </text>
-            <text class="ml-1 text-[10px] text-[var(--text-sub)]">
+            <text class="ml-1 text-[11px] text-[var(--text-sub)]">
               / {{ Number(dailyGoal.carbs).toFixed(1) }}g
             </text>
           </view>

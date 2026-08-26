@@ -54,7 +54,7 @@ const totalNutrients = computed(() => props.foods.reduce((acc, f) => ({
               {{ food.amount }}{{ food.unit }}
             </text>
           </view>
-          <view class="flex gap-3 text-[10px] text-[var(--text-sub)]">
+          <view class="flex gap-3 text-[11px] text-[var(--text-sub)]">
             <text>热量: {{ food.calories }}kcal</text>
             <text>蛋白: {{ food.protein }}g</text>
             <text>脂肪: {{ food.fat }}g</text>
@@ -69,7 +69,7 @@ const totalNutrients = computed(() => props.foods.reduce((acc, f) => ({
 
     <view
       v-if="foods.length > 1"
-      class="mt-3 flex gap-4 border-t border-[var(--border-color)] pt-3 text-[10px] text-[var(--text-sub)]"
+      class="mt-3 flex gap-4 border-t border-[var(--border-color)] pt-3 text-[11px] text-[var(--text-sub)]"
     >
       <text>蛋白质: {{ totalNutrients.protein.toFixed(1) }}g</text>
       <text>脂肪: {{ totalNutrients.fat.toFixed(1) }}g</text>

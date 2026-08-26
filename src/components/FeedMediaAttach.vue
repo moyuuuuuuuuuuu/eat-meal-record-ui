@@ -109,7 +109,7 @@ const swiperCurrent = ref(0)
             <text
               v-for="(food, idx) in item.attach.foods"
               :key="idx"
-              class="text-[10px] text-[var(--text-sub)]"
+              class="text-[11px] text-[var(--text-sub)]"
             >
               {{ food }}{{ Number(idx) < item.attach.foods.length - 1 ? '、' : '' }}
             </text>
@@ -179,7 +179,7 @@ const swiperCurrent = ref(0)
           <view class="mb-2 flex items-center justify-between">
             <view class="flex items-center gap-2">
               <view class="h-5 w-5 flex items-center justify-center rounded bg-emerald-500">
-                <text class="text-[10px] text-white">
+                <text class="text-[11px] text-white">
                   餐
                 </text>
               </view>

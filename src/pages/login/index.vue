@@ -251,7 +251,7 @@ function goUserAgreement() {
           class="h-10 flex-1 text-[var(--text-main)]"
         >
         <text
-          class="ml-4 text-sm text-blue-500"
+          class="ml-4 text-sm text-[var(--brand)] font-medium"
           :class="{ 'text-[var(--text-sub)] opacity-50': countdown > 0 || smsSending }"
           @click="handleGetCode"
         >
@@ -260,7 +260,7 @@ function goUserAgreement() {
       </view>
 
       <button
-        class="mt-8 h-12 w-full rounded-lg bg-blue-600 text-white"
+        class="mt-8 h-12 w-full rounded-xl bg-[var(--brand)] text-white font-semibold"
         :loading="loading"
         @click="handleLogin"
       >
@@ -273,11 +273,11 @@ function goUserAgreement() {
       <wd-checkbox v-model="isAgree" shape="square" size="14px" />
       <view class="text-xs text-[var(--text-sub)] leading-tight">
         我已阅读并同意
-        <text class="text-blue-500" @click="goUserAgreement">
+        <text class="text-[var(--brand)]" @click="goUserAgreement">
           《用户协议》
         </text>
         与
-        <text class="text-blue-500" @click="openPrivacy">
+        <text class="text-[var(--brand)]" @click="openPrivacy">
           《隐私政策》
         </text>
       </view>

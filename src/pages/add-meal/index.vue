@@ -504,9 +504,9 @@ async function handleSave() {
             @click="goToFoodSelector"
           >
             <view
-              class="h-10 w-10 flex items-center justify-center rounded-full bg-blue-500/50 text-emerald-500 dark:bg-emerald-900/20"
+              class="h-10 w-10 flex items-center justify-center rounded-full bg-[var(--brand-soft)]"
             >
-              <IconPlus size="20" color="white" />
+              <IconPlus size="20" color="var(--brand)" />
             </view>
             <text class="text-sm text-emerald-600 font-bold">
               手动添加
@@ -571,50 +571,50 @@ async function handleSave() {
           v-if="foodItems.length"
           class="border border-[var(--border-color)] rounded-xl bg-[var(--card-bg)] p-4 shadow-sm transition-all dark:border-[var(--wot-color-theme)]/10"
         >
-          <text class="mb-4 block text-[10px] text-[var(--text-sub)] font-bold uppercase">
+          <text class="mb-4 block text-xs text-[var(--text-sub)] font-bold">
             今日营养汇总
           </text>
           <view class="grid grid-cols-2 gap-3">
-            <view class="border border-[var(--border-color)] rounded-lg bg-[var(--page-bg)] p-3 shadow-sm">
-              <view class="mb-1 text-[10px] text-[var(--text-sub)]">
+            <view class="border border-[var(--border-color)] rounded-lg bg-[var(--surface-subtle)] p-3">
+              <view class="mb-1 text-[11px] text-[var(--text-sub)]">
                 热量
               </view>
-              <view class="text-xl text-emerald-500 font-bold">
+              <view class="text-xl text-[var(--brand)] font-bold">
                 {{ totals.calories.toFixed(0) }}
-                <text class="ml-1 text-[10px] text-[var(--text-sub)] font-normal">
+                <text class="ml-1 text-[11px] text-[var(--text-sub)] font-normal">
                   kcal
                 </text>
               </view>
             </view>
-            <view class="border border-[var(--border-color)] rounded-lg bg-[var(--page-bg)] p-3 shadow-sm">
-              <view class="mb-1 text-[10px] text-[var(--text-sub)]">
+            <view class="border border-[var(--border-color)] rounded-lg bg-[var(--surface-subtle)] p-3">
+              <view class="mb-1 text-[11px] text-[var(--text-sub)]">
                 蛋白质
               </view>
-              <view class="text-xl text-blue-500 font-bold dark:text-blue-400">
+              <view class="text-xl text-[var(--nutrient-protein)] font-bold">
                 {{ totals.protein.toFixed(1) }}
-                <text class="ml-1 text-[10px] text-[var(--text-sub)] font-normal">
+                <text class="ml-1 text-[11px] text-[var(--text-sub)] font-normal">
                   g
                 </text>
               </view>
             </view>
-            <view class="border border-[var(--border-color)] rounded-lg bg-[var(--page-bg)] p-3 shadow-sm">
-              <view class="mb-1 text-[10px] text-[var(--text-sub)]">
+            <view class="border border-[var(--border-color)] rounded-lg bg-[var(--surface-subtle)] p-3">
+              <view class="mb-1 text-[11px] text-[var(--text-sub)]">
                 脂肪
               </view>
-              <view class="text-xl text-orange-500 font-bold dark:text-orange-400">
+              <view class="text-xl text-[var(--nutrient-fat)] font-bold">
                 {{ totals.fat.toFixed(1) }}
-                <text class="ml-1 text-[10px] text-[var(--text-sub)] font-normal">
+                <text class="ml-1 text-[11px] text-[var(--text-sub)] font-normal">
                   g
                 </text>
               </view>
             </view>
-            <view class="border border-[var(--border-color)] rounded-lg bg-[var(--page-bg)] p-3 shadow-sm">
-              <view class="mb-1 text-[10px] text-[var(--text-sub)]">
+            <view class="border border-[var(--border-color)] rounded-lg bg-[var(--surface-subtle)] p-3">
+              <view class="mb-1 text-[11px] text-[var(--text-sub)]">
                 碳水
               </view>
-              <view class="text-xl text-purple-500 font-bold dark:text-purple-400">
+              <view class="text-xl text-[var(--nutrient-carbs)] font-bold">
                 {{ totals.carbs.toFixed(1) }}
-                <text class="ml-1 text-[10px] text-[var(--text-sub)] font-normal">
+                <text class="ml-1 text-[11px] text-[var(--text-sub)] font-normal">
                   g
                 </text>
               </view>
@@ -628,7 +628,7 @@ async function handleSave() {
             <text class="text-xs text-[var(--text-sub)] font-bold uppercase">
               已选食物
             </text>
-            <text class="text-[10px] text-[var(--text-sub)]/40">
+            <text class="text-[11px] text-[var(--text-sub)]/70">
               {{ foodItems.length }} 项
             </text>
           </view>
@@ -646,7 +646,7 @@ async function handleSave() {
                     {{ item.quantity }} {{ item.selectedUnit.name }}
                   </text>
                 </view>
-                <text class="text-[10px] text-[var(--text-sub)]">
+                <text class="text-[11px] text-[var(--text-sub)]">
                   {{ item.totalCalories || 0 }}kcal | 蛋白质:{{ item.totalProtein || 0 }}g 脂肪:{{ item.totalFat || 0 }}g 碳水:{{ item.totalCarbs || 0 }}g
                 </text>
               </view>
@@ -698,7 +698,7 @@ async function handleSave() {
           <text class="mx-auto mt-2 block max-w-64 text-xs text-[var(--text-sub)] leading-5">
             {{ aiTaskMessage }}
           </text>
-          <text class="mt-5 block text-[10px] text-[var(--text-sub)]/70">
+          <text class="mt-5 block text-[11px] text-[var(--text-sub)]/80">
             可以关闭此窗口，识别会在后台继续
           </text>
         </view>
@@ -749,8 +749,8 @@ async function handleSave() {
               aria-label="拍照或从相册选择图片识别"
               @click="handleCameraRecognize"
             >
-              <view class="h-12 w-12 flex items-center justify-center rounded-full bg-cyan-500/50 text-emerald-500 shadow-sm">
-                <IconCamera size="24" color="white" />
+              <view class="h-12 w-12 flex items-center justify-center rounded-full bg-[var(--brand-soft)]">
+                <IconCamera size="24" color="var(--brand)" />
               </view>
               <text class="text-xs text-emerald-600 font-bold">
                 拍摄照片
@@ -767,9 +767,9 @@ async function handleSave() {
             >
               <view
                 class="h-12 w-12 flex items-center justify-center rounded-full shadow-sm"
-                :class="isRecording ? 'bg-red-500 text-white animate-pulse' : 'bg-amber-500/50 text-emerald-500'"
+                :class="isRecording ? 'bg-red-500 text-white animate-pulse' : 'bg-[var(--brand-soft)]'"
               >
-                <IconMic size="24" color="white" />
+                <IconMic size="24" :color="isRecording ? 'white' : 'var(--brand)'" />
               </view>
               <text class="text-xs font-bold" :class="isRecording ? 'text-red-600' : 'text-emerald-600'">
                 {{ isRecording ? '松开识别' : '按住说话' }}
@@ -777,7 +777,7 @@ async function handleSave() {
             </view>
           </view>
         </view>
-        <view v-if="!isAiBusy" class="mt-8 text-center text-[10px] text-[var(--text-sub)]/60">
+        <view v-if="!isAiBusy" class="mt-8 text-center text-[11px] text-[var(--text-sub)]/70">
           AI 识别结果仅供参考，请以实际为准
         </view>
       </view>
@@ -812,11 +812,11 @@ async function handleSave() {
                 <text class="text-sm text-[var(--text-main)] font-bold">
                   {{ food.name }}
                 </text>
-                <text class="text-[10px] text-emerald-600 font-bold">
+                <text class="text-[11px] text-emerald-600 font-bold">
                   匹配度 {{ Math.round(food.confidence || 98) }}%
                 </text>
               </view>
-              <view class="flex gap-2 text-[10px] text-[var(--text-sub)]">
+              <view class="flex gap-2 text-[11px] text-[var(--text-sub)]">
                 <text>{{ food.calories }}kcal / {{ food.unit }}</text>
                 <text>蛋白质:{{ food.protein }}g 脂肪:{{ food.fat }}g 碳水:{{ food.carbs }}g</text>
               </view>

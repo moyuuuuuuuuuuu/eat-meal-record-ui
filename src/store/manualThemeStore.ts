@@ -131,6 +131,9 @@ export const useManualThemeStore = defineStore('manualTheme', {
      * 初始化主题
      */
     initTheme() {
+      // 品牌主色固定为薄荷绿，兼容升级前持久化的默认蓝色配置。
+      this.currentThemeColor = themeColorOptions[0]
+      this.themeVars.colorTheme = themeColorOptions[0].primary
       // 如果用户已手动设置且不跟随系统，保持当前主题
       if (this.hasUserSet && !this.followSystem) {
         console.log('使用用户设置的主题:', this.theme)

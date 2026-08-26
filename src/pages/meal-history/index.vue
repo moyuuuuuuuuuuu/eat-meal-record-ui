@@ -142,13 +142,13 @@ onReachBottom(() => {
                 </text>
               </view>
               <view class="text-right">
-                <text class="block text-[10px] text-teal-600/60 dark:text-teal-400/60">
+                <text class="block text-[11px] text-teal-600/70 dark:text-teal-400/70">
                   已加载摄入
                 </text>
                 <text class="mt-1 block text-2xl text-teal-700 font-bold dark:text-teal-300">
                   {{ loadedSummary.calories }}
                 </text>
-                <text class="text-[10px] text-teal-600/60 dark:text-teal-400/60">
+                <text class="text-[11px] text-teal-600/70 dark:text-teal-400/70">
                   kcal
                 </text>
               </view>
@@ -160,7 +160,7 @@ onReachBottom(() => {
               <text class="text-sm text-[var(--text-main)] font-bold">
                 每日记录
               </text>
-              <text class="text-[10px] text-[var(--text-sub)]">
+              <text class="text-[11px] text-[var(--text-sub)]">
                 点击日期查看餐食
               </text>
             </view>
@@ -178,7 +178,7 @@ onReachBottom(() => {
                       <text class="text-sm text-[var(--text-main)] font-bold">
                         {{ day.date }}
                       </text>
-                      <text class="rounded-full bg-white px-2 py-0.5 text-[9px] text-teal-600 dark:bg-slate-800 dark:text-teal-400">
+                      <text class="rounded-full bg-[var(--surface-subtle)] px-2 py-0.5 text-[11px] text-teal-600 dark:text-teal-400">
                         {{ day.mealCount }}餐
                       </text>
                     </view>
@@ -191,7 +191,7 @@ onReachBottom(() => {
 
                   <view class="grid grid-cols-3 gap-2">
                     <view>
-                      <text class="block text-[9px] text-[var(--text-sub)]">
+                      <text class="block text-[11px] text-[var(--text-sub)]">
                         摄入
                       </text>
                       <text class="mt-0.5 block text-sm text-[var(--text-main)] font-bold">
@@ -201,7 +201,7 @@ onReachBottom(() => {
                       </text>
                     </view>
                     <view>
-                      <text class="block text-[9px] text-[var(--text-sub)]">
+                      <text class="block text-[11px] text-[var(--text-sub)]">
                         消耗
                       </text>
                       <text class="mt-0.5 block text-sm text-[var(--text-main)] font-bold">
@@ -211,7 +211,7 @@ onReachBottom(() => {
                       </text>
                     </view>
                     <view class="text-right">
-                      <text class="block text-[9px] text-teal-600/70">
+                      <text class="block text-[11px] text-teal-600/70">
                         净摄入
                       </text>
                       <text class="mt-0.5 block text-base text-teal-600 font-black">
@@ -229,12 +229,12 @@ onReachBottom(() => {
                       <text class="text-xs text-[var(--text-main)] font-bold">
                         {{ meal.mealType }}
                       </text>
-                      <text class="text-[10px] text-teal-600">
+                      <text class="text-[11px] text-teal-600">
                         {{ meal.totalCalories }} kcal
                       </text>
                     </view>
                     <view class="flex flex-wrap gap-1.5">
-                      <text v-for="(item, idx) in meal.items" :key="idx" class="rounded-md bg-white px-2 py-1 text-[10px] text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                      <text v-for="(item, idx) in meal.items" :key="idx" class="rounded-md bg-[var(--surface-subtle)] px-2 py-1 text-[11px] text-[var(--text-sub)]">
                         {{ item.name }} {{ item.amount }}
                       </text>
                     </view>

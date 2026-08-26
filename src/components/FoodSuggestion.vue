@@ -63,7 +63,7 @@ async function handleRefresh() {
           <text
             v-for="(t, i) in suggestionTags"
             :key="i"
-            class="border border-white/10 rounded-full bg-white/20 px-2 py-0.5 text-[10px]"
+            class="border border-white/10 rounded-full bg-white/20 px-2 py-0.5 text-[11px]"
           >
             {{ t }}
           </text>

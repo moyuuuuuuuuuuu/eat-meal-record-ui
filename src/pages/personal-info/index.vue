@@ -243,7 +243,7 @@ async function handleSave() {
             <text class="text-xs opacity-80">
               BMI 指数
             </text>
-            <text class="rounded-full bg-white/20 px-2 py-0.5 text-[10px]">
+            <text class="rounded-full bg-white/20 px-2 py-0.5 text-[11px]">
               {{ bmiStatus }}
             </text>
           </view>

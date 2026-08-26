@@ -177,8 +177,8 @@ async function handleSave() {
         </view>
 
         <!-- 提示 -->
-        <view class="border border-blue-100/20 rounded-xl bg-blue-50/10 p-4">
-          <text class="text-xs text-blue-500 leading-relaxed">
+        <view class="border border-[var(--border-color)] rounded-xl bg-[var(--surface-subtle)] p-4">
+          <text class="text-xs text-[var(--text-sub)] leading-relaxed">
             💡 提示：系统会按蛋白质 30%、脂肪 25%、碳水 45% 的默认参考比例自动计算，您仍可根据个人情况调整；如有疾病或特殊营养需求，请咨询专业人士。
           </text>
         </view>

@@ -178,11 +178,11 @@ function confirmSelect() {
             <view class="flex flex-wrap gap-x-3 gap-y-0.5">
               <view class="flex items-center gap-1">
                 <view class="h-1.5 w-1.5 rounded-full bg-teal-400" />
-                <text class="text-[10px] text-teal-600 font-medium dark:text-teal-400">
+                <text class="text-[11px] text-teal-600 font-medium dark:text-teal-400">
                   {{ food.calories }} kcal / {{ food.unit }}
                 </text>
               </view>
-              <text class="text-[10px] text-[var(--text-sub)]">
+              <text class="text-[11px] text-[var(--text-sub)]">
                 蛋白 {{ food.protein || 0 }}g · 脂肪 {{ food.fat || 0 }}g · 碳水 {{ food.carbs || 0 }}g
               </text>
             </view>
@@ -230,7 +230,7 @@ function confirmSelect() {
             <text class="block text-base text-teal-600 font-bold dark:text-teal-400">
               {{ popupNutrition.calories }}
             </text>
-            <text class="text-[9px] text-[var(--text-sub)]">
+            <text class="text-[11px] text-[var(--text-sub)]">
               千卡
             </text>
           </view>
@@ -238,7 +238,7 @@ function confirmSelect() {
             <text class="block text-base text-[var(--text-main)] font-bold">
               {{ popupNutrition.carbs }}
             </text>
-            <text class="text-[9px] text-[var(--text-sub)]">
+            <text class="text-[11px] text-[var(--text-sub)]">
               碳水
             </text>
           </view>
@@ -246,7 +246,7 @@ function confirmSelect() {
             <text class="block text-base text-[var(--text-main)] font-bold">
               {{ popupNutrition.protein }}
             </text>
-            <text class="text-[9px] text-[var(--text-sub)]">
+            <text class="text-[11px] text-[var(--text-sub)]">
               蛋白质
             </text>
           </view>
@@ -254,7 +254,7 @@ function confirmSelect() {
             <text class="block text-base text-[var(--text-main)] font-bold">
               {{ popupNutrition.fat }}
             </text>
-            <text class="text-[9px] text-[var(--text-sub)]">
+            <text class="text-[11px] text-[var(--text-sub)]">
               脂肪
             </text>
           </view>

@@ -157,13 +157,13 @@ function goBack() {
 
     <view class="px-4 py-4 space-y-4">
       <!-- ── 时间段切换 ── -->
-      <view class="flex border border-[var(--border-color)] rounded-2xl bg-[var(--card-bg)] p-1 shadow-sm">
+      <view class="flex border border-[var(--border-color)] rounded-xl bg-[var(--card-bg)] p-1">
         <view
           v-for="p in periods"
           :key="p.key"
           class="flex flex-1 items-center justify-center rounded-xl py-2 transition-all"
           :class="activePeriod === p.key
-            ? 'bg-teal-500 shadow-sm'
+            ? 'bg-[var(--brand)]'
             : 'active:opacity-60'"
           @click="activePeriod = p.key"
         >
@@ -177,17 +177,17 @@ function goBack() {
       </view>
 
       <!-- ── 健康得分卡片 ── -->
-      <view class="relative overflow-hidden border border-teal-100 rounded-2xl bg-teal-50/60 p-5 dark:border-teal-800/40 dark:bg-teal-950/25">
+      <view class="relative overflow-hidden border border-[var(--brand)]/20 rounded-2xl bg-[var(--brand-soft)] p-5">
         <view class="flex items-center justify-between">
           <view>
-            <text class="block text-xs text-teal-600/70 dark:text-teal-400/70">
+            <text class="block text-xs text-[var(--brand-strong)]/80">
               综合营养得分
             </text>
             <view class="mt-1 flex items-end gap-2">
-              <text class="text-5xl text-teal-600 font-black leading-none dark:text-teal-400">
+              <text class="text-5xl text-[var(--brand-strong)] font-black leading-none">
                 {{ loading ? '--' : healthScore }}
               </text>
-              <text class="mb-1 text-sm text-teal-600/60 dark:text-teal-400/60">
+              <text class="mb-1 text-sm text-[var(--brand-strong)]/70">
                 / 100
               </text>
             </view>
@@ -209,7 +209,7 @@ function goBack() {
               />
             </svg>
             <view class="absolute inset-0 flex items-center justify-center">
-              <text class="text-xs text-teal-600 font-bold dark:text-teal-400">
+              <text class="text-xs text-[var(--brand-strong)] font-bold">
                 {{ loading ? '-' : `${healthScore}%` }}
               </text>
             </view>
@@ -218,7 +218,7 @@ function goBack() {
       </view>
 
       <!-- ── 雷达图卡片 ── -->
-      <view class="border border-[var(--border-color)] rounded-2xl bg-[var(--card-bg)] p-4 shadow-sm">
+      <view class="border border-[var(--border-color)] rounded-2xl bg-[var(--card-bg)] p-4">
         <text class="mb-3 block text-sm text-[var(--text-main)] font-bold">
           营养摄入分布
         </text>
@@ -312,13 +312,13 @@ function goBack() {
         <view class="mt-1 flex justify-center gap-5">
           <view class="flex items-center gap-1.5">
             <view class="h-0.5 w-5 rounded-full bg-teal-400/50" style="border-top: 1px dashed #0d9488" />
-            <text class="text-[10px] text-[var(--text-sub)]">
+            <text class="text-[11px] text-[var(--text-sub)]">
               DRI 参考值
             </text>
           </view>
           <view class="flex items-center gap-1.5">
             <view class="h-3 w-5 border border-teal-500/50 rounded-sm bg-teal-500/25" />
-            <text class="text-[10px] text-[var(--text-sub)]">
+            <text class="text-[11px] text-[var(--text-sub)]">
               实际摄入
             </text>
           </view>
@@ -326,7 +326,7 @@ function goBack() {
       </view>
 
       <!-- ── 营养维度明细卡片 ── -->
-      <view class="border border-[var(--border-color)] rounded-2xl bg-[var(--card-bg)] p-4 shadow-sm">
+      <view class="border border-[var(--border-color)] rounded-2xl bg-[var(--card-bg)] p-4">
         <text class="mb-3 block text-sm text-[var(--text-main)] font-bold">
           各项详情
         </text>
@@ -353,7 +353,7 @@ function goBack() {
               <text class="text-xs text-[var(--text-main)] font-bold">
                 {{ card.label }}
               </text>
-              <text class="block text-[9px] text-[var(--text-sub)]">
+              <text class="block text-[11px] text-[var(--text-sub)]">
                 {{ card.unit }}
               </text>
             </view>
@@ -372,19 +372,19 @@ function goBack() {
             <!-- 数值 + 百分比 -->
             <view class="w-20 flex-shrink-0 text-right">
               <text class="block text-xs text-[var(--text-main)] font-bold">
-                {{ card.value }}<text class="text-[9px] text-[var(--text-sub)] font-normal">
+                {{ card.value }}<text class="text-[11px] text-[var(--text-sub)] font-normal">
                   {{ card.unit }}
                 </text>
               </text>
               <text
-                class="text-[10px] font-medium"
+                class="text-[11px] font-medium"
                 :class="card.over ? 'text-amber-500' : card.under ? 'text-sky-500' : 'text-teal-500'"
               >
                 {{ card.pct }}%
-                <text v-if="card.over" class="text-[9px]">
+                <text v-if="card.over" class="text-[11px]">
                   ↑超标
                 </text>
-                <text v-else-if="card.under" class="text-[9px]">
+                <text v-else-if="card.under" class="text-[11px]">
                   ↓不足
                 </text>
               </text>
@@ -395,7 +395,7 @@ function goBack() {
 
       <!-- ── 底部说明 ── -->
       <view class="pb-4 text-center">
-        <text class="text-[10px] text-[var(--text-sub)] opacity-60">
+        <text class="text-[11px] text-[var(--text-sub)] opacity-70">
           数据基于中国居民膳食营养素参考摄入量（DRI）
         </text>
       </view>

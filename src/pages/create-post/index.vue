@@ -426,7 +426,7 @@ watch(showLocation, async (val) => {
               class="flex items-center gap-1 rounded-lg bg-emerald-50 px-2 py-1 text-emerald-600 transition-opacity active:opacity-70"
               @click="handleCreateTopic"
             >
-              <text class="text-[10px] font-bold">
+              <text class="text-[11px] font-bold">
                 + 自建
               </text>
             </view>
@@ -501,7 +501,7 @@ watch(showLocation, async (val) => {
             class="mt-4 max-h-[400px] overflow-y-auto border-t border-[var(--border-color)] pt-2 space-y-4"
           >
             <view v-for="day in weekMeals" :key="day.date">
-              <view class="mb-2 text-[10px] text-[var(--text-sub)] tracking-tight uppercase">
+              <view class="mb-2 text-[11px] text-[var(--text-sub)] tracking-tight">
                 {{ day.dateLabel }}
               </view>
               <view class="space-y-2">
@@ -518,7 +518,7 @@ watch(showLocation, async (val) => {
                     <text class="text-xs text-[var(--text-main)] font-bold">
                       {{ meal.mealType }}
                     </text>
-                    <text class="text-[10px] text-emerald-600">
+                    <text class="text-[11px] text-emerald-600">
                       {{ meal.totalCalories }} kcal
                     </text>
                   </view>
@@ -526,7 +526,7 @@ watch(showLocation, async (val) => {
                     <text
                       v-for="(item, idx) in meal.items"
                       :key="idx"
-                      class="border border-[var(--border-color)] rounded bg-[var(--card-bg)] px-1.5 py-0.5 text-[9px] text-[var(--text-sub)]"
+                      class="border border-[var(--border-color)] rounded bg-[var(--card-bg)] px-1.5 py-0.5 text-[11px] text-[var(--text-sub)]"
                     >
                       {{ item.name }}
                     </text>
@@ -546,7 +546,7 @@ watch(showLocation, async (val) => {
           >
             <view class="flex items-center gap-3">
               <view class="h-6 w-6 flex items-center justify-center rounded bg-emerald-500">
-                <text class="text-[10px] text-white">
+                <text class="text-[11px] text-white">
                   餐
                 </text>
               </view>
@@ -554,7 +554,7 @@ watch(showLocation, async (val) => {
                 <text class="block text-xs text-[var(--text-main)] font-bold">
                   {{ meal.mealType }}
                 </text>
-                <text class="text-[9px] text-[var(--text-sub)]">
+                <text class="text-[11px] text-[var(--text-sub)]">
                   {{ meal.items.map(i => i.name).join(', ') }} ({{ meal.totalCalories }}kcal)
                 </text>
               </view>
