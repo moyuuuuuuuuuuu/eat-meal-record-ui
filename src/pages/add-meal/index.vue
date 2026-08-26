@@ -168,7 +168,7 @@ function addRecognizedFood(food: any) {
   // 这里需要模拟 food-selector 的逻辑，将 food 转为 foodItems 格式
   // 由于 recognize 返回的是 FoodInfo & { confidence: number }
   // 我们默认选择其第一个单位，数量为 1
-  const unit = food.units && food.units.length > 0 ? food.units[0] : { unit_id: 1, unit_name: food.unit, weight: 100, nutrition: { calories: food.calories, protein: food.protein, carbs: food.carbs, fibers: food.fat } }
+  const unit = food.units && food.units.length > 0 ? food.units[0] : { unit_id: 1, unit_name: food.unit, weight: 100, nutrition: { calories: food.calories, protein: food.protein, carbs: food.carbs, fat: food.fat } }
 
   const selectedFood = {
     ...food,
@@ -534,11 +534,13 @@ async function handleSave() {
     <wd-popup
       v-model="showAiPopup"
       position="bottom"
+      close-on-click-modal
+      safe-area-inset-bottom
       custom-style="border-radius: 20px 20px 0 0; background: var(--card-bg);"
     >
       <view class="p-5">
         <view class="mb-6 flex items-center justify-between">
-          <view class="p-1" @click="showAiPopup = false">
+          <view class="p-2" aria-label="关闭 AI 识别" @click="showAiPopup = false">
             <IconX size="20" color="var(--text-main)" />
           </view>
           <text class="text-base text-[var(--text-main)] font-bold">

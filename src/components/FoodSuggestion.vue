@@ -12,6 +12,16 @@ const {
   immediate: true,
 })
 
+const suggestionTags = computed(() => {
+  const raw = currentSuggestion.value?.tag
+  const tags = (Array.isArray(raw) ? raw : [raw]).filter(Boolean).map(String)
+  const heatTags = tags.filter(tag => tag.includes('热量'))
+  const strongestHeatTag = heatTags.find(tag => tag.includes('高热量')) || heatTags[0]
+  return [...new Set(tags.filter(tag => !tag.includes('热量')).concat(strongestHeatTag ? [strongestHeatTag] : []))].slice(0, 4)
+})
+
+const suggestionReason = computed(() => String(currentSuggestion.value?.recommend_reason || '').replace(/^[“”"']+|[“”"']+$/g, ''))
+
 async function handleRefresh() {
   if (loading.value || isAnimating.value)
     return
@@ -36,7 +46,7 @@ async function handleRefresh() {
           今日吃什么
         </text>
       </view>
-      <view class="p-1" :class="{ rotating: isAnimating }" @click="handleRefresh">
+      <view class="p-2 -m-1" aria-label="换一个推荐" :class="{ rotating: isAnimating }" @click="handleRefresh">
         <IconRefreshCw size="18" color="white" />
       </view>
     </view>
@@ -51,7 +61,7 @@ async function handleRefresh() {
         </text>
         <view class="flex flex-wrap gap-1.5">
           <text
-            v-for="(t, i) in (Array.isArray(currentSuggestion.tag) ? currentSuggestion.tag : [currentSuggestion.tag])"
+            v-for="(t, i) in suggestionTags"
             :key="i"
             class="border border-white/10 rounded-full bg-white/20 px-2 py-0.5 text-[10px]"
           >
@@ -59,8 +69,8 @@ async function handleRefresh() {
           </text>
         </view>
       </view>
-      <view v-if="currentSuggestion.recommend_reason" class="line-clamp-1 mt-2 text-[11px] italic opacity-80">
-        "{{ currentSuggestion.recommend_reason }}"
+      <view v-if="suggestionReason" class="line-clamp-2 mt-2 text-[11px] leading-4 opacity-85">
+        {{ suggestionReason }}
       </view>
     </view>
     <view v-else-if="loading" class="h-10 flex items-center justify-center opacity-50">

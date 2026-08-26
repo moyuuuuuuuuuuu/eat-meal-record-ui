@@ -7,6 +7,9 @@ import IconSunrise from './icons/IconSunrise.vue'
 const emit = defineEmits(['select'])
 
 const active = ref(false)
+onHide(() => {
+  active.value = false
+})
 
 const actions = [
   { type: '加餐', icon: IconCoffee, color: '#92400e' },
@@ -34,6 +37,7 @@ function handleClick(type: string) {
           v-for="(item, index) in actions"
           :key="index"
           class="fab-item"
+          :aria-label="`添加${item.type}`"
           :style="{ backgroundColor: item.color }"
           @click="handleClick(item.type)"
         >
@@ -41,11 +45,14 @@ function handleClick(type: string) {
           <IconMoon v-else-if="item.icon === IconMoon" size="20" color="white" />
           <IconSun v-else-if="item.icon === IconSun" size="20" color="white" />
           <IconSunrise v-else-if="item.icon === IconSunrise" size="20" color="white" />
+          <text class="fab-label">
+            {{ item.type }}
+          </text>
           <!--          <component :is="item.icon" size="20" color="white" /> -->
         </view>
       </template>
       <template #trigger>
-        <view class="fab-trigger" @click="active = !active">
+        <view class="fab-trigger" :aria-label="active ? '收起添加菜单' : '展开添加菜单'" @click="active = !active">
           <IconPlus :size="active ? 28 : 24" color="white" :style="{ transform: active ? 'rotate(135deg)' : 'rotate(0)', transition: 'all 0.3s' }" />
         </view>
       </template>
@@ -73,5 +80,15 @@ function handleClick(type: string) {
   justify-content: center;
   margin-bottom: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+.fab-label {
+  position: absolute;
+  right: 54px;
+  white-space: nowrap;
+  border-radius: 6px;
+  background: rgba(31, 41, 55, 0.88);
+  color: white;
+  padding: 4px 8px;
+  font-size: 12px;
 }
 </style>

@@ -41,6 +41,9 @@ function handleNavigate(url: string) {
   router.push(url)
 }
 
+const weightDistance = computed(() => Math.abs(Number(userStats.value.currentWeight) - Number(userStats.value.targetWeight)).toFixed(2))
+const weightDirection = computed(() => Number(userStats.value.currentWeight) > Number(userStats.value.targetWeight) ? '需减' : Number(userStats.value.currentWeight) < Number(userStats.value.targetWeight) ? '需增' : '已达标')
+
 onShow(() => {
   refreshStats()
 })
@@ -67,10 +70,10 @@ onShow(() => {
           </view>
         </view>
         <view class="flex gap-2">
-          <view class="rounded-lg bg-white/20 p-2" @click="handleNavigate('/pages/theme-settings/index')">
+          <view class="rounded-lg bg-white/20 p-2" aria-label="主题设置" @click="handleNavigate('/pages/theme-settings/index')">
             <IconPalette size="20" color="white" />
           </view>
-          <view class="rounded-lg bg-white/20 p-2" @click="handleNavigate('/pages/personal-info/index')">
+          <view class="rounded-lg bg-white/20 p-2" aria-label="个人资料设置" @click="handleNavigate('/pages/personal-info/index')">
             <IconSettings size="20" color="white" />
           </view>
         </view>
@@ -94,16 +97,16 @@ onShow(() => {
             {{ userStats.avgCalories }}
           </view>
           <view class="mt-1 text-xs text-[var(--text-sub)]">
-            平均摄入
+            平均摄入(kcal/天)
           </view>
         </view>
         <view class="h-10 w-px self-center bg-[var(--border-color)]" />
         <view class="flex-1 text-center">
           <view class="text-2xl text-emerald-600 font-bold">
-            {{ Number(userStats.currentWeight - userStats.targetWeight).toFixed(2) }}kg
+            {{ weightDistance }}kg
           </view>
           <view class="mt-1 text-xs text-[var(--text-sub)]">
-            距离目标
+            {{ weightDirection }}
           </view>
         </view>
       </view>

@@ -36,7 +36,7 @@ onSuccess((event) => {
   }
 })
 
-// 监听热量变动，动态计算营养素 (国际卡路里标准占比)
+// 监听热量变动，按默认参考比例动态计算营养素
 // 蛋白质: 4kcal/g, 脂肪: 9kcal/g, 碳水: 4kcal/g
 watch(dailyCalories, (newVal) => {
   protein.value = Math.round((newVal * 0.30) / 4)
@@ -93,13 +93,15 @@ async function handleSave() {
   <view class="page-container h-screen flex flex-col overflow-hidden bg-[var(--page-bg)]">
     <wd-navbar title="目标设置" safe-area-inset-top fixed :custom-style="`--wd-navbar-height: ${navBarHeight}px`">
       <template #left>
-        <view class="flex items-center gap-2 pl-2">
+        <view class="flex items-center pl-2">
           <view class="flex items-center justify-center p-1" @click="goBack">
             <wd-icon name="arrow-left" size="20" />
           </view>
-          <view class="save-btn" @click="handleSave">
-            <text>保存</text>
-          </view>
+        </view>
+      </template>
+      <template #right>
+        <view class="save-btn" @click="handleSave">
+          <text>保存</text>
         </view>
       </template>
     </wd-navbar>
@@ -188,13 +190,13 @@ async function handleSave() {
               </text>
             </text>
           </view>
-          <wd-slider v-model="targetWeight" :min="40" :max="120" :step="1" active-color="#10b981" />
+          <wd-slider v-model="targetWeight" :min="30" :max="200" :step="1" active-color="#10b981" />
         </view>
 
         <!-- 提示 -->
         <view class="border border-blue-100/20 rounded-xl bg-blue-50/10 p-4">
           <text class="text-xs text-blue-500 leading-relaxed">
-            💡 提示：系统已根据您的每日热量目标，按照蛋白质 30%、脂肪 25%、碳水 45% 的国际推荐占比自动计算了营养素目标值。
+            💡 提示：系统会按蛋白质 30%、脂肪 25%、碳水 45% 的默认参考比例自动计算，您仍可根据个人情况调整；如有疾病或特殊营养需求，请咨询专业人士。
           </text>
         </view>
       </view>

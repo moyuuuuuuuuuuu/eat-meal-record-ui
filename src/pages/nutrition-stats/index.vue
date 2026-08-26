@@ -72,9 +72,9 @@ watch(activePeriod, p => fetchStats(p))
 onMounted(() => fetchStats('week'))
 
 // ── 雷达图 SVG 计算 ────────────────────────────────────────
-const CX = 150
-const CY = 150
-const R = 108
+const CX = 140
+const CY = 140
+const R = 92
 const N = dimensions.length
 const LEVELS = [20, 40, 60, 80, 100]
 
@@ -106,7 +106,7 @@ const dataPoints = computed(() => {
 // 轴线端点（轴标签定位用）
 const axisPoints = computed(() =>
   dimensions.map((d, i) => {
-    const tip = polarXY(angle(i), R + 24)
+    const tip = polarXY(angle(i), R + 22)
     const inner = polarXY(angle(i), R)
     return { label: d.label, tip, inner }
   }),
@@ -230,7 +230,7 @@ function goBack() {
 
         <!-- SVG 雷达图 -->
         <view v-else class="flex items-center justify-center">
-          <svg width="300" height="300" viewBox="0 0 300 300">
+          <svg class="h-auto max-w-[280px] w-full" viewBox="0 0 280 280">
 
             <!-- 网格背景多边形 -->
             <polygon
@@ -295,7 +295,7 @@ function goBack() {
               :y="ax.tip.y"
               text-anchor="middle"
               dominant-baseline="central"
-              font-size="11"
+              font-size="10"
               font-weight="500"
               fill="#0d9488"
               opacity="0.85"

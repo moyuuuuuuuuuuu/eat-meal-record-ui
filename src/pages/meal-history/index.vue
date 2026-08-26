@@ -173,7 +173,9 @@ onReachBottom(() => {
                     摄入
                   </text>
                   <text class="text-lg text-[var(--text-main)] font-bold">
-                    {{ day.totalCalories }}
+                    {{ day.totalCalories }}<text class="ml-0.5 text-[9px] font-normal">
+                      kcal
+                    </text>
                   </text>
                 </view>
               </view>
@@ -192,7 +194,9 @@ onReachBottom(() => {
                     消耗
                   </text>
                   <text class="text-lg text-[var(--text-main)] font-bold">
-                    {{ day.totalBurned }}
+                    {{ day.totalBurned }}<text class="ml-0.5 text-[9px] font-normal">
+                      kcal
+                    </text>
                   </text>
                 </view>
               </view>
@@ -207,7 +211,9 @@ onReachBottom(() => {
                 <text
                   class="text-lg text-emerald-600 font-black"
                 >
-                  {{ day.totalIntake }}
+                  {{ day.totalIntake }}<text class="ml-0.5 text-[9px] font-normal">
+                    kcal
+                  </text>
                 </text>
               </view>
             </view>

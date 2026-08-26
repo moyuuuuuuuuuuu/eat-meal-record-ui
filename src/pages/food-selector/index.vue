@@ -82,7 +82,7 @@ const popupNutrition = computed(() => {
   return {
     calories: Math.round(Number(unit.nutrition.calories) * q),
     protein: (Number(unit.nutrition.protein) * q).toFixed(1),
-    fat: (Number(unit.nutrition.fibers || 0) * q).toFixed(1),
+    fat: (Number(unit.nutrition.fat || 0) * q).toFixed(1),
     carbs: (Number(unit.nutrition.carbs) * q).toFixed(1),
   }
 })
@@ -117,7 +117,7 @@ function confirmSelect() {
     selectedUnit: selectedUnit.value,
     totalCalories: Math.round(Number(unit.nutrition.calories) * q),
     totalProtein: (Number(unit.nutrition.protein) * q).toFixed(1),
-    totalFat: (Number(unit.nutrition.fibers || 0) * q).toFixed(1),
+    totalFat: (Number(unit.nutrition.fat || 0) * q).toFixed(1),
     totalCarbs: (Number(unit.nutrition.carbs) * q).toFixed(1),
   }
   uni.$emit('add-food-item', selectedFood)
