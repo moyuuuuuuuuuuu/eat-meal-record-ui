@@ -6,6 +6,7 @@ import IconSettings from '@/components/icons/IconSettings.vue'
 import IconTarget from '@/components/icons/IconTarget.vue'
 import IconUser from '@/components/icons/IconUser.vue'
 import { useAuth } from '@/composables/useAuth'
+import { usePageShare } from '@/composables/usePageShare'
 import { useSystemInfo } from '@/composables/useSystemInfo'
 
 const { statusBarHeight, navBarHeight } = useSystemInfo()
@@ -36,6 +37,8 @@ const { data: userStats, send: refreshStats } = useRequest(Apis.user.stats(), {
   },
   immediate: false,
 })
+
+usePageShare({ title: '我的饮食记录', path: '/pages/profile/index' })
 const { send: refreshInformation } = useRequest(Apis.user.information(), { immediate: false })
 
 function handleNavigate(url: string) {

@@ -7,6 +7,7 @@ import IconImage from '@/components/icons/IconImage.vue'
 import IconMapPin from '@/components/icons/IconMapPin.vue'
 import IconVideo from '@/components/icons/IconVideo.vue'
 import IconX from '@/components/icons/IconX.vue'
+import { usePageShare } from '@/composables/usePageShare'
 import { useSystemInfo } from '@/composables/useSystemInfo'
 
 const { fixedNavbarHeight } = useSystemInfo()
@@ -17,6 +18,8 @@ definePage({
     navigationStyle: 'custom',
   },
 })
+
+usePageShare({ title: '来动态广场分享饮食生活', path: '/pages/create-post/index' })
 
 const content = ref('')
 const showLocation = ref(false)

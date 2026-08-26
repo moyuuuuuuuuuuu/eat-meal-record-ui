@@ -8,6 +8,7 @@ import IconPlus from '@/components/icons/IconPlus.vue'
 import IconSave from '@/components/icons/IconSave.vue'
 import IconX from '@/components/icons/IconX.vue'
 import { useAuth } from '@/composables/useAuth'
+import { usePageShare } from '@/composables/usePageShare'
 import { useSystemInfo } from '@/composables/useSystemInfo'
 
 const { fixedNavbarHeight } = useSystemInfo()
@@ -59,6 +60,7 @@ recorderManager.value.onStop(async (res) => {
     },
   })
 })
+usePageShare({ title: '一起记录每一餐', path: '/pages/add-meal/index' })
 // #endif
 
 async function handleAiRecognize() {

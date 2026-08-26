@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
+import { usePageShare } from '@/composables/usePageShare'
 import { useSystemInfo } from '@/composables/useSystemInfo'
 
 const { fixedNavbarHeight } = useSystemInfo()
@@ -10,6 +11,8 @@ definePage({
     navigationStyle: 'custom',
   },
 })
+
+usePageShare({ title: '读懂营养，吃得更健康', path: '/pages/nutrition-stats/index' })
 
 type Period = 'week' | 'month' | 'quarter' | 'year'
 

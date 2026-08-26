@@ -5,6 +5,7 @@ import IconPlus from '@/components/icons/IconPlus.vue'
 import IconSearch from '@/components/icons/IconSearch.vue'
 import IconX from '@/components/icons/IconX.vue'
 import { useAuth } from '@/composables/useAuth'
+import { usePageShare } from '@/composables/usePageShare'
 import { useSystemInfo } from '@/composables/useSystemInfo'
 
 const { fixedNavbarHeight } = useSystemInfo()
@@ -15,6 +16,8 @@ definePage({
     navigationStyle: 'custom',
   },
 })
+
+usePageShare({ title: '发现更多健康食物', path: '/pages/food-selector/index' })
 
 const { isLogin } = useAuth()
 

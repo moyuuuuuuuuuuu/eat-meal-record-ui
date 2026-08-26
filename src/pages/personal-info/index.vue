@@ -2,6 +2,7 @@
 import { useRequest } from 'alova/client'
 import { computed, ref } from 'vue'
 import { useAuth } from '@/composables/useAuth'
+import { usePageShare } from '@/composables/usePageShare'
 import { useSystemInfo } from '@/composables/useSystemInfo'
 
 const { fixedNavbarHeight } = useSystemInfo()
@@ -50,6 +51,8 @@ onShow(async () => {
     fillForm()
   }
 })
+
+usePageShare({ title: '完善健康资料，获得个性化建议', path: '/pages/personal-info/index' })
 
 const bmi = computed(() => {
   const h = height.value / 100

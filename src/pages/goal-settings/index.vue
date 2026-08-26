@@ -2,6 +2,7 @@
 import { useRequest } from 'alova/client'
 import { ref, watch } from 'vue'
 import { useAuth } from '@/composables/useAuth'
+import { usePageShare } from '@/composables/usePageShare'
 import { useSystemInfo } from '@/composables/useSystemInfo'
 
 const { fixedNavbarHeight } = useSystemInfo()
@@ -13,6 +14,8 @@ definePage({
     navigationStyle: 'custom',
   },
 })
+
+usePageShare({ title: '制定你的健康饮食目标', path: '/pages/goal-settings/index' })
 
 const dailyCalories = ref(2000)
 const protein = ref(150)

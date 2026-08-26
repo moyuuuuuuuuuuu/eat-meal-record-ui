@@ -3,6 +3,7 @@ import IconCheck from '@/components/icons/IconCheck.vue' // 补全 Check 图标�
 import IconMonitor from '@/components/icons/IconMonitor.vue'
 import IconMoon from '@/components/icons/IconMoon.vue'
 import IconSun from '@/components/icons/IconSun.vue'
+import { usePageShare } from '@/composables/usePageShare'
 import { useSystemInfo } from '@/composables/useSystemInfo'
 
 const { fixedNavbarHeight } = useSystemInfo()
@@ -13,6 +14,8 @@ definePage({
     navigationStyle: 'custom',
   },
 })
+
+usePageShare({ title: '选择你喜欢的页面主题', path: '/pages/theme-settings/index' })
 
 const { theme: currentTheme, followSystem, toggleTheme, setFollowSystem } = useManualTheme()
 

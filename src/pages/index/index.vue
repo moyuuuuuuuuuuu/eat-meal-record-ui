@@ -5,6 +5,7 @@ import IconFlame from '@/components/icons/IconFlame.vue'
 import IconHelpCircle from '@/components/icons/IconHelpCircle.vue'
 import IconTrendingUp from '@/components/icons/IconTrendingUp.vue'
 import { useAuth } from '@/composables/useAuth'
+import { usePageShare } from '@/composables/usePageShare'
 import { useSystemInfo } from '@/composables/useSystemInfo'
 
 const { totalHeight } = useSystemInfo()
@@ -17,6 +18,8 @@ definePage({
     navigationStyle: 'custom',
   },
 })
+
+usePageShare({ title: '记录饮食，吃得更清楚', path: '/pages/index/index' })
 
 const dailyGoal = ref({
   calories: 2000,

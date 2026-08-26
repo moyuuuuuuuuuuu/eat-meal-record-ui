@@ -3,6 +3,7 @@ import { onPullDownRefresh, onReachBottom } from '@dcloudio/uni-app'
 import { usePagination } from 'alova/client'
 import { computed, ref } from 'vue'
 import IconChevronDown from '@/components/icons/IconChevronDown.vue'
+import { usePageShare } from '@/composables/usePageShare'
 import { useSystemInfo } from '@/composables/useSystemInfo'
 
 const { fixedNavbarHeight } = useSystemInfo()
@@ -40,6 +41,8 @@ const {
 const showSkeleton = computed(() => {
   return loading.value && page.value === 1 && history.value.length === 0
 })
+
+usePageShare({ title: '坚持记录，了解自己的饮食', path: '/pages/meal-history/index' })
 
 const loadedSummary = computed(() => history.value.reduce((summary, day) => ({
   calories: summary.calories + Number(day.totalCalories || 0),

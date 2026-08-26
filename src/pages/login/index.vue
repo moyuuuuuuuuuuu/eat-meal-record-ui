@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useRequest } from 'alova/client'
 import { useAuth } from '@/composables/useAuth'
+import { usePageShare } from '@/composables/usePageShare'
 
 const props = defineProps<{
   redirect?: string
@@ -91,6 +92,8 @@ onUnload(() => {
   if (countdownTimer)
     clearInterval(countdownTimer)
 })
+
+usePageShare({ title: '饮食记录，轻松管理每一餐', path: '/pages/login/index' })
 
 function handleLogin() {
   if (!isAgree.value) {
