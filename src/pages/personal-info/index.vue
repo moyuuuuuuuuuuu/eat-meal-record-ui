@@ -148,16 +148,11 @@ async function handleSave() {
           </view>
         </view>
       </template>
-      <template #right>
-        <view class="save-btn" @click="handleSave">
-          <text>保存</text>
-        </view>
-      </template>
     </wd-navbar>
-    <view :style="{ height: `${totalHeight}px` }" />
+    <view class="shrink-0" :style="{ height: `${totalHeight}px` }" />
 
     <scroll-view scroll-y class="w-full flex-1">
-      <view class="w-full px-4 py-4 pb-10 space-y-4">
+      <view class="w-full px-4 py-4 pb-28 space-y-4">
         <!-- 头像 -->
         <view class="flex flex-col items-center rounded-xl bg-[var(--card-bg)] p-6" @click="handleChooseAvatar">
           <view class="mb-3 h-20 w-20 flex items-center justify-center overflow-hidden rounded-full bg-emerald-100">
@@ -177,17 +172,17 @@ async function handleSave() {
               <text class="text-sm text-[var(--text-main)]">
                 性别
               </text>
-              <wd-radio-group v-model="gender" inline shape="button" active-color="#10b981">
-                <wd-radio value="1">
-                  男
-                </wd-radio>
-                <wd-radio value="2">
-                  女
-                </wd-radio>
-                <wd-radio value="3">
-                  未设置
-                </wd-radio>
-              </wd-radio-group>
+              <view class="gender-selector">
+                <view
+                  v-for="item in [{ label: '男', value: '1' }, { label: '女', value: '2' }, { label: '未设置', value: '3' }]"
+                  :key="item.value"
+                  class="gender-option"
+                  :class="{ 'gender-option--active': gender === item.value }"
+                  @click="gender = item.value"
+                >
+                  {{ item.label }}
+                </view>
+              </view>
             </view>
             <wd-datetime-picker
               v-model="birthdayTimestamp"
@@ -226,7 +221,7 @@ async function handleSave() {
                   {{ height }}
                 </text>
               </view>
-              <wd-slider v-model="height" :min="140" :max="220" :step="1" active-color="#10b981" />
+              <wd-slider v-model="height" :min="140" :max="220" :step="1" hide-label active-color="#10b981" />
             </view>
             <view>
               <view class="mb-2 flex justify-between">
@@ -237,7 +232,7 @@ async function handleSave() {
                   {{ weight }}
                 </text>
               </view>
-              <wd-slider v-model="weight" :min="30" :max="200" :step="0.1" active-color="#10b981" />
+              <wd-slider v-model="weight" :min="30" :max="200" :step="0.1" hide-label active-color="#10b981" />
             </view>
           </view>
         </view>
@@ -264,20 +259,51 @@ async function handleSave() {
         </view>
       </view>
     </scroll-view>
+
+    <view class="save-bar">
+      <wd-button type="success" block :loading="saving" @click="handleSave">
+        保存个人信息
+      </wd-button>
+    </view>
   </view>
 </template>
 
 <style scoped>
-.save-btn {
-  background-color: #10b981;
-  color: white;
-  height: 28px;
-  padding: 0 16px;
-  border-radius: 6px;
-  font-size: 13px;
+.gender-selector {
   display: flex;
-  align-items: center;
-  font-weight: bold;
+  width: 220px;
+  padding: 3px;
+  gap: 3px;
+  border-radius: 10px;
+  background: var(--page-bg);
+}
+.gender-option {
+  flex: 1;
+  min-width: 0;
+  padding: 7px 4px;
+  border-radius: 8px;
+  color: var(--text-sub);
+  font-size: 13px;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+}
+.gender-option--active {
+  background: #ecfdf5;
+  color: #059669;
+  font-weight: 600;
+  box-shadow: inset 0 0 0 1px #6ee7b7;
+}
+.save-bar {
+  position: fixed;
+  z-index: 20;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--border-color);
+  background: var(--card-bg);
+  box-shadow: 0 -6px 20px rgb(15 23 42 / 6%);
 }
 :deep(.wd-input) {
   padding: 10px 15px;

@@ -91,16 +91,11 @@ async function handleSave() {
           </view>
         </view>
       </template>
-      <template #right>
-        <view class="save-btn" @click="handleSave">
-          <text>保存</text>
-        </view>
-      </template>
     </wd-navbar>
-    <!-- <view :style="{ height: `${totalHeight}px` }" /> -->
+    <view class="shrink-0" :style="{ height: `${totalHeight}px` }" />
 
-    <scroll-view scroll-y class="w-full flex-1" :style="{ paddingTop: `${totalHeight}px` }">
-      <view class="w-full px-4 py-4 pb-10 space-y-4">
+    <scroll-view scroll-y class="w-full flex-1">
+      <view class="w-full px-4 py-4 pb-28 space-y-4">
         <!-- 热量目标 -->
         <view class="rounded-xl bg-[var(--card-bg)] p-4 shadow-sm">
           <view class="mb-6 flex items-center justify-between">
@@ -114,11 +109,7 @@ async function handleSave() {
               </text>
             </text>
           </view>
-          <wd-slider v-model="dailyCalories" :min="1200" :max="3500" :step="50" active-color="#10b981" />
-          <view class="mt-2 flex justify-between text-[10px] text-[var(--text-sub)]">
-            <text>1200</text>
-            <text>3500</text>
-          </view>
+          <wd-slider v-model="dailyCalories" :min="1200" :max="3500" :step="50" hide-label active-color="#10b981" />
         </view>
 
         <!-- 营养素目标 -->
@@ -138,7 +129,7 @@ async function handleSave() {
                   {{ protein }}
                 </text>
               </view>
-              <wd-slider v-model="protein" :min="10" :max="300" :step="1" active-color="#10b981" />
+              <wd-slider v-model="protein" :min="10" :max="300" :step="1" hide-label active-color="#10b981" />
             </view>
 
             <!-- 脂肪 -->
@@ -151,7 +142,7 @@ async function handleSave() {
                   {{ fat }}
                 </text>
               </view>
-              <wd-slider v-model="fat" :min="10" :max="200" :step="1" active-color="#3b82f6" />
+              <wd-slider v-model="fat" :min="10" :max="200" :step="1" hide-label active-color="#3b82f6" />
             </view>
 
             <!-- 碳水 -->
@@ -164,7 +155,7 @@ async function handleSave() {
                   {{ carbs }}
                 </text>
               </view>
-              <wd-slider v-model="carbs" :min="50" :max="600" :step="1" active-color="#f59e0b" />
+              <wd-slider v-model="carbs" :min="50" :max="600" :step="1" hide-label active-color="#f59e0b" />
             </view>
           </view>
         </view>
@@ -182,7 +173,7 @@ async function handleSave() {
               </text>
             </text>
           </view>
-          <wd-slider v-model="targetWeight" :min="30" :max="200" :step="1" active-color="#10b981" />
+          <wd-slider v-model="targetWeight" :min="30" :max="200" :step="1" hide-label active-color="#10b981" />
         </view>
 
         <!-- 提示 -->
@@ -193,19 +184,25 @@ async function handleSave() {
         </view>
       </view>
     </scroll-view>
+
+    <view class="save-bar">
+      <wd-button type="success" block :loading="saving" @click="handleSave">
+        保存目标设置
+      </wd-button>
+    </view>
   </view>
 </template>
 
 <style scoped>
-.save-btn {
-  background-color: #10b981;
-  color: white;
-  height: 28px;
-  padding: 0 16px;
-  border-radius: 6px;
-  font-size: 13px;
-  display: flex;
-  align-items: center;
-  font-weight: bold;
+.save-bar {
+  position: fixed;
+  z-index: 20;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--border-color);
+  background: var(--card-bg);
+  box-shadow: 0 -6px 20px rgb(15 23 42 / 6%);
 }
 </style>
