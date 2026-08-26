@@ -6,7 +6,7 @@ import FeedMediaAttach from '@/components/FeedMediaAttach.vue'
 import { usePlatform } from '@/composables/usePlatform'
 import { useSystemInfo } from '@/composables/useSystemInfo'
 
-const { statusBarHeight, navBarHeight } = useSystemInfo()
+const { fixedNavbarHeight } = useSystemInfo()
 const { isMp, isWechat, isTencentEnv } = usePlatform()
 
 definePage({
@@ -182,7 +182,7 @@ onShareTimeline(() => {
       </view>
     </view>
 
-    <view :style="{ height: `${statusBarHeight + navBarHeight + 52.5}px` }" />
+    <view :style="{ height: `${fixedNavbarHeight + 52.5}px` }" />
 
     <view class="posts-list mt-6 pb-20 space-y-2">
       <template v-if="showSkeleton">

@@ -9,7 +9,7 @@ import IconVideo from '@/components/icons/IconVideo.vue'
 import IconX from '@/components/icons/IconX.vue'
 import { useSystemInfo } from '@/composables/useSystemInfo'
 
-const { totalHeight, navBarHeight } = useSystemInfo()
+const { fixedNavbarHeight } = useSystemInfo()
 
 definePage({
   style: {
@@ -336,7 +336,7 @@ watch(showLocation, async (val) => {
 
 <template>
   <view class="page-container h-screen flex flex-col overflow-hidden bg-[var(--page-bg)]">
-    <wd-navbar title="发布动态" safe-area-inset-top fixed :custom-style="`--wd-navbar-height: ${navBarHeight}px`">
+    <wd-navbar title="发布动态" safe-area-inset-top fixed>
       <template #left>
         <view class="flex items-center gap-2 pl-2">
           <view class="flex items-center justify-center p-1" @click="goBack">
@@ -348,7 +348,7 @@ watch(showLocation, async (val) => {
         </view>
       </template>
     </wd-navbar>
-    <view :style="{ height: `${totalHeight}px` }" />
+    <view class="shrink-0" :style="{ height: `${fixedNavbarHeight}px` }" />
 
     <scroll-view scroll-y class="w-full flex-1">
       <view class="w-full p-4 pb-10 space-y-4">

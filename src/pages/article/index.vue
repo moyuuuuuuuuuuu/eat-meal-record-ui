@@ -4,7 +4,7 @@ import { useRequest } from 'alova/client'
 import { ref } from 'vue'
 import { useSystemInfo } from '@/composables/useSystemInfo'
 
-const { statusBarHeight, navBarHeight } = useSystemInfo()
+const { fixedNavbarHeight } = useSystemInfo()
 
 definePage({
   name: 'article',
@@ -68,7 +68,7 @@ function formatRichText(html: string) {
     <wd-navbar :title="detail.title" left-arrow safe-area-inset-top fixed @click-left="handleBack" />
 
     <!-- 顶部占位 -->
-    <view :style="{ height: `${statusBarHeight + navBarHeight}px` }" />
+    <view :style="{ height: `${fixedNavbarHeight}px` }" />
 
     <view v-if="loading" class="flex justify-center">
       <wd-loading />

@@ -4,7 +4,7 @@ import { useRequest } from 'alova/client'
 import FeedMediaAttach from '@/components/FeedMediaAttach.vue'
 import { useSystemInfo } from '@/composables/useSystemInfo'
 
-const { statusBarHeight, navBarHeight } = useSystemInfo()
+const { fixedNavbarHeight } = useSystemInfo()
 
 definePage({
   name: 'feed-detail',
@@ -99,7 +99,7 @@ onShareTimeline(() => {
     <wd-navbar title="动态详情" left-arrow safe-area-inset-top fixed @click-left="handleBack" />
 
     <!-- 顶部占位 -->
-    <view :style="{ height: `${statusBarHeight + navBarHeight}px` }" />
+    <view :style="{ height: `${fixedNavbarHeight}px` }" />
 
     <view v-if="loading" class="mt-20 flex flex-col items-center justify-center opacity-50">
       <wd-loading size="24px" />

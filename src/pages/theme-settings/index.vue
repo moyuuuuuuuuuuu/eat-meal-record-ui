@@ -5,7 +5,7 @@ import IconMoon from '@/components/icons/IconMoon.vue'
 import IconSun from '@/components/icons/IconSun.vue'
 import { useSystemInfo } from '@/composables/useSystemInfo'
 
-const { statusBarHeight, navBarHeight } = useSystemInfo()
+const { fixedNavbarHeight } = useSystemInfo()
 
 definePage({
   style: {
@@ -41,10 +41,10 @@ function setTheme(val: string) {
 
 <template>
   <view class="page-container min-h-screen bg-[var(--page-bg)]">
-    <wd-navbar title="主题设置" left-arrow fixed safe-area-inset-top @click-left="goBack" />
+    <wd-navbar title="主题设置" left-arrow safe-area-inset-top fixed @click-left="goBack" />
 
     <!-- 顶部占位 -->
-    <view :style="{ height: `${statusBarHeight + navBarHeight}px` }" />
+    <view :style="{ height: `${fixedNavbarHeight}px` }" />
 
     <view class="mt-4 px-4">
       <view class="overflow-hidden rounded-xl bg-[var(--card-bg)] shadow-sm">

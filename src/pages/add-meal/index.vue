@@ -10,7 +10,7 @@ import IconX from '@/components/icons/IconX.vue'
 import { useAuth } from '@/composables/useAuth'
 import { useSystemInfo } from '@/composables/useSystemInfo'
 
-const { totalHeight, navBarHeight } = useSystemInfo()
+const { fixedNavbarHeight } = useSystemInfo()
 
 definePage({
   style: {
@@ -461,7 +461,7 @@ async function handleSave() {
 
 <template>
   <view class="page-container h-screen flex flex-col overflow-hidden bg-[var(--page-bg)]">
-    <wd-navbar title="添加餐食" safe-area-inset-top fixed :custom-style="`--wd-navbar-height: ${navBarHeight}px`">
+    <wd-navbar title="添加餐食" safe-area-inset-top fixed>
       <template #left>
         <view class="flex items-center gap-2 pl-2">
           <view class="flex items-center justify-center p-1" @click="goBack">
@@ -480,7 +480,7 @@ async function handleSave() {
         </view>
       </template>
     </wd-navbar>
-    <view :style="{ height: `${totalHeight}px` }" />
+    <view class="shrink-0" :style="{ height: `${fixedNavbarHeight}px` }" />
 
     <scroll-view scroll-y class="flex-1 px-4 py-4 space-y-4">
       <view class="pb-24 space-y-4">

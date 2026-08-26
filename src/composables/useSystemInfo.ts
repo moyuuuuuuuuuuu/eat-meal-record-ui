@@ -25,11 +25,14 @@ export function useSystemInfo() {
   // #endif
 
   const totalHeight = computed(() => statusBarHeight.value + navBarHeight.value)
+  // Wot Navbar 的内容区固定为 44px，不能用微信胶囊推算高度代替。
+  const fixedNavbarHeight = computed(() => statusBarHeight.value + 44)
 
   return {
     statusBarHeight,
     navBarHeight,
     totalHeight,
+    fixedNavbarHeight,
     windowWidth,
     menuButtonInfo,
     capsuleRightOffset,

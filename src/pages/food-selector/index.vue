@@ -7,7 +7,7 @@ import IconX from '@/components/icons/IconX.vue'
 import { useAuth } from '@/composables/useAuth'
 import { useSystemInfo } from '@/composables/useSystemInfo'
 
-const { statusBarHeight, navBarHeight } = useSystemInfo()
+const { fixedNavbarHeight } = useSystemInfo()
 
 definePage({
   style: {
@@ -137,7 +137,7 @@ function confirmSelect() {
     </view>
 
     <!-- 顶部占位 -->
-    <view :style="{ height: `${statusBarHeight + navBarHeight + 64}px` }" />
+    <view :style="{ height: `${fixedNavbarHeight + 64}px` }" />
 
     <!-- 食物列表 -->
     <view class="mt-6 px-4 pb-10 space-y-2">

@@ -2,7 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useSystemInfo } from '@/composables/useSystemInfo'
 
-const { statusBarHeight, navBarHeight } = useSystemInfo()
+const { fixedNavbarHeight } = useSystemInfo()
 
 definePage({
   style: {
@@ -153,7 +153,7 @@ function goBack() {
 <template>
   <view class="page-container min-h-screen bg-[var(--page-bg)]">
     <wd-navbar title="营养统计" left-arrow safe-area-inset-top fixed @click-left="goBack" />
-    <view :style="{ height: `${statusBarHeight + navBarHeight}px` }" />
+    <view :style="{ height: `${fixedNavbarHeight}px` }" />
 
     <view class="px-4 py-4 space-y-4">
       <!-- ── 时间段切换 ── -->

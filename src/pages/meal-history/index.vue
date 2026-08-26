@@ -5,7 +5,7 @@ import { computed, ref } from 'vue'
 import IconChevronDown from '@/components/icons/IconChevronDown.vue'
 import { useSystemInfo } from '@/composables/useSystemInfo'
 
-const { statusBarHeight, navBarHeight } = useSystemInfo()
+const { fixedNavbarHeight } = useSystemInfo()
 
 definePage({
   style: {
@@ -88,7 +88,7 @@ onReachBottom(() => {
     <wd-navbar title="餐食记录" left-arrow safe-area-inset-top fixed @click-left="goBack" />
 
     <!-- 顶部占位 -->
-    <view :style="{ height: `${statusBarHeight + navBarHeight}px` }" />
+    <view :style="{ height: `${fixedNavbarHeight}px` }" />
 
     <view class="px-4 py-4 space-y-4">
       <!-- 骨架屏 -->
