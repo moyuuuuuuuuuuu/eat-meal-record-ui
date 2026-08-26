@@ -52,7 +52,6 @@ const showPopup = ref(false)
 const currentFood = ref<FoodInfo | null>(null)
 const quantity = ref(1)
 const selectedUnit = ref<TmpFoodUnit>()
-const loadingProps = inject('globalLoadingProps')
 const hasReachedBottom = ref(false)
 
 onReachBottom(() => {
@@ -195,12 +194,11 @@ function confirmSelect() {
       </template>
 
       <!-- 加载更多 -->
-      <wd-loadmore
-        v-if="!showSkeleton && hasReachedBottom"
-        :state="isLastPage ? 'finished' : (loading ? 'loading' : 'ready')"
-        finished-text="我是有底线的"
-        loading-text="加载中"
-        :loading-props="loadingProps"
+      <ListLoadMore
+        v-if="!showSkeleton"
+        :reached-bottom="hasReachedBottom"
+        :loading="loading"
+        :finished="isLastPage"
       />
     </view>
 

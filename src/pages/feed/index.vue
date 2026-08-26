@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onPageScroll, onPullDownRefresh, onReachBottom, onShareAppMessage, onShareTimeline, onShow } from '@dcloudio/uni-app'
 import { usePagination, useRequest } from 'alova/client'
-import { computed, inject, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import FeedMediaAttach from '@/components/FeedMediaAttach.vue'
 import { usePlatform } from '@/composables/usePlatform'
 import { useSystemInfo } from '@/composables/useSystemInfo'
@@ -18,7 +18,6 @@ definePage({
   },
 })
 
-const loadingProps = inject('globalLoadingProps')
 const {
   loading,
   data: posts,
@@ -297,12 +296,11 @@ onShareTimeline(() => {
         </view>
       </template>
 
-      <wd-loadmore
-        v-if="!showSkeleton && hasReachedBottom"
-        :state="(isLastPage ? 'finished' : (loading ? 'loading' : 'ready')) as any"
-        finished-text="我是有底线的"
-        loading-text="加载中"
-        :loading-props="loadingProps as any"
+      <ListLoadMore
+        v-if="!showSkeleton"
+        :reached-bottom="hasReachedBottom"
+        :loading="loading"
+        :finished="isLastPage"
       />
     </view>
 
