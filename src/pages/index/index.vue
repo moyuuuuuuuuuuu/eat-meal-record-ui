@@ -64,44 +64,54 @@ const { send: updateSteps } = useRequest(data => Apis.user.steps({ data }), {
   immediate: false,
 })
 
-function getWeRunDataAndUpload() {
+function getWeRunDataAndUpload(): Promise<void> {
   // #ifdef MP-WEIXIN
-  uni.getWeRunData({
-    success: async (res) => {
-      if (res.encryptedData && res.iv) {
-        try {
-          await updateSteps({
-            encryptedData: res.encryptedData,
-            iv: res.iv,
-          })
-          // 标记已获取过，避免重复拉起
-          uni.setStorageSync('has_fetched_werun', 'true')
+  return new Promise((resolve, reject) => {
+    uni.getWeRunData({
+      success: async (res) => {
+        if (res.encryptedData && res.iv) {
+          try {
+            await updateSteps({
+              encryptedData: res.encryptedData,
+              iv: res.iv,
+            })
+            resolve()
+          }
+          catch (err) {
+            console.error('更新步数失败', err)
+            reject(err)
+          }
         }
-        catch (err) {
-          console.error('更新步数失败', err)
+        else {
+          reject(new Error('微信运动数据为空'))
         }
-      }
-    },
-    fail: (err) => {
-      // 用户点击“拒绝”会进入这里
-      console.warn('获取微信运动数据失败或用户拒绝:', err)
+      },
+      fail: (err) => {
+        // 用户点击“拒绝”会进入这里
+        console.warn('获取微信运动数据失败或用户拒绝:', err)
 
-      // 如果用户之前拒绝过，再次调用会直接进入 fail，此时需引导去设置页
-      if (err.errMsg.includes('auth deny')) {
-        uni.showModal({
-          title: '授权提示',
-          content: '需要读取微信运动数据以计算消耗，请在设置中开启',
-          confirmText: '去开启',
-          confirmColor: '#10b981', // 使用你喜欢的 emerald-500 绿色
-          success: (modalRes) => {
-            if (modalRes.confirm) {
-              uni.openSetting()
-            }
-          },
-        })
-      }
-    },
+        // 如果用户之前拒绝过，再次调用会直接进入 fail，此时需引导去设置页
+        if (err.errMsg.includes('auth deny')) {
+          uni.showModal({
+            title: '授权提示',
+            content: '需要读取微信运动数据以计算消耗，请在设置中开启',
+            confirmText: '去开启',
+            confirmColor: '#10b981',
+            success: (modalRes) => {
+              if (modalRes.confirm) {
+                uni.openSetting()
+              }
+            },
+          })
+        }
+        reject(err)
+      },
+    })
   })
+  // #endif
+
+  // #ifndef MP-WEIXIN
+  return Promise.resolve()
   // #endif
 }
 // 步数同步参数接口
@@ -112,6 +122,12 @@ enum StorageKeys {
 }
 // 1. 内存锁：防止单次运行期间多次触发（TS 自动推导为 boolean）
 let isWeRunSyncing = false
+function getLocalDateKey(): string {
+  const now = new Date()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const day = String(now.getDate()).padStart(2, '0')
+  return `${now.getFullYear()}-${month}-${day}`
+}
 /**
  * 逻辑判断归口
  */
@@ -123,7 +139,7 @@ async function syncWeRunIfNeeded(): Promise<void> {
   if (isWeRunSyncing) {
     return
   }
-  const today = new Date().toISOString().split('T')[0]
+  const today = getLocalDateKey()
   const lastSyncDate = uni.getStorageSync(StorageKeys.LastWeRunSyncDate) as string
   const justLoggedIn = uni.getStorageSync(StorageKeys.JustLoggedIn) as boolean
 
@@ -131,12 +147,15 @@ async function syncWeRunIfNeeded(): Promise<void> {
   if (justLoggedIn || lastSyncDate !== today) {
     isWeRunSyncing = true
     try {
-      getWeRunDataAndUpload()
+      await getWeRunDataAndUpload()
+      uni.setStorageSync(StorageKeys.LastWeRunSyncDate, today)
       if (justLoggedIn)
         uni.removeStorageSync(StorageKeys.JustLoggedIn)
     }
+    catch (err) {
+      console.warn('本次微信运动同步未完成', err)
+    }
     finally {
-      // 这里的解锁建议放在异步回调之外，或根据实际请求状态调整
       isWeRunSyncing = false
     }
   }
@@ -195,7 +214,7 @@ onUnmounted(() => {
 })
 
 function deleteFood(id: string) {
-  useRequest(Apis.diary.deleteFood({ params: { id } })).send().then(() => {
+  useRequest(Apis.diary.deleteFood({ data: { meal_record_food_id: id } })).send().then(() => {
     // Refresh data
     getSummary().then((res) => {
       if (res) {

@@ -28,11 +28,12 @@ export default {
   'diary.summary': ['GET', '/diary/summary'],
   'diary.meals': ['GET', '/diary'],
   'diary.addFood': ['POST', '/diary/meal/add'],
-  'diary.deleteFood': ['DELETE', '/diary/meal/food'],
+  'diary.deleteFood': ['POST', '/diary/meal/food/delete'],
   'diary.history': ['GET', '/diary/history'],
 
   // Auth
   'auth.sms.login': ['POST', '/auth/sms/login'],
+  'auth.sms.send': ['POST', '/sms/send'],
   'auth.login': ['POST', '/auth/login'],
 
   // User (app-specific)

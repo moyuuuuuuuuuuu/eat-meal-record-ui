@@ -17,11 +17,13 @@ const { login: setAuth } = useAuth()
 const { error: showError, success: showSuccess } = useGlobalToast()
 
 const { loading, send: smsLoginRequest } = useRequest(data => Apis.auth.sms.login({ data }), { immediate: false })
+const { loading: smsSending, send: sendSmsRequest } = useRequest(data => Apis.auth.sms.send({ data }), { immediate: false })
 const { loading: wxLoading, send: wxLoginRequest } = useRequest(data => Apis.auth.login({ data }), { immediate: false })
 
 const phone = ref('')
 const code = ref('')
 const countdown = ref(0)
+let countdownTimer: ReturnType<typeof setInterval> | null = null
 const isAgree = ref(false)
 
 // 平台检测
@@ -48,24 +50,47 @@ function togglePhoneForm() {
   showPhoneForm.value = true
 }
 
-function handleGetCode() {
+function getSafeRedirect(): string {
+  if (!props.redirect)
+    return '/pages/index/index'
+  try {
+    const target = decodeURIComponent(props.redirect)
+    return target.startsWith('/pages/') && !target.includes('://') ? target : '/pages/index/index'
+  }
+  catch {
+    return '/pages/index/index'
+  }
+}
+
+async function handleGetCode() {
   if (!phone.value || !/^1[3-9]\d{9}$/.test(phone.value)) {
     showError('请输入正确的手机号')
     return
   }
-  if (countdown.value > 0)
+  if (countdown.value > 0 || smsSending.value)
     return
 
-  // 模拟获取验证码
-  showSuccess('验证码已发送')
-  countdown.value = 60
-  const timer = setInterval(() => {
-    countdown.value--
-    if (countdown.value <= 0) {
-      clearInterval(timer)
-    }
-  }, 1000)
+  try {
+    await sendSmsRequest({ mobile: phone.value })
+    showSuccess('验证码已发送')
+    countdown.value = 60
+    countdownTimer = setInterval(() => {
+      countdown.value--
+      if (countdown.value <= 0 && countdownTimer) {
+        clearInterval(countdownTimer)
+        countdownTimer = null
+      }
+    }, 1000)
+  }
+  catch (err) {
+    console.error('发送验证码失败', err)
+  }
 }
+
+onUnload(() => {
+  if (countdownTimer)
+    clearInterval(countdownTimer)
+})
 
 function handleLogin() {
   if (!isAgree.value) {
@@ -86,10 +111,11 @@ function handleLogin() {
       // 标记为刚刚登录成功，用于首页触发授权
       uni.setStorageSync('JUST_LOGGED_IN', true)
       showSuccess('登录成功')
-      const targetUrl = props.redirect ? decodeURIComponent(props.redirect) : '/pages/index/index'
+      const targetUrl = getSafeRedirect()
       setTimeout(() => {
-        if (targetUrl.startsWith('/pages/index/index') || targetUrl.startsWith('/pages/feed/index') || targetUrl.startsWith('/pages/profile/index')) {
-          uni.switchTab({ url: targetUrl })
+        const targetPath = targetUrl.split('?')[0]
+        if (['/pages/index/index', '/pages/feed/index', '/pages/profile/index'].includes(targetPath)) {
+          uni.switchTab({ url: targetPath })
         }
         else {
           uni.reLaunch({ url: targetUrl })
@@ -120,10 +146,11 @@ function handleWxLogin() {
             // 标记为刚刚登录成功，用于首页触发授权
             uni.setStorageSync('JUST_LOGGED_IN', true)
             showSuccess('登录成功')
-            const targetUrl = props.redirect ? decodeURIComponent(props.redirect) : '/pages/index/index'
+            const targetUrl = getSafeRedirect()
             setTimeout(() => {
-              if (targetUrl.startsWith('/pages/index/index') || targetUrl.startsWith('/pages/feed/index') || targetUrl.startsWith('/pages/profile/index')) {
-                uni.switchTab({ url: targetUrl })
+              const targetPath = targetUrl.split('?')[0]
+              if (['/pages/index/index', '/pages/feed/index', '/pages/profile/index'].includes(targetPath)) {
+                uni.switchTab({ url: targetPath })
               }
               else {
                 uni.reLaunch({ url: targetUrl })
@@ -225,10 +252,10 @@ function goUserAgreement() {
         >
         <text
           class="ml-4 text-sm text-blue-500"
-          :class="{ 'text-[var(--text-sub)] opacity-50': countdown > 0 }"
+          :class="{ 'text-[var(--text-sub)] opacity-50': countdown > 0 || smsSending }"
           @click="handleGetCode"
         >
-          {{ countdown > 0 ? `${countdown}s后重发` : '获取验证码' }}
+          {{ smsSending ? '发送中...' : (countdown > 0 ? `${countdown}s后重发` : '获取验证码') }}
         </text>
       </view>
 

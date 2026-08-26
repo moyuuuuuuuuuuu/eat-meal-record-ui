@@ -34,6 +34,21 @@ const showAiResults = ref(false)
 
 // #ifdef MP-WEIXIN || APP-PLUS
 recorderManager.value = uni.getRecorderManager()
+recorderManager.value.onStop(async (res) => {
+  isRecording.value = false
+  uni.showLoading({ title: '语音解析中...' })
+  uni.getFileSystemManager().readFile({
+    filePath: res.tempFilePath,
+    encoding: 'base64',
+    success: async (fileRes) => {
+      await callRecognizeApi(fileRes.data as string, 'audio', { format: 'wav' })
+    },
+    fail: () => {
+      uni.hideLoading()
+      uni.showToast({ title: '读取录音失败', icon: 'none' })
+    },
+  })
+})
 // #endif
 
 function handleAiRecognize() {
@@ -109,18 +124,6 @@ function startVoiceRecognize() {
     numberOfChannels: 1,
     encodeBitRate: 48000,
     format: 'wav', // 根据实际后端支持调整
-  })
-
-  recorderManager.value.onStop(async (res) => {
-    isRecording.value = false
-    uni.showLoading({ title: '语音解析中...' })
-    uni.getFileSystemManager().readFile({
-      filePath: res.tempFilePath,
-      encoding: 'base64',
-      success: async (fileRes) => {
-        await callRecognizeApi(fileRes.data as string, 'audio', { format: 'wav' })
-      },
-    })
   })
 }
 
@@ -296,14 +299,16 @@ function goToFoodSelector() {
   })
 }
 
-onMounted(() => {
-  uni.$on('add-food-item', (item: any) => {
-    foodItems.value.push(item)
-  })
-})
+function handleFoodItemAdded(item: any) {
+  foodItems.value.push(item)
+}
+
+onMounted(() => uni.$on('add-food-item', handleFoodItemAdded))
 
 onUnload(() => {
-  uni.$off('add-food-item')
+  if (isRecording.value)
+    recorderManager.value?.stop()
+  uni.$off('add-food-item', handleFoodItemAdded)
 })
 
 const { loading: saving, send: addMealApi } = useRequest(data => Apis.diary.addFood({ data }), {

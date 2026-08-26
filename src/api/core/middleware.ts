@@ -14,10 +14,13 @@ export function createDelayLoadingMiddleware(delay = 300) {
       loading.v = true
     }, delay)
 
-    await next()
-
-    loading.v = false
-    clearTimeout(timer)
+    try {
+      await next()
+    }
+    finally {
+      loading.v = false
+      clearTimeout(timer)
+    }
   }
 }
 
