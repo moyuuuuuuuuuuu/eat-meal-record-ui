@@ -13,23 +13,52 @@ definePage({
   },
 })
 
-const { userInfo } = useAuth()
+const { userInfo, setUserInfo } = useAuth()
 
-const name = ref(userInfo.value?.nickname || '用户')
-const avatarUrl = ref(userInfo.value?.avatar || '')
-const gender = ref(userInfo.value?.gender || '女')
-const birthday = ref(userInfo.value?.birthday || '1998-01-15')
-const minDate = ref(new Date('1970/01/01').getTime())
-const birthdayTimestamp = ref(new Date(birthday.value).getTime())
-const height = ref(userInfo.value?.height || 170)
-const weight = ref(userInfo.value?.weight || 65)
+const name = ref('')
+const avatarUrl = ref('')
+const gender = ref('3')
+const birthday = ref('')
+const minDate = new Date('1900/01/01').getTime()
+const maxDate = Date.now()
+const birthdayTimestamp = ref(maxDate)
+const height = ref(170)
+const weight = ref(65)
+
+function fillForm() {
+  const profile = userInfo.value
+  if (!profile)
+    return
+  name.value = profile.nickname
+  avatarUrl.value = profile.avatar
+  gender.value = String(profile.sex || 3)
+  birthday.value = profile.birthday
+  birthdayTimestamp.value = profile.birthday ? new Date(profile.birthday.replace(/-/g, '/')).getTime() : maxDate
+  height.value = profile.height || 170
+  weight.value = profile.currentWeight || 65
+}
+
+const { send: getInformation } = useRequest(Apis.user.information(), { immediate: false })
+
+onShow(async () => {
+  try {
+    const profile = await getInformation()
+    if (profile)
+      setUserInfo(profile)
+  }
+  finally {
+    fillForm()
+  }
+})
 
 const bmi = computed(() => {
   const h = height.value / 100
-  return (weight.value / (h * h)).toFixed(1)
+  return h > 0 ? (weight.value / (h * h)).toFixed(1) : '--'
 })
 
 const bmiStatus = computed(() => {
+  if (bmi.value === '--')
+    return '未设置'
   const v = Number.parseFloat(bmi.value)
   if (v < 18.5)
     return '偏瘦'
@@ -85,8 +114,8 @@ async function handleSave() {
     const postData = {
       nickname: name.value,
       avatar: avatarUrl.value,
-      sex: gender.value === '男' ? 1 : 2,
-      birthday: birthday.value,
+      sex: Number(gender.value),
+      ...(birthday.value ? { birthday: birthday.value } : {}),
       tall: height.value,
       weight: weight.value,
       // signature: '', // 如果有签名档可以在这里补充
@@ -95,9 +124,8 @@ async function handleSave() {
 
     const res = await updateInfoApi(postData)
     // 更新全局用户信息状态
-    if (userInfo.value) {
-      userInfo.value = res
-    }
+    if (res)
+      setUserInfo(res)
 
     uni.hideLoading()
     uni.showToast({ title: '保存成功', icon: 'success' })
@@ -114,13 +142,15 @@ async function handleSave() {
   <view class="page-container h-screen flex flex-col overflow-hidden bg-[var(--page-bg)]">
     <wd-navbar title="个人信息" safe-area-inset-top fixed :custom-style="`--wd-navbar-height: ${navBarHeight}px`">
       <template #left>
-        <view class="flex items-center gap-2 pl-2">
+        <view class="flex items-center pl-2">
           <view class="flex items-center justify-center p-1" @click="goBack">
             <wd-icon name="arrow-left" size="20" />
           </view>
-          <view class="save-btn" @click="handleSave">
-            <text>保存</text>
-          </view>
+        </view>
+      </template>
+      <template #right>
+        <view class="save-btn" @click="handleSave">
+          <text>保存</text>
         </view>
       </template>
     </wd-navbar>
@@ -148,11 +178,14 @@ async function handleSave() {
                 性别
               </text>
               <wd-radio-group v-model="gender" inline shape="button" active-color="#10b981">
-                <wd-radio value="男">
+                <wd-radio value="1">
                   男
                 </wd-radio>
-                <wd-radio value="女">
+                <wd-radio value="2">
                   女
+                </wd-radio>
+                <wd-radio value="3">
+                  未设置
                 </wd-radio>
               </wd-radio-group>
             </view>
@@ -160,6 +193,7 @@ async function handleSave() {
               v-model="birthdayTimestamp"
               type="date"
               :min-date="minDate"
+              :max-date="maxDate"
               @confirm="handleDateConfirm"
             >
               <view class="flex items-center justify-between bg-[var(--card-bg)] px-[15px] py-3">
@@ -168,7 +202,7 @@ async function handleSave() {
                 </text>
                 <view class="flex items-center gap-2">
                   <text class="text-sm text-[var(--text-sub)]">
-                    {{ birthday }}
+                    {{ birthday || '未设置' }}
                   </text>
                   <IconChevronRight size="16" color="#9ca3af" />
                 </view>

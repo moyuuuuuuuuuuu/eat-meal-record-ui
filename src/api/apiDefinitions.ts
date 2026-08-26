@@ -38,6 +38,7 @@ export default {
 
   // User (app-specific)
   'user.steps': ['POST', '/user/steps'],
+  'user.information': ['GET', '/user/information'],
   'user.update': ['POST', '/user/update'],
   'user.stats': ['GET', '/user/stats'],
   'user.goal': ['GET', '/user/goal'],

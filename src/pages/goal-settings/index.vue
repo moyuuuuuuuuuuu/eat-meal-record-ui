@@ -5,7 +5,7 @@ import { useAuth } from '@/composables/useAuth'
 import { useSystemInfo } from '@/composables/useSystemInfo'
 
 const { totalHeight, navBarHeight } = useSystemInfo()
-const { userInfo } = useAuth()
+const { patchUserInfo } = useAuth()
 
 definePage({
   style: {
@@ -66,17 +66,9 @@ async function handleSave() {
       weight: targetWeight.value,
     })
 
-    // 更新全局用户信息中的目标数据和体重
-    if (res && userInfo.value) {
-      userInfo.value = {
-        ...userInfo.value,
-        daily_calories: res.daily_calories,
-        protein: res.protein,
-        fat: res.fat,
-        carbohydrate: res.carbohydrate,
-        weight: res.weight,
-      }
-    }
+    // 目标体重属于 goal，不能覆盖个人资料中的当前体重。
+    if (res)
+      patchUserInfo({ goal: res, targetWeight: Number(res.weight) })
 
     uni.hideLoading()
     uni.showToast({ title: '保存成功', icon: 'success' })

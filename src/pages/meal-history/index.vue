@@ -122,24 +122,21 @@ onReachBottom(() => {
         <view
           v-for="day in history"
           :key="day.id"
-          class="day-card relative w-full overflow-hidden border border-[var(--border-color)] rounded-2xl bg-[var(--card-bg)] shadow-[0_2px_12px_rgba(0,0,0,0.05)] transition-all dark:shadow-[0_2px_12px_rgba(0,0,0,0.20)]"
+          class="day-card relative w-full overflow-hidden border border-slate-100 rounded-2xl bg-[var(--card-bg)] shadow-[0_6px_22px_rgba(15,23,42,0.06)] transition-all dark:border-slate-800 dark:shadow-[0_6px_22px_rgba(0,0,0,0.22)]"
         >
-          <!-- 左侧装饰条：展开 teal，收起 slate -->
-          <!--          <view class="absolute left-0 top-0 h-full w-1 from-green-100 to-emerald-200 bg-gradient-to-b dark:from-slate-600 dark:to-slate-700" /> -->
-
           <!-- 日期头部 -->
-          <view class="flex flex-col p-5 active:opacity-80" @click="toggleDay(day.id)">
-            <view class="mb-4 flex items-center justify-between">
+          <view class="active:opacity-80" @click="toggleDay(day.id)">
+            <view class="flex items-center justify-between border-b border-slate-100 px-4 py-4 dark:border-slate-800">
               <view class="flex items-center gap-2">
-                <text class="text-base text-[var(--text-main)] font-bold">
+                <view class="h-8 w-1 rounded-full bg-emerald-500" />
+                <text class="text-base text-[var(--text-main)] font-bold tracking-tight">
                   {{ day.date }}
                 </text>
-                <!-- 餐次 badge：展开 teal，收起 slate -->
                 <view
-                  class="rounded-full bg-slate-100 px-2 py-0.5 dark:bg-slate-700/50"
+                  class="rounded-full bg-emerald-50 px-2 py-0.5 dark:bg-emerald-900/30"
                 >
                   <text
-                    class="text-[10px] text-slate-500 font-medium dark:text-slate-400"
+                    class="text-[10px] text-emerald-700 font-medium dark:text-emerald-400"
                   >
                     {{ day.mealCount }}餐
                   </text>
@@ -147,7 +144,7 @@ onReachBottom(() => {
               </view>
               <!-- 箭头按钮：展开 teal，收起 gray -->
               <view
-                class="h-6 w-6 flex items-center justify-center rounded-full bg-gray-50 dark:bg-gray-800"
+                class="h-7 w-7 flex items-center justify-center rounded-full bg-slate-50 dark:bg-slate-800"
               >
                 <IconChevronDown
                   size="14"
@@ -157,22 +154,19 @@ onReachBottom(() => {
               </view>
             </view>
 
-            <!-- 数据行：展开时背景淡白，收起时 gray -->
-            <view
-              class="flex items-center justify-around rounded-xl bg-gray-50/60 p-3 dark:bg-gray-800/20"
-            >
+            <view class="grid grid-cols-3 gap-2 bg-slate-50/70 p-3 dark:bg-slate-900/25">
               <!-- 摄入 -->
-              <view class="flex items-center gap-3">
+              <view class="flex flex-col items-center justify-center rounded-xl bg-white px-2 py-3 shadow-sm dark:bg-slate-900">
                 <view
-                  class="h-10 w-10 flex items-center justify-center rounded-full bg-white shadow-sm dark:bg-gray-800"
+                  class="mb-1 h-8 w-8 flex items-center justify-center rounded-full bg-emerald-50 dark:bg-emerald-900/30"
                 >
                   <IconFlame size="18" color="#10b981" />
                 </view>
-                <view>
-                  <text class="block text-[10px] text-[var(--text-sub)] tracking-wider uppercase">
+                <view class="text-center">
+                  <text class="block text-[10px] text-[var(--text-sub)]">
                     摄入
                   </text>
-                  <text class="text-lg text-[var(--text-main)] font-bold">
+                  <text class="mt-0.5 block text-base text-[var(--text-main)] font-bold leading-tight">
                     {{ day.totalCalories }}<text class="ml-0.5 text-[9px] font-normal">
                       kcal
                     </text>
@@ -180,20 +174,18 @@ onReachBottom(() => {
                 </view>
               </view>
 
-              <view class="h-8 w-px bg-[var(--border-color)]" />
-
               <!-- 消耗 -->
-              <view class="flex items-center gap-3">
+              <view class="flex flex-col items-center justify-center rounded-xl bg-white px-2 py-3 shadow-sm dark:bg-slate-900">
                 <view
-                  class="h-10 w-10 flex items-center justify-center rounded-full bg-white shadow-sm dark:bg-gray-800"
+                  class="mb-1 h-8 w-8 flex items-center justify-center rounded-full bg-blue-50 dark:bg-blue-900/30"
                 >
                   <IconTrendingUp size="18" color="#3b82f6" />
                 </view>
-                <view>
-                  <text class="block text-[10px] text-[var(--text-sub)] tracking-wider uppercase">
+                <view class="text-center">
+                  <text class="block text-[10px] text-[var(--text-sub)]">
                     消耗
                   </text>
-                  <text class="text-lg text-[var(--text-main)] font-bold">
+                  <text class="mt-0.5 block text-base text-[var(--text-main)] font-bold leading-tight">
                     {{ day.totalBurned }}<text class="ml-0.5 text-[9px] font-normal">
                       kcal
                     </text>
@@ -201,15 +193,13 @@ onReachBottom(() => {
                 </view>
               </view>
 
-              <view class="h-8 w-px bg-[var(--border-color)]" />
-
               <!-- 净摄入 -->
-              <view class="text-right">
-                <text class="block text-[10px] text-[var(--text-sub)] tracking-wider uppercase">
+              <view class="flex flex-col items-center justify-center border border-emerald-100 rounded-xl from-emerald-50 to-teal-50 bg-gradient-to-br px-2 py-3 dark:border-emerald-900/50 dark:from-emerald-950/40 dark:to-teal-950/30">
+                <text class="block text-[10px] text-emerald-700 dark:text-emerald-400">
                   净摄入
                 </text>
                 <text
-                  class="text-lg text-emerald-600 font-black"
+                  class="mt-1 block text-lg text-emerald-600 font-black leading-tight"
                 >
                   {{ day.totalIntake }}<text class="ml-0.5 text-[9px] font-normal">
                     kcal
@@ -222,7 +212,7 @@ onReachBottom(() => {
           <!-- ── 餐食详情（展开区域）── -->
           <view
             v-if="expandedDay === day.id"
-            class="border-t border-teal-100 bg-teal-50/30 p-3 space-y-2 dark:border-teal-900/40 dark:bg-teal-950/20"
+            class="border-t border-slate-100 bg-white p-3 space-y-2 dark:border-slate-800 dark:bg-slate-950/20"
           >
             <view
               v-for="meal in day.meals"

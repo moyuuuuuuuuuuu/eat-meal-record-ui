@@ -21,7 +21,7 @@ definePage({
 })
 
 const router = useRouter()
-const { userInfo } = useAuth()
+const { userInfo, setUserInfo } = useAuth()
 const { data: userStats, send: refreshStats } = useRequest(Apis.user.stats(), {
   initialData: {
     name: '用户',
@@ -34,8 +34,9 @@ const { data: userStats, send: refreshStats } = useRequest(Apis.user.stats(), {
     age: 0,
     gender: '未知',
   },
-  immediate: true,
+  immediate: false,
 })
+const { send: refreshInformation } = useRequest(Apis.user.information(), { immediate: false })
 
 function handleNavigate(url: string) {
   router.push(url)
@@ -43,9 +44,12 @@ function handleNavigate(url: string) {
 
 const weightDistance = computed(() => Math.abs(Number(userStats.value.currentWeight) - Number(userStats.value.targetWeight)).toFixed(2))
 const weightDirection = computed(() => Number(userStats.value.currentWeight) > Number(userStats.value.targetWeight) ? '需减' : Number(userStats.value.currentWeight) < Number(userStats.value.targetWeight) ? '需增' : '已达标')
+const joinDays = computed(() => Math.max(0, Math.floor(Number(userStats.value.joinDays) || 0)))
 
-onShow(() => {
-  refreshStats()
+onShow(async () => {
+  const [profile] = await Promise.all([refreshInformation(), refreshStats()])
+  if (profile)
+    setUserInfo(profile)
 })
 </script>
 
@@ -66,7 +70,7 @@ onShow(() => {
             {{ userInfo?.nickname || userStats.name }}
           </view>
           <view class="text-sm opacity-80">
-            已坚持 {{ userStats.joinDays }} 天
+            已坚持 {{ joinDays }} 天
           </view>
         </view>
         <view class="flex gap-2">
@@ -159,7 +163,7 @@ onShow(() => {
               性别
             </text>
             <text class="text-[var(--text-main)]">
-              {{ userInfo?.gender || userStats.gender }}
+              {{ userInfo?.gender || '未设置' }}
             </text>
           </view>
           <view class="flex items-center justify-between border-b border-[var(--border-color)] py-2 text-sm">
@@ -175,7 +179,7 @@ onShow(() => {
               身高
             </text>
             <text class="text-[var(--text-main)]">
-              {{ userInfo?.height || userStats.height }}cm
+              {{ userInfo?.height ? `${userInfo.height}cm` : '未设置' }}
             </text>
           </view>
           <view class="flex items-center justify-between py-2 text-sm">
@@ -183,7 +187,7 @@ onShow(() => {
               当前体重
             </text>
             <text class="text-[var(--text-main)]">
-              {{ userInfo?.weight || userStats.currentWeight }}kg
+              {{ userInfo?.currentWeight ? `${userInfo.currentWeight}kg` : '未设置' }}
             </text>
           </view>
         </view>

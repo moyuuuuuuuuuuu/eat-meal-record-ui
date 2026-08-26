@@ -1,6 +1,67 @@
 import { createGlobalState } from '@vueuse/core'
 import { computed, ref, watch } from 'vue'
 
+export interface UserGoal {
+  daily_calories: number
+  protein: number
+  fat: number
+  carbohydrate: number
+  weight: number
+}
+
+export interface UserProfile {
+  id?: number
+  nickname: string
+  avatar: string
+  sex: number
+  gender: string
+  birthday: string
+  age: number
+  tall: number
+  height: number
+  weight: number
+  currentWeight: number
+  targetWeight: number
+  goal?: UserGoal
+  [key: string]: unknown
+}
+
+function parseObject<T>(value: unknown): T | undefined {
+  if (typeof value !== 'string')
+    return value as T | undefined
+  try {
+    return JSON.parse(value) as T
+  }
+  catch {
+    return undefined
+  }
+}
+
+function normalizeUserProfile(raw: unknown): UserProfile | null {
+  if (!raw || typeof raw !== 'object')
+    return null
+  const data = raw as Record<string, any>
+  const sex = Number(data.sex ?? (data.gender === '男' ? 1 : data.gender === '女' ? 2 : 3))
+  const tall = Number(data.tall ?? data.height ?? 0)
+  const weight = Number(data.weight ?? data.currentWeight ?? 0)
+  const goal = parseObject<UserGoal>(data.goal)
+  return {
+    ...data,
+    nickname: String(data.nickname ?? data.name ?? '用户'),
+    avatar: String(data.avatar ?? ''),
+    sex,
+    gender: String(data.gender ?? (sex === 1 ? '男' : sex === 2 ? '女' : '未知')),
+    birthday: String(data.birthday ?? ''),
+    age: Number(data.age ?? 0),
+    tall,
+    height: tall,
+    weight,
+    currentWeight: weight,
+    targetWeight: Number(data.targetWeight ?? goal?.weight ?? 0),
+    goal,
+  }
+}
+
 export const useAuth = createGlobalState(() => {
   const getStorage = (key: string) => {
     const val = uni.getStorageSync(key)
@@ -12,7 +73,7 @@ export const useAuth = createGlobalState(() => {
   }
 
   const token = ref(getStorage('token') || '')
-  const userInfo = ref(getStorage('userInfo') || null)
+  const userInfo = ref<UserProfile | null>(normalizeUserProfile(getStorage('userInfo')))
 
   watch(token, (val) => {
     uni.setStorageSync('token', val)
@@ -24,12 +85,18 @@ export const useAuth = createGlobalState(() => {
 
   const isLogin = computed(() => !!token.value)
 
-  const login = (_token: string, _userInfo?: any) => {
+  const setUserInfo = (profile: unknown) => {
+    userInfo.value = normalizeUserProfile(profile)
+  }
+
+  const patchUserInfo = (profile: Partial<UserProfile>) => {
+    setUserInfo({ ...(userInfo.value || {}), ...profile })
+  }
+
+  const login = (_token: string, _userInfo?: unknown) => {
     token.value = _token
-    if (_userInfo) {
-      // 检查 _userInfo 是否已经包含了 data 层，如果是则解包
-      userInfo.value = _userInfo
-    }
+    if (_userInfo)
+      setUserInfo(_userInfo)
   }
 
   const logout = () => {
@@ -44,6 +111,8 @@ export const useAuth = createGlobalState(() => {
     userInfo,
     isLogin,
     login,
+    setUserInfo,
+    patchUserInfo,
     logout,
   }
 })
