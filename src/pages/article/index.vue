@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onLoad } from '@dcloudio/uni-app'
+import { onLoad, onShareAppMessage, onShareTimeline } from '@dcloudio/uni-app'
 import { useRequest } from 'alova/client'
 import { ref } from 'vue'
 import { useSystemInfo } from '@/composables/useSystemInfo'
@@ -61,11 +61,43 @@ function formatRichText(html: string) {
     .replace(/<section/g, '<div')
     .replace(/\/section>/g, '/div>')
 }
+
+function getShareTitle() {
+  return detail.value?.title || (articleType.value === 'notice' ? '饮食记录公告' : '饮食记录')
+}
+
+function getSharePath() {
+  const query = [
+    articleId.value ? `id=${encodeURIComponent(articleId.value)}` : '',
+    articleType.value ? `type=${encodeURIComponent(articleType.value)}` : '',
+  ].filter(Boolean).join('&')
+  return `/pages/article/index${query ? `?${query}` : ''}`
+}
+
+// #ifdef MP-WEIXIN
+onShareAppMessage(() => ({
+  title: getShareTitle(),
+  path: getSharePath(),
+}))
+
+onShareTimeline(() => ({
+  title: getShareTitle(),
+  query: getSharePath().split('?')[1] || '',
+}))
+// #endif
 </script>
 
 <template>
   <view class="page-container min-h-screen bg-[var(--page-bg)] pb-10">
-    <wd-navbar :title="detail.title" left-arrow safe-area-inset-top fixed @click-left="handleBack" />
+    <wd-navbar :title="detail?.title || '文章详情'" left-arrow safe-area-inset-top fixed @click-left="handleBack">
+      <!-- #ifdef MP-WEIXIN -->
+      <template #right>
+        <button class="share-button" open-type="share" aria-label="分享文章">
+          <IconShare2 size="20" color="var(--text-main)" />
+        </button>
+      </template>
+      <!-- #endif -->
+    </wd-navbar>
 
     <!-- 顶部占位 -->
     <view :style="{ height: `${fixedNavbarHeight}px` }" />
@@ -98,6 +130,23 @@ function formatRichText(html: string) {
   color: #333;
   font-size: 28rpx;
   word-break: break-all;
+}
+
+.share-button {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  line-height: 1;
+}
+
+.share-button::after {
+  border: 0;
 }
 
 /* 微信富文本内全局样式修正 */

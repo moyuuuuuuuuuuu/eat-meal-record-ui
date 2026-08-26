@@ -64,6 +64,13 @@ function handleLike() {
 // #ifdef MP-WEIXIN
 onShareAppMessage(() => {
   const post = detail.value
+  if (!post) {
+    return {
+      title: '动态广场',
+      path: '/pages/feed/index',
+      imageUrl: 'https://bos.eatclear.moyuu.cn/wot-design-uni-assets/share.jpg',
+    }
+  }
   let imageUrl = 'https://bos.eatclear.moyuu.cn/wot-design-uni-assets/share.jpg'
   const firstAttach = post.attach?.find((item: any) => item.type === 0 || item.poster)
   if (firstAttach) {
@@ -79,6 +86,13 @@ onShareAppMessage(() => {
 
 onShareTimeline(() => {
   const post = detail.value
+  if (!post) {
+    return {
+      title: '动态广场',
+      query: '',
+      imageUrl: 'https://bos.eatclear.moyuu.cn/wot-design-uni-assets/share.jpg',
+    }
+  }
   let imageUrl = 'https://bos.eatclear.moyuu.cn/wot-design-uni-assets/share.jpg'
   const firstAttach = post.attach?.find((item: any) => item.type === 0 || item.poster)
   if (firstAttach) {
@@ -87,7 +101,7 @@ onShareTimeline(() => {
   }
   return {
     title: post.content.substring(0, 30) || '分享一条精彩动态',
-    path: `/pages/feed-detail/index?id=${post.id}`,
+    query: `id=${post.id}`,
     imageUrl,
   }
 })
@@ -96,7 +110,15 @@ onShareTimeline(() => {
 
 <template>
   <view class="page-container min-h-screen bg-[var(--page-bg)] pb-10">
-    <wd-navbar title="动态详情" left-arrow safe-area-inset-top fixed @click-left="handleBack" />
+    <wd-navbar title="动态详情" left-arrow safe-area-inset-top fixed @click-left="handleBack">
+      <!-- #ifdef MP-WEIXIN -->
+      <template #right>
+        <button class="share-button" open-type="share" aria-label="分享动态">
+          <IconShare2 size="20" color="var(--text-main)" />
+        </button>
+      </template>
+      <!-- #endif -->
+    </wd-navbar>
 
     <!-- 顶部占位 -->
     <view :style="{ height: `${fixedNavbarHeight}px` }" />
@@ -114,7 +136,7 @@ onShareTimeline(() => {
         <view class="h-12 w-12 overflow-hidden rounded-full ring-2 ring-emerald-500/20">
           <wd-img :width="50" :height="50" :src="detail.author?.avatar" mode="aspectFill" class="h-full w-full">
             <template #error>
-              <view class="h-full w-full flex items-center justify-center bg-gray-100">
+              <view class="h-full w-full flex items-center justify-center bg-[var(--surface-subtle)]">
                 加载失败
               </view>
             </template>
@@ -151,14 +173,14 @@ onShareTimeline(() => {
 
       <!-- 位置信息 -->
       <view v-if="detail.location" class="mb-6 flex items-center gap-2 rounded-lg bg-[var(--card-bg)] p-3">
-        <view class="h-8 w-8 flex items-center justify-center rounded-full bg-gray-100">
+        <view class="h-8 w-8 flex items-center justify-center rounded-full bg-[var(--surface-subtle)]">
           <IconMapPin size="16" color="#6b7280" />
         </view>
         <view class="flex-1 overflow-hidden">
           <view class="truncate text-sm text-[var(--text-main)] font-medium">
             {{ detail.location.name }}
           </view>
-          <view class="truncate text-[10px] text-[var(--text-sub)]">
+          <view class="truncate text-[11px] text-[var(--text-sub)]">
             {{ detail.location.address }}
           </view>
         </view>
@@ -215,6 +237,23 @@ onShareTimeline(() => {
 
 .animate-fade-in {
   animation: fadeIn 0.4s ease-out;
+}
+
+.share-button {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  line-height: 1;
+}
+
+.share-button::after {
+  border: 0;
 }
 
 @keyframes fadeIn {

@@ -157,7 +157,7 @@ onShareAppMessage((res) => {
 })
 
 onShareTimeline(() => {
-  return { title: '动态广场', path: '/pages/feed/index', imageUrl: 'https://bos.eatclear.moyuu.cn/wot-design-uni-assets/share.jpg' }
+  return { title: '动态广场', query: '', imageUrl: 'https://bos.eatclear.moyuu.cn/wot-design-uni-assets/share.jpg' }
 })
 // #endif
 </script>
@@ -221,7 +221,7 @@ onShareTimeline(() => {
             >
               <wd-img v-if="post.author.avatar" round :width="41" :height="41" :src="post.author?.avatar" mode="aspectFill" class="h-full w-full">
                 <template #error>
-                  <view class="h-full w-full flex items-center justify-center bg-gray-100">
+                  <view class="h-full w-full flex items-center justify-center bg-[var(--surface-subtle)]">
                     加载失败
                   </view>
                 </template>
@@ -260,7 +260,7 @@ onShareTimeline(() => {
           <!-- 位置信息 -->
           <view v-if="post.location" class="mb-3 flex items-center gap-1">
             <IconMapPin size="10" color="#9ca3af" />
-            <text class="text-[10px] text-[var(--text-sub)]">
+            <text class="text-[11px] text-[var(--text-sub)]">
               {{
                 post.location.name || post.location.address || '未知位置'
               }}
